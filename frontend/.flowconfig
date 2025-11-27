@@ -1,0 +1,10 @@
+[ignore]
+.*/__tests__/.*
+.*/spec/.*
+.*/node_modules/fbemitter/.*
+.*/node_modules/json5/test/.*\.json
+<PROJECT_ROOT>/node_modules/fbjs/.*
+<PROJECT_ROOT>/node_modules/flow/include/.*
+<PROJECT_ROOT>/node_modules/flux/node_modules/.*
+<PROJECT_ROOT>/node_modules/flux/flow/.*
+.*/react/node_modules/.*
