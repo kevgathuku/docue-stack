@@ -6,136 +6,106 @@ describe('Roles Spec', () => {
   const app = require('../index');
   let token = null;
 
-  beforeEach((done) => {
-    // Promise that returns a generatedToken
-    helper.beforeEach()
-      .then((generatedToken) => {
-        token = generatedToken;
-        done();
-      })
-      .catch((err) => {
-        console.log('Error running the beforeEach function', err);
-        done();
-      });
+  beforeEach(async () => {
+    token = await helper.beforeEach();
   });
 
   describe('Role Creation', () => {
-    it('should create a role successfully', (done) => {
+    it('should create a role successfully', async () => {
       // Try to create an allowed but non-existent role
-      request(app)
+      const res = await request(app)
         .post('/api/roles')
         .send({
           title: 'admin'
         })
         .set('Accept', 'application/json')
-        .set('x-access-token', token)
-        .end((err, res) => {
-          expect(err).toBeNull();
-          expect(res.statusCode).toBe(201);
-          expect(res.body.title).toBe('admin');
-          // Should assign the accessLevel correctly
-          expect(res.body.accessLevel).toBe(2);
-          expect(res.body.id).not.toBeNull();
-          done();
-        });
+        .set('x-access-token', token);
+      
+      expect(res.statusCode).toBe(201);
+      expect(res.body.title).toBe('admin');
+      // Should assign the accessLevel correctly
+      expect(res.body.accessLevel).toBe(2);
+      expect(res.body.id).not.toBeNull();
     });
 
-    it('should not create a role without a title', (done) => {
-      request(app)
+    it('should not create a role without a title', async () => {
+      const res = await request(app)
         .post('/api/roles')
         .send({
           title: ''
         })
         .set('Accept', 'application/json')
-        .set('x-access-token', token)
-        .end((err, res) => {
-          expect(err).toBeNull();
-          expect(res.statusCode).toBe(400);
-          expect(res.body.error).toBe(
-            'The role title is required');
-          done();
-        });
+        .set('x-access-token', token);
+      
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toBe('The role title is required');
     });
 
-    it('should not create a duplicate role', (done) => {
+    it('should not create a duplicate role', async () => {
       // Try to create a duplicate role
-      request(app)
+      const res = await request(app)
         .post('/api/roles')
         .send({
           title: 'viewer'
         })
         .set('Accept', 'application/json')
-        .set('x-access-token', token)
-        .end((err, res) => {
-          expect(err).toBeNull();
-          expect(res.statusCode).toBe(400);
-          expect(res.body.title).toBeUndefined();
-          expect(res.body.error).toBe('Role already exists');
-          done();
-        });
+        .set('x-access-token', token);
+      
+      expect(res.statusCode).toBe(400);
+      expect(res.body.title).toBeUndefined();
+      expect(res.body.error).toBe('Role already exists');
     });
 
-    it('should not create a role if the user is unauthenticated', (done) => {
+    it('should not create a role if the user is unauthenticated', async () => {
       // Try to send a request without a token
-      request(app)
+      const res = await request(app)
         .post('/api/roles')
         .send({
           title: 'viewer'
         })
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-          expect(res.statusCode).toBe(403);
-          expect(res.body.error).toBe('No token provided.');
-          done();
-        });
+        .set('Accept', 'application/json');
+      
+      expect(res.statusCode).toBe(403);
+      expect(res.body.error).toBe('No token provided.');
     });
 
-    it('should not create an invalid role', (done) => {
+    it('should not create an invalid role', async () => {
       const invalidTitle = 'invalid title';
-      request(app)
+      const res = await request(app)
         .post('/api/roles')
         .send({
           title: invalidTitle
         })
         .set('Accept', 'application/json')
-        .set('x-access-token', token)
-        .end((err, res) => {
-          expect(res.statusCode).toBe(400);
-          expect(res.body.error).toBe(
-            invalidTitle + ' is not a valid role title');
-          done();
-        });
+        .set('x-access-token', token);
+      
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toBe(invalidTitle + ' is not a valid role title');
     });
 
   });
 
   describe('Get All Roles', () => {
-    it('should return all roles', (done) => {
+    it('should return all roles', async () => {
       // The 2 seeded Roles should be returned
-      request(app)
+      const res = await request(app)
         .get('/api/roles')
         .set('x-access-token', token)
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-          expect(res.statusCode).toBe(200);
-          expect(err).toBeNull();
-          expect(res.body.length).toBe(2);
-          done();
-        });
+        .set('Accept', 'application/json');
+      
+      expect(res.statusCode).toBe(200);
+      expect(res.body.length).toBe(2);
     });
 
-    it('getAllRoles should return the correct roles', (done) => {
-      request(app)
+    it('getAllRoles should return the correct roles', async () => {
+      const res = await request(app)
         .get('/api/roles')
-        .set('x-access-token', token)
-        .end((err, res) => {
-          const allRoles = res.body.map(role => role.title);
-          expect(err).toBeNull();
-          expect(res.body.length).toBe(2);
-          expect(allRoles).toContain('viewer');
-          expect(allRoles).toContain('staff');
-          done();
-        });
+        .set('x-access-token', token);
+      
+      const allRoles = res.body.map(role => role.title);
+      expect(res.body.length).toBe(2);
+      expect(allRoles).toContain('viewer');
+      expect(allRoles).toContain('staff');
     });
 
   });
