@@ -2,7 +2,7 @@
   "name": "docue",
   "version": "0.1.1",
   "engines": {
-    "node": "10.x"
+    "node": "22.x"
   },
   "private": true,
   "scripts": {
@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "coveralls": "^2.11.6",
-    "dotenv": "^2.0.0",
+    "dotenv": "^16.4.7",
     "eslint": "^3.1.1",
     "jasmine": "^2.4.1",
     "mockgoose": "^7.3.3",

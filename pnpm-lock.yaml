@@ -61,8 +61,8 @@ importers:
         specifier: ^2.11.6
         version: 2.13.3
       dotenv:
-        specifier: ^2.0.0
-        version: 2.0.0
+        specifier: ^16.4.7
+        version: 16.6.1
       eslint:
         specifier: ^3.1.1
         version: 3.19.0
@@ -2972,8 +2972,9 @@ packages:
   dotenv-expand@4.2.0:
     resolution: {integrity: sha512-pHWVt6L/YkqbBCMb1hG6e7oO0WdMhlapDIibl+BZ9PncVE3i+G77uvNr8GUxW2ItSituOK8QOYC9oOJjwWD94A==}
 
-  dotenv@2.0.0:
-    resolution: {integrity: sha512-Y+zZAmv7p2zOdpyZcSIA+aIxohsyfTcNaMeh3YJn9exq85bQhso65Wz9IhjYYNB4zyvXnfi7Ae+FuygARljVJw==}
+  dotenv@16.6.1:
+    resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
+    engines: {node: '>=12'}
 
   dotenv@6.0.0:
     resolution: {integrity: sha512-FlWbnhgjtwD+uNLUGHbMykMOYQaTivdHEmYwAKFjn6GKe/CqY0fNae93ZHTd20snh9ZLr8mTzIL9m0APQ1pjQg==}
@@ -11894,7 +11895,7 @@ snapshots:
 
   dotenv-expand@4.2.0: {}
 
-  dotenv@2.0.0: {}
+  dotenv@16.6.1: {}
 
   dotenv@6.0.0: {}
 

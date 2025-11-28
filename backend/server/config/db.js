@@ -6,7 +6,7 @@
 const mongoose = require('mongoose');
 // load .env only in dev mode
 if (process.env.NODE_ENV === 'development') {
-  require('dotenv').load();
+  require('dotenv').config();
 }
 
 // Use bluebird for Mongoose promises

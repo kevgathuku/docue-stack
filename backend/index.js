@@ -14,7 +14,7 @@ let express = require('express'),
 
 // Load the env variables only in DEV mode
 if (!isProduction) {
-  require('dotenv').load();
+  require('dotenv').config();
 }
 
 // Set JWT secret on the app object
