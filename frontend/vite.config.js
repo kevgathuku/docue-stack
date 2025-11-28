@@ -8,8 +8,8 @@ export default defineConfig({
       include: /\.(jsx|js)$/,
     }),
     elm({
-      debug: false,
-      optimize: true,
+      debug: process.env.NODE_ENV !== 'production',
+      optimize: process.env.NODE_ENV === 'production',
     }),
   ],
   server: {

@@ -5,6 +5,7 @@ export default class Elm extends React.Component {
   shouldComponentUpdate = () => {
     return false;
   };
+  
   ref = (node) => {
     if (node === null) return;
     
@@ -13,7 +14,7 @@ export default class Elm extends React.Component {
     
     // If src is undefined, log error with helpful info
     if (!elmModule) {
-      console.error('Elm module is undefined. Props:', this.props);
+      console.error('[ReactElm] Elm module is undefined. Props:', this.props);
       return;
     }
     
@@ -27,19 +28,38 @@ export default class Elm extends React.Component {
     }
     
     if (!elmModule || !elmModule.init) {
-      console.error('Elm module does not have init method. Module:', elmModule);
+      console.error('[ReactElm] Elm module does not have init method. Module:', elmModule);
       return;
     }
     
-    const app = elmModule.init({
-      node,
-      flags: this.props.flags,
-    });
+    // Log Elm initialization in development
+    if (process.env.NODE_ENV === 'development') {
+      const moduleName = elmModule.constructor?.name || 'Unknown';
+      console.log(`[ReactElm] Initializing Elm module with flags:`, this.props.flags);
+    }
+    
+    try {
+      const app = elmModule.init({
+        node,
+        flags: this.props.flags,
+      });
 
-    if (typeof this.props.ports !== 'undefined') {
-      this.props.ports(app.ports);
+      // Store app instance for debugging
+      if (process.env.NODE_ENV === 'development') {
+        window.__ELM_APPS__ = window.__ELM_APPS__ || [];
+        window.__ELM_APPS__.push(app);
+        console.log('[ReactElm] Elm app initialized. Access via window.__ELM_APPS__');
+      }
+
+      if (typeof this.props.ports !== 'undefined') {
+        this.props.ports(app.ports);
+      }
+    } catch (error) {
+      console.error('[ReactElm] Error initializing Elm app:', error);
+      console.error('[ReactElm] Flags:', this.props.flags);
     }
   };
+  
   render = () => {
     return <div ref={this.ref} />;
   };
