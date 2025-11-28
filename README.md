@@ -160,6 +160,22 @@ The backend API runs on `http://localhost:8000` and provides the following endpo
 
 All authenticated endpoints require an `x-access-token` header with a valid JWT token.
 
+## Deployment
+
+This project can be deployed to Vercel. See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions.
+
+Quick deploy:
+```bash
+# Install Vercel CLI
+npm install -g vercel
+
+# Deploy backend
+cd backend && vercel --prod
+
+# Deploy frontend
+cd frontend && vercel --prod
+```
+
 ## Continuous Integration
 
 This project uses GitHub Actions for CI/CD. Tests run automatically on:
