@@ -1,6 +1,11 @@
 const path = require('path');
 const webpack = require('webpack');
+const crypto = require('crypto');
 const PnpWebpackPlugin = require('pnp-webpack-plugin');
+
+// Fix for Node 22 - Webpack 4 uses MD4 which is no longer supported
+const crypto_orig_createHash = crypto.createHash;
+crypto.createHash = algorithm => crypto_orig_createHash(algorithm === 'md4' ? 'sha256' : algorithm);
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
