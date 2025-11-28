@@ -249,7 +249,7 @@ module.exports = {
 
     const limit = parseInt(req.query.limit) || 10;
     // Ensure the date format is in the format expected
-    const dateRegex = /\d{4}\-\d{1,2}\-\d{1,2}$/;
+    const dateRegex = /\d{4}-\d{1,2}-\d{1,2}$/;
     // If the regex does not match, throw an error
     if (!dateRegex.test(req.params.date)) {
       const dateError = new Error('Date must be in the format YYYY-MM-DD');
