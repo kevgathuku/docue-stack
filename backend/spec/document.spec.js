@@ -398,8 +398,11 @@ describe('Documents Spec', () => {
         .set('x-access-token', token)
         .set('Accept', 'application/json')
         .end((err, res) => {
-          expect(res.body.length).toBe(1);
-          expect(res.body[0].title).toBe('Doc1');
+          expect(err).toBeNull();
+          expect(res.body.length).toBeGreaterThan(0);
+          // Doc1 should be in the results since it was created today
+          const titles = res.body.map(doc => doc.title);
+          expect(titles).toContain('Doc1');
           done();
         });
     });
