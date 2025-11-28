@@ -131,43 +131,42 @@ module.exports = {
     }
   },
 
-  delete: (req, res, next) => {
-    // A user can only delete their own profile
-    // An admin can also delete a user
-    if (
-      req.decoded._id === req.params.id ||
-      req.decoded.role.title === 'admin'
-    ) {
-      Users.findOneAndRemove({
-        _id: req.params.id
-      })
-        .exec()
-        .then(() => {
-          res.sendStatus(204);
-        })
-        .catch(err => {
-          next(err);
+  delete: async (req, res, next) => {
+    try {
+      // A user can only delete their own profile
+      // An admin can also delete a user
+      if (
+        req.decoded._id === req.params.id ||
+        req.decoded.role.title === 'admin'
+      ) {
+        await Users.findOneAndDelete({
+          _id: req.params.id
+        }).exec();
+        
+        res.sendStatus(204);
+      } else {
+        res.status(403).json({
+          error: 'Unauthorized Access'
         });
-    } else {
-      res.status(403).json({
-        error: 'Unauthorized Access'
-      });
+      }
+    } catch (err) {
+      next(err);
     }
   },
 
   // Get all documents created by this user
-  getDocs: (req, res) => {
-    Documents.find()
-      .where({
-        ownerId: req.params.id
-      })
-      .exec()
-      .then(docs => {
-        res.json(docs);
-      })
-      .catch(err => {
-        res.next(err);
-      });
+  getDocs: async (req, res, next) => {
+    try {
+      const docs = await Documents.find()
+        .where({
+          ownerId: req.params.id
+        })
+        .exec();
+      
+      res.json(docs);
+    } catch (err) {
+      next(err);
+    }
   },
 
   all: (req, res) => {
@@ -268,23 +267,23 @@ module.exports = {
       // Check if the user is logged in
       let user = extractUserFromToken(token);
       if (!user.loggedIn) {
-        res.status(401).json({
+        return res.status(401).json({
           error: 'Unauthorized Access. Please login first'
         });
       }
-      // verifies secret and checks expiry time
-      jwt.verify(token, req.app.get('superSecret'), (err, decoded) => {
-        if (err) {
-          res.status(401).json({
-            error: 'Failed to authenticate token.'
-          });
-        } else {
-          // if everything is good, save to request for use in other routes
-          decoded.password = null;
-          req.decoded = decoded;
-          next();
-        }
-      });
+      
+      try {
+        // verifies secret and checks expiry time
+        const decoded = jwt.verify(token, req.app.get('superSecret'));
+        // if everything is good, save to request for use in other routes
+        decoded.password = null;
+        req.decoded = decoded;
+        next();
+      } catch {
+        res.status(401).json({
+          error: 'Failed to authenticate token.'
+        });
+      }
     } else {
       // if there is no token return an error
       res.status(403).send({
@@ -293,37 +292,35 @@ module.exports = {
     }
   },
 
-  getSession: (req, res) => {
+  getSession: async (req, res) => {
     // check header or post parameters for token
     let token = req.body.token || req.headers['x-access-token'];
 
     // decode token
     if (token) {
-      // verifies secret and checks expiry time
-      jwt.verify(token, req.app.get('superSecret'), (err, decoded) => {
-        if (err) {
-          // If the token cannot be verified, return false
+      try {
+        // verifies secret and checks expiry time
+        const decoded = jwt.verify(token, req.app.get('superSecret'));
+        
+        // Return user's loggedIn status from the DB
+        const user = await Users.findById(decoded._id).populate('role').exec();
+        
+        if (!user) {
           res.json({
             loggedIn: 'false'
           });
         } else {
-          // Return user's loggedIn status from the DB
-          Users.findById(decoded._id)
-            .populate('role')
-            .exec((err, user) => {
-              if (err || !user) {
-                res.json({
-                  loggedIn: 'false'
-                });
-              } else {
-                res.json({
-                  user: user,
-                  loggedIn: user.loggedIn.toString()
-                });
-              }
-            });
+          res.json({
+            user: user,
+            loggedIn: user.loggedIn.toString()
+          });
         }
-      });
+      } catch {
+        // If the token cannot be verified, return false
+        res.json({
+          loggedIn: 'false'
+        });
+      }
     } else {
       // if there is no token, return a logged out status
       res.json({

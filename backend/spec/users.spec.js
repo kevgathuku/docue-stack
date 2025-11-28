@@ -3,29 +3,19 @@ describe('User Spec', () => {
 
   const helper = require('./helper');
   const request = require('supertest');
-  const Promise = require('bluebird');
   const app = require('../index');
   const extractUserFromToken = require('../server/controllers/utils').extractUserFromToken;
   const Documents = require('../server/models/documents');
   const Roles = require('../server/models/roles');
   let token = null;
 
-  beforeEach((done) => {
-    // Promise that returns a generatedToken
-    helper.beforeEach()
-      .then((generatedToken) => {
-        token = generatedToken;
-        done();
-      })
-      .catch((err) => {
-        console.log('Error running the beforeEach function', err);
-        done();
-      });
+  beforeEach(async () => {
+    token = await helper.beforeEach();
   });
 
   describe('User Creation', () => {
-    it('should create a user successfully', (done) => {
-      request(app)
+    it('should create a user successfully', async () => {
+      const res = await request(app)
         .post('/api/users')
         .send({
           username: 'johnSnow',
@@ -35,24 +25,19 @@ describe('User Spec', () => {
           password: 'knfenfenfen',
           role: Roles.schema.paths.title.default()
         })
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-          expect(err).toBeNull();
-          expect(res.statusCode).toBe(201);
-          expect(res.body.user.username).toBe('johnSnow');
-          expect(res.body.user.name.first).toBe('John');
-          expect(res.body.user.name.last).toBe('Snow');
-          expect(res.body.token).not.toBeNull();
-          expect(res.body.user.id).not.toBeNull();
-          done();
-        });
+        .set('Accept', 'application/json');
+      
+      expect(res.statusCode).toBe(201);
+      expect(res.body.user.username).toBe('johnSnow');
+      expect(res.body.user.name.first).toBe('John');
+      expect(res.body.user.name.last).toBe('Snow');
+      expect(res.body.token).not.toBeNull();
+      expect(res.body.user.id).not.toBeNull();
     });
 
-    it('should log in the user after signup', (done) => {
-      let userID = null;
-      let userToken = null;
+    it('should log in the user after signup', async () => {
       // Create the user
-      request(app)
+      const createRes = await request(app)
         .post('/api/users')
         .set('Accept', 'application/json')
         .send({
@@ -62,32 +47,23 @@ describe('User Spec', () => {
           email: 'Jjsnow@winterfell.org',
           password: 'knffenfen',
           role: Roles.schema.paths.title.default()
-        })
-        .then((res) => {
-          expect(res.statusCode).toBe(201);
-          userID = res.body.user._id;
-          userToken = res.body.token;
-          return Promise.resolve(userToken);
-        })
-        .then((userToken) => {
-          return request(app)
-            .get('/api/users/' + userID)
-            .set('x-access-token', userToken);
-        })
-        .then((res) => {
-          expect(res.statusCode).toBe(200);
-          expect(res.body.loggedIn).toBe(true);
-          done();
-        })
-        .catch((err) => {
-          console.log('Error logging in user after signup', err);
-          done();
         });
+      
+      expect(createRes.statusCode).toBe(201);
+      const userID = createRes.body.user._id;
+      const userToken = createRes.body.token;
+      
+      const getRes = await request(app)
+        .get('/api/users/' + userID)
+        .set('x-access-token', userToken);
+      
+      expect(getRes.statusCode).toBe(200);
+      expect(getRes.body.loggedIn).toBe(true);
     });
 
-    it('should enforce a unique username field', (done) => {
+    it('should enforce a unique username field', async () => {
       // Try to provide a duplicate username field
-      request(app)
+      const res = await request(app)
         .post('/api/users')
         .send({
           username: 'jsnow',
@@ -97,19 +73,15 @@ describe('User Spec', () => {
           password: 'knfenfenfen',
           role: Roles.schema.paths.title.default()
         })
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-          expect(err).toBeNull();
-          expect(res.statusCode).toBe(400);
-          expect(res.body.error).toBe(
-            'The User already exists');
-          done();
-        });
+        .set('Accept', 'application/json');
+      
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toBe('The User already exists');
     });
 
-    it('should enforce a unique email field', (done) => {
+    it('should enforce a unique email field', async () => {
       // Try to provide a duplicate email field
-      request(app)
+      const res = await request(app)
         .post('/api/users')
         .send({
           username: 'jsnow67',
@@ -119,18 +91,14 @@ describe('User Spec', () => {
           password: 'knfenfenfen',
           role: Roles.schema.paths.title.default()
         })
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-          expect(err).toBeNull();
-          expect(res.statusCode).toBe(400);
-          expect(res.body.error).toBe(
-            'The User already exists');
-          done();
-        });
+        .set('Accept', 'application/json');
+      
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toBe('The User already exists');
     });
 
-    it('should populate the user\'s role if it is not defined', (done) => {
-      request(app)
+    it('should populate the user\'s role if it is not defined', async () => {
+      const res = await request(app)
         .post('/api/users')
         .send({
           username: 'newUser',
@@ -138,20 +106,16 @@ describe('User Spec', () => {
           lastname: 'Snow',
           email: 'snow@winterfell.org',
           password: 'knfenfenfen'
-        })
-        .end((err, res) => {
-          expect(err).toBeNull();
-          expect(res.statusCode).toBe(201);
-          expect(res.body.user.role).not.toBeNull();
-          // The role should be populated i.e. an object
-          expect(res.body.user.role).toEqual(jasmine.any(Object));
-          done();
         });
+      
+      expect(res.statusCode).toBe(201);
+      expect(res.body.user.role).not.toBeNull();
+      // The role should be populated i.e. an object
+      expect(res.body.user.role).toEqual(jasmine.any(Object));
     });
 
-    it('should raise an error if required attributes are missing', (
-      done) => {
-      request(app)
+    it('should raise an error if required attributes are missing', async () => {
+      const res = await request(app)
         .post('/api/users')
         .send({
           username: 'kevin',
@@ -160,15 +124,12 @@ describe('User Spec', () => {
           password: 'knnfenfen',
           role: Roles.schema.paths.title.default()
         })
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-          expect(err).toBeNull();
-          expect(res.statusCode).toBe(400);
-          expect(res.body.error).toBe(
-            'Please provide the username, firstname, ' +
-            'lastname, email, and password values');
-          done();
-        });
+        .set('Accept', 'application/json');
+      
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toBe(
+        'Please provide the username, firstname, ' +
+        'lastname, email, and password values');
     });
 
   });
@@ -177,9 +138,9 @@ describe('User Spec', () => {
     let user = null;
     let staffToken = null;
 
-    beforeEach((done) => {
+    beforeEach(async () => {
       // Create a new user with the staff role
-      request(app)
+      const res = await request(app)
         .post('/api/users')
         .send({
           username: 'staffUser',
@@ -188,47 +149,34 @@ describe('User Spec', () => {
           email: 'snow@staff.org',
           password: 'staff',
           role: 'staff'
-        })
-        .then((res) => {
-          // Save the staff token
-          staffToken = res.body.token;
-          // Decode the user object from the token
-          user = extractUserFromToken(token);
-          done();
-        })
-        .catch((err) => {
-          console.log('Error', err);
-          done();
         });
+      
+      // Save the staff token
+      staffToken = res.body.token;
+      // Decode the user object from the token
+      user = extractUserFromToken(token);
     });
 
-    it('should fetch the user\'s own profile successfully', (done) => {
-      request(app)
+    it('should fetch the user\'s own profile successfully', async () => {
+      const res = await request(app)
         .get('/api/users/' + user._id)
         .set('Accept', 'application/json')
-        .set('x-access-token', token)
-        .end((err, res) => {
-          expect(err).toBeNull();
-          expect(res.statusCode).toBe(200);
-          expect(res.body._id).toBe(user._id);
-          // The password should not be returned
-          expect(res.body.password).toBeUndefined();
-          done();
-        });
+        .set('x-access-token', token);
+      
+      expect(res.statusCode).toBe(200);
+      expect(res.body._id).toBe(user._id);
+      // The password should not be returned
+      expect(res.body.password).toBeUndefined();
     });
 
-    it('should not allow a user to fetch another user\'s profile', (
-      done) => {
-      request(app)
+    it('should not allow a user to fetch another user\'s profile', async () => {
+      const res = await request(app)
         .get('/api/users/' + user._id)
         .set('Accept', 'application/json')
-        .set('x-access-token', staffToken)
-        .end((err, res) => {
-          expect(err).toBeNull();
-          expect(res.statusCode).toBe(403);
-          expect(res.body.error).toBe('Unauthorized Access');
-          done();
-        });
+        .set('x-access-token', staffToken);
+      
+      expect(res.statusCode).toBe(403);
+      expect(res.body.error).toBe('Unauthorized Access');
     });
 
   });
@@ -236,14 +184,13 @@ describe('User Spec', () => {
   describe('User update', () => {
     let userId = null;
 
-    beforeEach((done) => {
+    beforeEach(() => {
       // Decode the user object from the token
       userId = extractUserFromToken(token)._id;
-      done();
     });
 
-    it('should update a user successfully', (done) => {
-      request(app)
+    it('should update a user successfully', async () => {
+      const res = await request(app)
         .put('/api/users/' + userId)
         .send({
           username: 'theImp',
@@ -252,20 +199,17 @@ describe('User Spec', () => {
           email: 'masterofcoin@westeros.org'
         })
         .set('Accept', 'application/json')
-        .set('x-access-token', token)
-        .end((err, res) => {
-          expect(err).toBeNull();
-          expect(res.statusCode).toBe(200);
-          expect(res.body.username).toBe('theImp');
-          expect(res.body.name.first).toBe('Half');
-          expect(res.body.name.last).toBe('Man');
-          expect(res.body.email).toBe('masterofcoin@westeros.org');
-          done();
-        });
+        .set('x-access-token', token);
+      
+      expect(res.statusCode).toBe(200);
+      expect(res.body.username).toBe('theImp');
+      expect(res.body.name.first).toBe('Half');
+      expect(res.body.name.last).toBe('Man');
+      expect(res.body.email).toBe('masterofcoin@westeros.org');
     });
 
-    it('should throw an error if a user does not exist', (done) => {
-      request(app)
+    it('should throw an error if a user does not exist', async () => {
+      const res = await request(app)
         .put('/api/users/i-do-not-exist')
         .send({
           username: 'theImp',
@@ -274,14 +218,11 @@ describe('User Spec', () => {
           email: 'masterofcoin@westeros.org'
         })
         .set('Accept', 'application/json')
-        .set('x-access-token', token)
-        .end((err, res) => {
-          // Should be treated as trying to access another user's profile
-          expect(err).toBeNull();
-          expect(res.statusCode).toBe(403);
-          expect(res.body.error).toBe('Unauthorized Access');
-          done();
-        });
+        .set('x-access-token', token);
+      
+      // Should be treated as trying to access another user's profile
+      expect(res.statusCode).toBe(403);
+      expect(res.body.error).toBe('Unauthorized Access');
     });
 
   });
@@ -289,113 +230,92 @@ describe('User Spec', () => {
   describe('User delete', () => {
     let userId = null;
 
-    beforeEach((done) => {
+    beforeEach(() => {
       // Decode the user object from the token
       userId = extractUserFromToken(token)._id;
-      done();
     });
 
-    it('should delete a user successfully', (done) => {
-      request(app)
+    it('should delete a user successfully', async () => {
+      const res = await request(app)
         .delete('/api/users/' + userId)
-        .set('x-access-token', token)
-        .end((err, res) => {
-          expect(err).toBeNull();
-          expect(res.statusCode).toBe(204);
-          done();
-        });
+        .set('x-access-token', token);
+      
+      expect(res.statusCode).toBe(204);
     });
 
-    it('should raise an error when given an invalid user', (done) => {
-      request(app)
+    it('should raise an error when given an invalid user', async () => {
+      const res = await request(app)
         .delete('/api/users/cant-touch-this')
-        .set('x-access-token', token)
-        .end((err, res) => {
-          expect(err).toBeNull();
-          expect(res.statusCode).toBe(403);
-          expect(res.body.error).toBe('Unauthorized Access');
-          done();
-        });
+        .set('x-access-token', token);
+      
+      expect(res.statusCode).toBe(403);
+      expect(res.body.error).toBe('Unauthorized Access');
     });
 
   });
 
   describe('User Documents', () => {
-    it('should get a user\'s documents', (done) => {
-      Documents.find({})
+    it('should get a user\'s documents', async () => {
+      const doc = await Documents.find({})
         .limit(1)
-        .exec((err, doc) => {
-          const userId = doc[0].ownerId;
-          request(app)
-            .get('/api/users/' + userId + '/documents')
-            .expect('Content-Type', /json/)
-            .set('x-access-token', token)
-            .expect(200)
-            .end((err, res) => {
-              expect(err).toBeNull();
-              // It should return the user's 3 documents
-              expect(res.body.length).toBe(3);
-              done();
-            });
-        });
+        .exec();
+      
+      const userId = doc[0].ownerId;
+      const res = await request(app)
+        .get('/api/users/' + userId + '/documents')
+        .expect('Content-Type', /json/)
+        .set('x-access-token', token)
+        .expect(200);
+      
+      // It should return the user's 3 documents
+      expect(res.body.length).toBe(3);
     });
   });
 
   describe('getAllUsers function', () => {
     let adminToken = null;
 
-    beforeEach((done) => {
+    beforeEach(async () => {
       // Create the admin role in the DB
-      Roles.create({
+      const adminRole = await Roles.create({
         title: 'admin'
-      })
-        .then((adminRole) => {
-          return request(app)
-            .post('/api/users')
-            .send({
-              username: 'adminUser',
-              firstname: 'John',
-              lastname: 'Snow',
-              email: 'snow@admin.org',
-              password: 'admin',
-              role: adminRole.title // 'admin'
-            });
-        })
-        .then((res) => {
-          adminToken = res.body.token;
-          done();
-        })
-        .catch((err) => {
-          console.log('Error', err);
-          done();
+      });
+      
+      const res = await request(app)
+        .post('/api/users')
+        .send({
+          username: 'adminUser',
+          firstname: 'John',
+          lastname: 'Snow',
+          email: 'snow@admin.org',
+          password: 'admin',
+          role: adminRole.title // 'admin'
         });
+      
+      adminToken = res.body.token;
     });
 
-    it('should return all users when called by admin user', (done) => {
-      // The 2 seeded Roles should be returned
-      request(app)
+    it('should return all users when called by admin user', async () => {
+      // The 3 seeded users should be returned
+      const res = await request(app)
         .get('/api/users')
         .set('Accept', 'application/json')
-        .set('x-access-token', adminToken)
-        .end((err, res) => {
-          expect(err).toBeNull();
-          expect(res.body.length).toBe(3);
-          expect(res.body[0].username).toBe('jsnow');
-          expect(res.body[1].username).toBe('nstark');
-          expect(res.body[2].username).toBe('adminUser');
-          done();
-        });
+        .set('x-access-token', adminToken);
+      
+      expect(res.body.length).toBe(3);
+      const usernames = res.body.map(user => user.username);
+      expect(usernames).toContain('jsnow');
+      expect(usernames).toContain('nstark');
+      expect(usernames).toContain('adminUser');
     });
 
-    it('should not be accessible to regular users', (done) => {
-      request(app)
+    it('should not be accessible to regular users', async () => {
+      const res = await request(app)
         .get('/api/users')
-        .set('x-access-token', token)
-        .end((err, res) => {
-          expect(res.statusCode).toBe(403);
-          expect(res.body.error).toBe('Unauthorized Access');
-          done();
-        });
+        .set('x-access-token', token);
+      
+      expect(res.statusCode).toBe(403);
+      expect(res.body.error).toBe('Unauthorized Access');
     });
   });
 
@@ -404,8 +324,8 @@ describe('User Spec', () => {
     let userToken = null;
     const userPassword = 'knfenfenfen';
 
-    beforeEach((done) => {
-      request(app)
+    beforeEach(async () => {
+      const res = await request(app)
         .post('/api/users')
         .send({
           username: 'jeremy',
@@ -414,105 +334,77 @@ describe('User Spec', () => {
           email: 'jerenotceo@andela.com',
           password: userPassword
         })
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-          expect(err).toBeNull();
-          // Save the new user in a variable
-          user = res.body.user;
-          userToken = res.body.token;
-          // Expect the user to be logged in
-          expect(res.body.user.loggedIn).toBe(true);
-          done();
-        });
+        .set('Accept', 'application/json');
+      
+      // Save the new user in a variable
+      user = res.body.user;
+      userToken = res.body.token;
+      // Expect the user to be logged in
+      expect(res.body.user.loggedIn).toBe(true);
     });
 
-    it('should login and logout user successfully', (done) => {
+    it('should login and logout user successfully', async () => {
       // logout the user
-      request(app)
+      const logoutRes = await request(app)
         .post('/api/users/logout')
-        .set('x-access-token', userToken)
-        .then((res) => {
-          expect(res.statusCode).toBe(200);
-          expect(res.body.message).toBe('Successfully logged out');
-          return Promise.resolve(res.body);
-        })
-        .then(() => {
-          return request(app)
-            .post('/api/users/login')
-            .send({
-              username: user.username,
-              password: userPassword
-            });
-        })
-        .then((res) => {
-          // The loggedIn flag should be set to true
-          expect(res.body.user.loggedIn).toBe(true);
-          done();
-        })
-        .catch((err) => {
-          console.log('Error', err);
-          done();
+        .set('x-access-token', userToken);
+      
+      expect(logoutRes.statusCode).toBe(200);
+      expect(logoutRes.body.message).toBe('Successfully logged out');
+      
+      const loginRes = await request(app)
+        .post('/api/users/login')
+        .send({
+          username: user.username,
+          password: userPassword
         });
+      
+      // The loggedIn flag should be set to true
+      expect(loginRes.body.user.loggedIn).toBe(true);
     });
   });
 
   describe('User Session', () => {
-    it('should return false if no token is provided', (done) => {
-      request(app)
-        .get('/api/users/session')
-        .end((err, res) => {
-          expect(res.statusCode).toBe(200);
-          expect(res.body.loggedIn).toBe('false');
-          done();
-        });
+    it('should return false if no token is provided', async () => {
+      const res = await request(app)
+        .get('/api/users/session');
+      
+      expect(res.statusCode).toBe(200);
+      expect(res.body.loggedIn).toBe('false');
     });
 
-    it('should return true if the user is logged in', (done) => {
-      request(app)
+    it('should return true if the user is logged in', async () => {
+      const res = await request(app)
         .get('/api/users/session')
-        .set('x-access-token', token)
-        .end((err, res) => {
-          expect(res.statusCode).toBe(200);
-          expect(res.body.loggedIn).toBe('true');
-          done();
-        });
+        .set('x-access-token', token);
+      
+      expect(res.statusCode).toBe(200);
+      expect(res.body.loggedIn).toBe('true');
     });
 
-    it('should return false if the token is invalid', (done) => {
-      request(app)
+    it('should return false if the token is invalid', async () => {
+      const res = await request(app)
         .get('/api/users/session')
-        .set('x-access-token', 'i-will-hack-you')
-        .end((err, res) => {
-          expect(res.statusCode).toBe(200);
-          expect(res.body.loggedIn).toBe('false');
-          done();
-        });
+        .set('x-access-token', 'i-will-hack-you');
+      
+      expect(res.statusCode).toBe(200);
+      expect(res.body.loggedIn).toBe('false');
     });
 
-    it('should return false if the user is logged out', (done) => {
+    it('should return false if the user is logged out', async () => {
       // logout the user
-      request(app)
+      const logoutRes = await request(app)
         .post('/api/users/logout')
-        .set('x-access-token', token)
-        .then((res) => {
-          expect(res.statusCode).toBe(200);
-          return Promise.resolve(res.body.message);
-        })
-        .then(() => {
-          return request(app)
-            .get('/api/users/session')
-            .set('x-access-token', token);
-        })
-        .then((res) => {
-          expect(res.statusCode).toBe(200);
-          expect(res.body.loggedIn).toBe('false');
-          done();
-        })
-        .catch((err) => {
-          console.log('Error', err);
-          done();
-        });
-
+        .set('x-access-token', token);
+      
+      expect(logoutRes.statusCode).toBe(200);
+      
+      const sessionRes = await request(app)
+        .get('/api/users/session')
+        .set('x-access-token', token);
+      
+      expect(sessionRes.statusCode).toBe(200);
+      expect(sessionRes.body.loggedIn).toBe('false');
     });
 
   });

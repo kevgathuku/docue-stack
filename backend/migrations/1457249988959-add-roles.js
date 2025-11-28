@@ -21,19 +21,19 @@ exports.up = function(next) {
   });
 
   Promise.all(tasks)
-      .then(()=> { next(); })
-      .catch((error) => {
-        console.error(error);
-        next();
-      });
+    .then(()=> { next(); })
+    .catch((error) => {
+      console.error(error);
+      next();
+    });
 };
 
 exports.down = function(next) {
 
   Roles.remove({ title: { $in: titles}})
-      .then(() => next())
-      .catch((error) => {
-        console.error(error);
-        next();
-      });
+    .then(() => next())
+    .catch((error) => {
+      console.error(error);
+      next();
+    });
 };

@@ -1,5 +1,5 @@
 const mongoose = require('../config/db');
-const bcrypt = require('bcrypt-nodejs');
+const bcrypt = require('bcrypt');
 
 const UserSchema = mongoose.Schema({
   username: {
@@ -47,26 +47,24 @@ UserSchema.pre('save', function(next) {
 
   // Only hash the password if it has been modified (or is new)
   if (!user.isModified('password')) {
-    next();
+    return next();
   }
 
-  // Hash the user's password
-  bcrypt.hash(user.password, null, null, function(err, hash) {
+  // Hash the user's password with 10 salt rounds
+  bcrypt.hash(user.password, 10, function(err, hash) {
     if (err) {
       return next(err);
-    } else {
-      // Replace the cleartext password with the hashed one
-      user.password = hash;
-      next();
     }
+    // Replace the cleartext password with the hashed one
+    user.password = hash;
+    next();
   });
 });
 
 // Check if entered password is the same as the stored password
 // Returns true if the passwords match, false otherwise
 UserSchema.methods.comparePassword = function(password) {
-  const user = this;
-  return bcrypt.compareSync(password, user.password);
+  return bcrypt.compareSync(password, this.password);
 };
 
 module.exports = mongoose.model('User', UserSchema);
