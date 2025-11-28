@@ -34,12 +34,12 @@
     "@babel/core": "^7.26.0",
     "@babel/eslint-parser": "^7.25.9",
     "@eslint/js": "^9.39.1",
-    "coveralls": "^2.11.6",
-    "dotenv": "^16.4.7",
+    "coveralls": "^3.1.1",
+    "dotenv": "^17.2.3",
     "eslint": "^9.17.0",
     "jasmine": "^5.5.0",
-    "mockgoose": "^7.3.3",
-    "nyc": "^11.3.0",
-    "supertest": "^2.0.1"
+    "mockgoose": "^8.0.4",
+    "nyc": "^17.1.0",
+    "supertest": "^7.1.4"
   }
 }
