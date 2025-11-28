@@ -279,7 +279,7 @@ module.exports = {
         decoded.password = null;
         req.decoded = decoded;
         next();
-      } catch (err) {
+      } catch {
         res.status(401).json({
           error: 'Failed to authenticate token.'
         });
@@ -315,7 +315,7 @@ module.exports = {
             loggedIn: user.loggedIn.toString()
           });
         }
-      } catch (err) {
+      } catch {
         // If the token cannot be verified, return false
         res.json({
           loggedIn: 'false'
