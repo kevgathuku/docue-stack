@@ -1,21 +1,20 @@
-/* @flow */
 import AppConstants from '../constants/AppConstants';
 import BaseActions from './BaseActions';
 
 export default {
-  createDoc: (body, token: ?string) => {
+  createDoc: (body, token) => {
     BaseActions.post('/api/documents', body, AppConstants.CREATE_DOC, token);
   },
 
-  getDocs: (token: ?string) => {
+  getDocs: (token) => {
     BaseActions.get('/api/documents', AppConstants.USER_DOCS, token);
   },
 
-  fetchDoc: (docId, token: ?string) => {
+  fetchDoc: (docId, token) => {
     BaseActions.get(`/api/documents/${docId}`, AppConstants.GET_DOC, token);
   },
 
-  deleteDoc: (docID, token: ?string) => {
+  deleteDoc: (docID, token) => {
     BaseActions.delete(
       `/api/documents/${docID}`,
       AppConstants.DELETE_DOC,
@@ -23,7 +22,7 @@ export default {
     );
   },
 
-  editDoc: (docID, updatedDoc, token: ?string) => {
+  editDoc: (docID, updatedDoc, token) => {
     BaseActions.put(
       `/api/documents/${docID}`,
       updatedDoc,

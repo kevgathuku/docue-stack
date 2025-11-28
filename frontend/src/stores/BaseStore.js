@@ -1,17 +1,19 @@
-import { EventEmitter } from 'events';
+import EventEmitter from 'eventemitter3';
 
-let BaseStore = Object.assign({}, EventEmitter.prototype, {
+const emitter = new EventEmitter();
+
+let BaseStore = {
   emitChange(event = 'change') {
-    this.emit(event);
+    emitter.emit(event);
   },
 
   addChangeListener(callback, event = 'change') {
-    this.on(event, callback);
+    emitter.on(event, callback);
   },
 
   removeChangeListener(callback, event = 'change') {
-    this.removeListener(event, callback);
+    emitter.removeListener(event, callback);
   }
-});
+};
 
 export default BaseStore;

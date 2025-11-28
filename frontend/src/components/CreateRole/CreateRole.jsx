@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import Elm from '../../utils/ReactElm';
 import RoleActions from '../../actions/RoleActions';
 import RoleStore from '../../stores/RoleStore';
-import ElmComponents from '../CreateRole.elm';
+import * as ElmCreateRole from '../CreateRole.elm';
 import { withNavigate } from '../../utils/withNavigate';
 
 const token = localStorage.getItem('user');
@@ -58,7 +58,7 @@ class Main extends React.Component {
   };
 
   render() {
-    return <Elm src={ElmComponents.Elm.CreateRole} flags={this.flags} ports={this.setupPorts} />;
+    return <Elm src={ElmCreateRole} flags={this.flags} ports={this.setupPorts} />;
   }
 }
 

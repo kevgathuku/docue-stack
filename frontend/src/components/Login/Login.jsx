@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 import Elm from '../../utils/ReactElm';
-import ElmComponents from '../Login.elm';
+import * as ElmLogin from '../Login.elm';
 import { initiateLogin } from '../../actions/actionCreators';
 import { withNavigate } from '../../utils/withNavigate';
 
@@ -64,7 +64,7 @@ class Login extends React.Component {
   }
 
   render() {
-    return <Elm src={ElmComponents.Elm.Login} ports={this.setupPorts} />;
+    return <Elm src={ElmLogin} ports={this.setupPorts} />;
   }
 }
 

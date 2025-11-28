@@ -1,7 +1,7 @@
 import React from 'react';
 import BaseActions from '../../actions/BaseActions';
 import Elm from '../../utils/ReactElm';
-import ElmComponents from '../Admin.elm';
+import * as ElmAdmin from '../Admin.elm';
 
 export default class Main extends React.Component {
   flags = {
@@ -10,6 +10,6 @@ export default class Main extends React.Component {
   };
 
   render() {
-    return <Elm src={ElmComponents.Elm.Admin} flags={this.flags} />;
+    return <Elm src={ElmAdmin} flags={this.flags} />;
   }
 }
