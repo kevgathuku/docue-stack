@@ -10,111 +10,89 @@ describe('Documents Spec', () => {
 
   jasmine.DEFAULT_TIMEOUT_INTERVAL = 15000;
 
-  beforeEach(done => {
-    // Promise that returns a generatedToken
-    helper
-      .beforeEach()
-      .then(generatedToken => {
-        token = generatedToken;
-        done();
-      })
-      .catch(err => {
-        console.log('Error running the beforeEach function', err);
-        done();
-      });
+  beforeEach(async () => {
+    token = await helper.beforeEach();
   });
 
   describe('Document Creation', () => {
-    it('should create a document successfully', done => {
-      request(app)
+    it('should create a document successfully', async () => {
+      const res = await request(app)
         .post('/api/documents')
         .send({
           title: 'Doc 1',
           content: 'JS Curriculum'
         })
-        .set('x-access-token', token)
-        .end((err, res) => {
-          expect(err).toBeNull();
-          expect(res.statusCode).toBe(201);
-          expect(res.body.title).toBe('Doc 1');
-          expect(res.body.content).toBe('JS Curriculum');
-          // The timestamps should be created
-          expect(res.body.dateCreated).not.toBeNull();
-          expect(res.body.lastModified).not.toBeNull();
-          // The User Id should be added
-          expect(res.body.ownerId).not.toBeNull();
-          done();
-        });
+        .set('x-access-token', token);
+      
+      expect(res.statusCode).toBe(201);
+      expect(res.body.title).toBe('Doc 1');
+      expect(res.body.content).toBe('JS Curriculum');
+      // The timestamps should be created
+      expect(res.body.dateCreated).not.toBeNull();
+      expect(res.body.lastModified).not.toBeNull();
+      // The User Id should be added
+      expect(res.body.ownerId).not.toBeNull();
     });
 
-    it('should not create document if user is unauthenticated', done => {
+    it('should not create document if user is unauthenticated', async () => {
       // Send a request without a token
-      request(app)
+      const res = await request(app)
         .post('/api/documents')
         .send({
           title: 'Doc 1',
           content: 'JS Curriculum'
         })
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-          expect(res.statusCode).toBe(403);
-          expect(res.body.error).toBe('No token provided.');
-          done();
-        });
+        .set('Accept', 'application/json');
+      
+      expect(res.statusCode).toBe(403);
+      expect(res.body.error).toBe('No token provided.');
     });
 
-    it('should not create new document if title is missing', done => {
+    it('should not create new document if title is missing', async () => {
       // Send a request with an empty title
-      request(app)
+      const res = await request(app)
         .post('/api/documents')
         .send({
           title: '',
           content: 'JS Curriculum'
         })
-        .set('x-access-token', token)
-        .end((err, res) => {
-          expect(res.statusCode).toBe(400);
-          expect(res.body.error).toBe('The document title is required');
-          done();
-        });
+        .set('x-access-token', token);
+      
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toBe('The document title is required');
     });
 
-    it('should not create a duplicate document', done => {
-      request(app)
+    it('should not create a duplicate document', async () => {
+      const res = await request(app)
         .post('/api/documents')
         .send({
           title: 'Doc1',
           content: 'Duplicate document test'
         })
-        .set('x-access-token', token)
-        .expect(201)
-        .end((err, res) => {
-          expect(res.statusCode).toBe(400);
-          expect(res.body.title).toBeUndefined();
-          expect(res.body.error).toBe('Document already exists');
-          done();
-        });
+        .set('x-access-token', token);
+      
+      expect(res.statusCode).toBe(400);
+      expect(res.body.title).toBeUndefined();
+      expect(res.body.error).toBe('Document already exists');
     });
 
-    it('should assign a default role if one is not defined', done => {
-      request(app)
+    it('should assign a default role if one is not defined', async () => {
+      const res = await request(app)
         .post('/api/documents')
         .send({
           title: 'Doc 1',
           content: 'JS Curriculum'
         })
         .set('Accept', 'application/json')
-        .set('x-access-token', token)
-        .end((err, res) => {
-          expect(res.statusCode).toBe(201);
-          // It should assign the default role
-          expect(res.body.role.title).toBe(defaultRole);
-          done();
-        });
+        .set('x-access-token', token);
+      
+      expect(res.statusCode).toBe(201);
+      // It should assign the default role
+      expect(res.body.role.title).toBe(defaultRole);
     });
 
-    it('should assign defined roles correctly', done => {
-      request(app)
+    it('should assign defined roles correctly', async () => {
+      const res = await request(app)
         .post('/api/documents')
         .send({
           title: 'Doc 1',
@@ -122,117 +100,97 @@ describe('Documents Spec', () => {
           role: 'staff'
         })
         .set('Accept', 'application/json')
-        .set('x-access-token', token)
-        .end((err, res) => {
-          expect(err).toBeNull();
-          expect(res.statusCode).toBe(201);
-          expect(res.body.role.title).toBe('staff');
-          done();
-        });
+        .set('x-access-token', token);
+      
+      expect(res.statusCode).toBe(201);
+      expect(res.body.role.title).toBe('staff');
     });
   });
 
   describe('Document Fetching', () => {
-    it('should return all documents', done => {
-      request(app)
+    it('should return all documents', async () => {
+      const res = await request(app)
         .get('/api/documents')
-        .set('x-access-token', token)
-        .end((err, res) => {
-          expect(res.statusCode).toBe(200);
-          expect(err).toBeNull();
-          // Should contain all 3 seeded docs
-          expect(res.body.length).toBe(3);
-          done();
-        });
+        .set('x-access-token', token);
+      
+      expect(res.statusCode).toBe(200);
+      // Should contain all 3 seeded docs
+      expect(res.body.length).toBe(3);
     });
 
-    it('should return documents limited by a specified number', done => {
+    it('should return documents limited by a specified number', async () => {
       const limit = 2;
-      request(app)
+      const res = await request(app)
         .get('/api/documents?limit=' + limit)
-        .set('x-access-token', token)
-        .end((err, res) => {
-          expect(res.statusCode).toBe(200);
-          expect(err).toBeNull();
-          // Should return only the specified number of documents
-          expect(res.body.length).toBe(limit);
-          done();
-        });
+        .set('x-access-token', token);
+      
+      expect(res.statusCode).toBe(200);
+      // Should return only the specified number of documents
+      expect(res.body.length).toBe(limit);
     });
 
-    it('should return documents in latest first order', done => {
-      request(app)
+    it('should return documents in latest first order', async () => {
+      const res = await request(app)
         .get('/api/documents')
-        .set('x-access-token', token)
-        .end((err, res) => {
-          expect(err).toBeNull();
-          expect(res.body.length).toBe(3);
-          expect(res.body[0].title).toBe('Doc3');
-          expect(res.body[1].title).toBe('Doc2');
-          expect(res.body[2].title).toBe('Doc1');
-          done();
-        });
+        .set('x-access-token', token);
+      
+      expect(res.body.length).toBe(3);
+      expect(res.body[0].title).toBe('Doc3');
+      expect(res.body[1].title).toBe('Doc2');
+      expect(res.body[2].title).toBe('Doc1');
     });
   });
 
   describe('Documents Update', () => {
     let documentID = null;
 
-    beforeEach(done => {
-      request(app)
+    beforeEach(async () => {
+      const res = await request(app)
         .get('/api/documents')
-        .set('x-access-token', token)
-        .end((err, res) => {
-          expect(res.statusCode).toBe(200);
-          // Store the first document's Id for later use
-          documentID = res.body[0]._id;
-          done();
-        });
+        .set('x-access-token', token);
+      
+      expect(res.statusCode).toBe(200);
+      // Store the first document's Id for later use
+      documentID = res.body[0]._id;
     });
 
-    it('should correctly update a document', done => {
-      request(app)
+    it('should correctly update a document', async () => {
+      const res = await request(app)
         .put('/api/documents/' + documentID)
         .set('x-access-token', token)
         .send({
           title: 'Brand',
           content: 'New'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).toBe(200);
-          // Should contain the updated doc attributes
-          expect(res.body.title).toBe('Brand');
-          expect(res.body.content).toBe('New');
-          done();
         });
+      
+      expect(res.statusCode).toBe(200);
+      // Should contain the updated doc attributes
+      expect(res.body.title).toBe('Brand');
+      expect(res.body.content).toBe('New');
     });
   });
 
   describe('Single Document Fetch', () => {
     let documentID = null;
 
-    beforeEach(done => {
-      request(app)
+    beforeEach(async () => {
+      const res = await request(app)
         .get('/api/documents')
-        .set('x-access-token', token)
-        .end((err, res) => {
-          // Store the first document's Id for later use
-          documentID = res.body[0]._id;
-          done();
-        });
+        .set('x-access-token', token);
+      
+      // Store the first document's Id for later use
+      documentID = res.body[0]._id;
     });
 
-    it('should correctly fetch a single document', done => {
-      request(app)
+    it('should correctly fetch a single document', async () => {
+      const res = await request(app)
         .get('/api/documents/' + documentID)
-        .set('x-access-token', token)
-        .end((err, res) => {
-          expect(res.statusCode).toBe(200);
-          // Should contain the doc's attributes
-          expect(res.body.title).not.toBe(null);
-          expect(res.body.content).not.toBe(null);
-          done();
-        });
+        .set('x-access-token', token);
+      
+      expect(res.statusCode).toBe(200);
+      // Should contain the doc's attributes
+      expect(res.body.title).not.toBe(null);
+      expect(res.body.content).not.toBe(null);
     });
   });
 
@@ -240,9 +198,9 @@ describe('Documents Spec', () => {
     let staffToken = null;
     let documentID = null;
 
-    beforeEach(done => {
+    beforeEach(async () => {
       // Create a new user with the staff role
-      request(app)
+      const userRes = await request(app)
         .post('/api/users')
         .send({
           username: 'staffUser',
@@ -251,122 +209,99 @@ describe('Documents Spec', () => {
           email: 'snow@staff.org',
           password: 'staff',
           role: 'staff'
-        })
-        .then(res => {
-          staffToken = res.body.token;
-          return Promise.resolve(staffToken);
-        })
-        .then(staffToken => {
-          return request(app)
-            .post('/api/documents')
-            .set('x-access-token', staffToken)
-            .send({
-              title: 'Staff Doc',
-              description: 'Confidential',
-              role: 'staff'
-            });
-        })
-        .then(res => {
-          documentID = res.body._id;
-          done();
-        })
-        .catch(err => {
-          console.log('Error', err);
-          done();
         });
-    });
-
-    it('should allow access to authorized users', done => {
-      request(app)
-        .get('/api/documents/' + documentID)
+      
+      staffToken = userRes.body.token;
+      
+      const docRes = await request(app)
+        .post('/api/documents')
         .set('x-access-token', staffToken)
-        .end((err, res) => {
-          expect(res.statusCode).toBe(200);
-          expect(res.body.title).not.toBe(null);
-          expect(res.body.content).not.toBe(null);
-          done();
+        .send({
+          title: 'Staff Doc',
+          description: 'Confidential',
+          role: 'staff'
         });
+      
+      documentID = docRes.body._id;
     });
 
-    it('should not allow unauthorized viewing of a document', done => {
-      request(app)
+    it('should allow access to authorized users', async () => {
+      const res = await request(app)
         .get('/api/documents/' + documentID)
-        .set('x-access-token', token)
-        .end((err, res) => {
-          expect(res.statusCode).toBe(403);
-          expect(res.body.error).toBe(
-            'You are not allowed to access this document'
-          );
-          done();
-        });
+        .set('x-access-token', staffToken);
+      
+      expect(res.statusCode).toBe(200);
+      expect(res.body.title).not.toBe(null);
+      expect(res.body.content).not.toBe(null);
     });
 
-    it('should not allow unauthorized editing of documents', done => {
-      request(app)
+    it('should not allow unauthorized viewing of a document', async () => {
+      const res = await request(app)
+        .get('/api/documents/' + documentID)
+        .set('x-access-token', token);
+      
+      expect(res.statusCode).toBe(403);
+      expect(res.body.error).toBe(
+        'You are not allowed to access this document'
+      );
+    });
+
+    it('should not allow unauthorized editing of documents', async () => {
+      const res = await request(app)
         .put('/api/documents/' + documentID)
         .set('x-access-token', token)
         .send({
           title: 'Users docs'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).toBe(403);
-          expect(res.body.error).toBe(
-            'You are not allowed to access this document'
-          );
-          done();
         });
+      
+      expect(res.statusCode).toBe(403);
+      expect(res.body.error).toBe(
+        'You are not allowed to access this document'
+      );
     });
 
-    it('should not allow unauthorized deletion of documents', done => {
-      request(app)
+    it('should not allow unauthorized deletion of documents', async () => {
+      const res = await request(app)
         .delete('/api/documents/' + documentID)
-        .set('x-access-token', token)
-        .end((err, res) => {
-          expect(res.statusCode).toBe(403);
-          expect(res.body.error).toBe(
-            'You are not allowed to delete this document'
-          );
-          done();
-        });
+        .set('x-access-token', token);
+      
+      expect(res.statusCode).toBe(403);
+      expect(res.body.error).toBe(
+        'You are not allowed to delete this document'
+      );
     });
 
-    it('should only return documents a user is allowed to access', done => {
-      request(app)
+    it('should only return documents a user is allowed to access', async () => {
+      const res = await request(app)
         .get('/api/documents/')
-        .set('x-access-token', token)
-        .end((err, res) => {
-          expect(res.statusCode).toBe(200);
-          // Should not return the doc with the staff role
-          expect(res.body.length).toBe(3);
-          done();
-        });
+        .set('x-access-token', token);
+      
+      expect(res.statusCode).toBe(200);
+      // Should not return the doc with the staff role
+      expect(res.body.length).toBe(3);
     });
   });
 
   describe('Document delete', () => {
     let documentID = null;
 
-    beforeEach(done => {
-      request(app)
+    beforeEach(async () => {
+      const res = await request(app)
         .get('/api/documents')
-        .set('x-access-token', token)
-        .end((err, res) => {
-          // Store the first document's Id for later use
-          documentID = res.body[0]._id;
-          done();
-        });
+        .set('x-access-token', token);
+      
+      // Store the first document's Id for later use
+      documentID = res.body[0]._id;
     });
 
-    it('should correctly delete a document', done => {
-      request(app)
+    it('should correctly delete a document', async () => {
+      const res = await request(app)
         .delete('/api/documents/' + documentID)
-        .set('x-access-token', token)
-        .end((err, res) => {
-          expect(res.statusCode).toBe(204);
-          // should send back an empty body
-          expect(res.body).toEqual({});
-          done();
-        });
+        .set('x-access-token', token);
+      
+      expect(res.statusCode).toBe(204);
+      // should send back an empty body
+      expect(res.body).toEqual({});
     });
   });
 
@@ -374,17 +309,15 @@ describe('Documents Spec', () => {
     // The viewer role (default) is the test role
     let testRole = defaultRole;
 
-    it('should return documents accessible by the given role', done => {
+    it('should return documents accessible by the given role', async () => {
       // Get the documents accessible by the test role
-      request(app)
+      const res = await request(app)
         .get('/api/documents/roles/' + testRole)
         .set('x-access-token', token)
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-          expect(res.body.length).toBe(3);
-          expect(res.body[0].role.title).toBe(testRole);
-          done();
-        });
+        .set('Accept', 'application/json');
+      
+      expect(res.body.length).toBe(3);
+      expect(res.body[0].role.title).toBe(testRole);
     });
   });
 
@@ -394,31 +327,26 @@ describe('Documents Spec', () => {
     // Formt should be YYYY-MM-DD
     let testDate = `${today.getFullYear()}-${today.getMonth() +
       1}-${today.getDate()}`;
-    it('should return documents created on the date provided', done => {
-      request(app)
+    it('should return documents created on the date provided', async () => {
+      const res = await request(app)
         .get('/api/documents/created/' + testDate)
         .set('x-access-token', token)
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-          expect(err).toBeNull();
-          expect(res.body.length).toBeGreaterThan(0);
-          // Doc1 should be in the results since it was created today
-          const titles = res.body.map(doc => doc.title);
-          expect(titles).toContain('Doc1');
-          done();
-        });
+        .set('Accept', 'application/json');
+      
+      expect(res.body.length).toBeGreaterThan(0);
+      // Doc1 should be in the results since it was created today
+      const titles = res.body.map(doc => doc.title);
+      expect(titles).toContain('Doc1');
     });
 
-    it('should return an error if the format is not valid', done => {
-      request(app)
+    it('should return an error if the format is not valid', async () => {
+      const res = await request(app)
         .get('/api/documents/created/' + '20er-343-343e3d')
         .set('x-access-token', token)
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-          expect(res.statusCode).toBe(400);
-          expect(res.body.error).toBe('Date must be in the format YYYY-MM-DD');
-          done();
-        });
+        .set('Accept', 'application/json');
+      
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toBe('Date must be in the format YYYY-MM-DD');
     });
   });
 });
