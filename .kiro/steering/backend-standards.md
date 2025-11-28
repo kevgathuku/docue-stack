@@ -8,10 +8,10 @@ fileMatchPattern: "backend/**/*"
 ## Technology Stack
 
 - **Runtime**: Node.js 22.x
-- **Framework**: Express.js 4.x
+- **Framework**: Express.js 4.x (latest)
 - **Database**: MongoDB with Mongoose ODM
 - **Testing**: Jasmine with Supertest for API testing
-- **Auth**: JWT (jsonwebtoken) with bcrypt-nodejs
+- **Auth**: JWT (jsonwebtoken) with bcrypt
 
 ## Code Style
 
@@ -43,13 +43,25 @@ fileMatchPattern: "backend/**/*"
 - Use compression middleware for responses
 - Validate and sanitize all user inputs
 
-## Modernization Priorities
+## Modernization Status
 
-When updating backend code:
-1. Replace deprecated packages (bcrypt-nodejs → bcrypt)
-2. Update Mongoose to latest 8.x (currently on 4.7.9)
-3. Migrate from old callback patterns to async/await
-4. Update Express to latest 4.x
-5. Replace deprecated middleware patterns
-6. Update test framework if needed (Jasmine → Jest/Vitest)
-7. Add TypeScript types gradually if beneficial
+**Completed:**
+- ✅ Updated Express to 4.21.2
+- ✅ Replaced bcrypt-nodejs with bcrypt 5.1.1
+- ✅ Removed body-parser (using Express built-in)
+- ✅ Updated ESLint to 9.x with flat config
+- ✅ Updated core dependencies (morgan, compression, cors, etc.)
+- ✅ Fixed dotenv.load() → dotenv.config()
+
+**Remaining:**
+1. Update Mongoose to latest 8.x (currently on 4.7.9)
+2. Migrate from old callback patterns to async/await
+3. Update test framework if needed (Jasmine → Jest/Vitest)
+4. Add TypeScript types gradually if beneficial
+
+## Password Hashing
+
+- Use `bcrypt` package (not bcrypt-nodejs)
+- Hash passwords with 10 salt rounds: `bcrypt.hash(password, 10, callback)`
+- Compare passwords: `bcrypt.compareSync(password, hash)`
+- Always hash in pre-save hooks, only when password is modified
