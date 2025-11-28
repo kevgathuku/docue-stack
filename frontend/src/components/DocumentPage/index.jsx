@@ -7,12 +7,13 @@ import DocActions from '../../actions/DocActions';
 import DocStore from '../../stores/DocStore';
 import RoleActions from '../../actions/RoleActions';
 import RoleStore from '../../stores/RoleStore';
+import { withNavigate } from '../../utils/withNavigate';
 
 import 'sweetalert/dist/sweetalert.css';
 
 class DocumentPage extends React.Component {
   static propTypes = {
-    history: PropTypes.object,
+    navigate: PropTypes.func,
     match: PropTypes.object,
   };
 
@@ -76,7 +77,7 @@ class DocumentPage extends React.Component {
     let result = DocStore.getDocDeleteResult();
     if (result && result.statusCode === 204) {
       swal('Deleted!', 'Your document has been deleted.', 'success');
-      this.props.history.push('/dashboard');
+      this.props.navigate('/dashboard');
     }
   };
 
@@ -181,4 +182,4 @@ class DocumentPage extends React.Component {
   }
 }
 
-export default DocumentPage;
+export default withNavigate(DocumentPage);

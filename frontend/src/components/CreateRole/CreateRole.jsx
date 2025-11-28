@@ -4,12 +4,13 @@ import Elm from '../../utils/ReactElm';
 import RoleActions from '../../actions/RoleActions';
 import RoleStore from '../../stores/RoleStore';
 import ElmComponents from '../CreateRole.elm';
+import { withNavigate } from '../../utils/withNavigate';
 
 const token = localStorage.getItem('user');
 
-export default class Main extends React.Component {
+class Main extends React.Component {
   static propTypes = {
-    history: PropTypes.object,
+    navigate: PropTypes.func,
   };
 
   componentDidMount() {
@@ -51,7 +52,7 @@ export default class Main extends React.Component {
           2000,
           'success-toast'
         );
-        this.props.history.push('/admin/roles');
+        this.props.navigate('/admin/roles');
       }
     }
   };
@@ -60,3 +61,5 @@ export default class Main extends React.Component {
     return <Elm src={ElmComponents.Elm.CreateRole} flags={this.flags} ports={this.setupPorts} />;
   }
 }
+
+export default withNavigate(Main);

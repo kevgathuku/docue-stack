@@ -1,7 +1,7 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
-import { BrowserRouter as Router, Redirect, Switch } from 'react-router-dom';
-import thunk from 'redux-thunk';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter as Router, Navigate, Routes, Route } from 'react-router-dom';
+import { thunk } from 'redux-thunk';
 import { applyMiddleware, createStore, compose } from 'redux';
 import { Provider } from 'react-redux';
 import reducer from './stores/reducer';
@@ -26,26 +26,29 @@ import './styles/style.css';
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const store = createStore(reducer, composeEnhancers(applyMiddleware(thunk)));
 
-ReactDOM.render(
+// React 18 root API
+const container = document.getElementById('content');
+const root = createRoot(container);
+
+root.render(
   <Provider store={store}>
     <Router>
-      <Switch>
-        <DefaultLayout exact path="/" component={Landing} />
-        <DefaultLayout path="/auth" component={Auth} />
-        <DefaultLayout exact path="/admin" component={Admin} />
-        <DefaultLayout path="/admin/roles" component={RolesAdmin} />
-        <DefaultLayout path="/admin/users" component={UsersAdmin} />
-        <DefaultLayout path="/admin/roles/create" component={CreateRole} />
-        <DefaultLayout path="/dashboard" component={Dashboard} />
-        <DefaultLayout path="/documents/create" component={CreateDocument} />
-        <DefaultLayout path="/documents/:id" component={DocumentPage} />
-        <DefaultLayout path="/profile" component={Profile} />
-        <DefaultLayout path="/404" component={NotFound} />
-        <Redirect path="*" to="404" />
-      </Switch>
+      <Routes>
+        <Route path="/" element={<DefaultLayout component={Landing} />} />
+        <Route path="/auth" element={<DefaultLayout component={Auth} />} />
+        <Route path="/admin" element={<DefaultLayout component={Admin} />} />
+        <Route path="/admin/roles" element={<DefaultLayout component={RolesAdmin} />} />
+        <Route path="/admin/users" element={<DefaultLayout component={UsersAdmin} />} />
+        <Route path="/admin/roles/create" element={<DefaultLayout component={CreateRole} />} />
+        <Route path="/dashboard" element={<DefaultLayout component={Dashboard} />} />
+        <Route path="/documents/create" element={<DefaultLayout component={CreateDocument} />} />
+        <Route path="/documents/:id" element={<DefaultLayout component={DocumentPage} />} />
+        <Route path="/profile" element={<DefaultLayout component={Profile} />} />
+        <Route path="/404" element={<DefaultLayout component={NotFound} />} />
+        <Route path="*" element={<Navigate to="/404" replace />} />
+      </Routes>
     </Router>
-  </Provider>,
-  document.getElementById('content')
+  </Provider>
 );
 
 // If you want your app to work offline and load faster, you can change

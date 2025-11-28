@@ -6,10 +6,11 @@ import DocStore from '../../stores/DocStore';
 import RoleActions from '../../actions/RoleActions';
 import RoleStore from '../../stores/RoleStore';
 import { handleFieldChange } from '../../utils/componentHelpers';
+import { withNavigate } from '../../utils/withNavigate';
 
 class CreateDocument extends React.Component {
   static propTypes = {
-    history: PropTypes.object,
+    navigate: PropTypes.func,
   };
 
   constructor(props) {
@@ -45,7 +46,7 @@ class CreateDocument extends React.Component {
           2000,
           'success-toast'
         );
-        this.props.history.push('/dashboard');
+        this.props.navigate('/dashboard');
       }
     }
   };
@@ -155,4 +156,4 @@ class CreateDocument extends React.Component {
   }
 }
 
-export default CreateDocument;
+export default withNavigate(CreateDocument);

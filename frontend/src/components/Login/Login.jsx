@@ -5,11 +5,12 @@ import { connect } from 'react-redux';
 import Elm from '../../utils/ReactElm';
 import ElmComponents from '../Login.elm';
 import { initiateLogin } from '../../actions/actionCreators';
+import { withNavigate } from '../../utils/withNavigate';
 
 class Login extends React.Component {
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
-    history: PropTypes.object,
+    navigate: PropTypes.func,
     loginError: PropTypes.string,
     token: PropTypes.string,
     user: PropTypes.object,
@@ -41,7 +42,7 @@ class Login extends React.Component {
         2000,
         'success-toast'
       );
-      this.props.history.push('/dashboard');
+      this.props.navigate('/dashboard');
     }
   }
 
@@ -75,4 +76,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps)(Login);
+export default withNavigate(connect(mapStateToProps)(Login));

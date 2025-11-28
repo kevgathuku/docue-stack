@@ -4,12 +4,13 @@ import { connect } from 'react-redux';
 
 import { getSession, initiateLogout } from '../../actions/actionCreators';
 import logoSrc from '../../images/favicon.png';
+import { withNavigate } from '../../utils/withNavigate';
 
 class NavBar extends React.Component {
   // Receive the current pathname as a prop
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
-    history: PropTypes.object,
+    navigate: PropTypes.func,
     loggedIn: PropTypes.bool,
     logoutResult: PropTypes.string,
     pathname: PropTypes.string,
@@ -40,7 +41,7 @@ class NavBar extends React.Component {
       localStorage.removeItem('user');
       localStorage.removeItem('userInfo');
 
-      this.props.history.push('/');
+      this.props.navigate('/');
     }
 
     if (session && prevProps.session !== session) {
@@ -54,12 +55,12 @@ class NavBar extends React.Component {
         // If the user is not logged in and is not on the homepage
         // redirect them to the login page
         if (this.props.pathname !== '/') {
-          this.props.history.push('/auth');
+          this.props.navigate('/auth');
         }
       } else if (session.loggedIn) {
         // Redirect to the dashboard if logged in and on the auth page or homepage
         if (this.props.pathname === '/auth' || this.props.pathname === '/') {
-          this.props.history.push('/dashboard');
+          this.props.navigate('/dashboard');
         }
       }
     }
@@ -163,4 +164,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps)(NavBar);
+export default withNavigate(connect(mapStateToProps)(NavBar));

@@ -4,11 +4,12 @@ import { connect } from 'react-redux';
 
 import { handleFieldChange } from '../../utils/componentHelpers';
 import { initiateSignup } from '../../actions/actionCreators';
+import { withNavigate } from '../../utils/withNavigate';
 
 class SignupForm extends React.Component {
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
-    history: PropTypes.object,
+    navigate: PropTypes.func,
     signupError: PropTypes.object,
     token: PropTypes.string,
     user: PropTypes.object,
@@ -47,7 +48,7 @@ class SignupForm extends React.Component {
         2000,
         'success-toast'
       );
-      this.props.history.push('/dashboard');
+      this.props.navigate('/dashboard');
     }
   }
 
@@ -174,4 +175,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps)(SignupForm);
+export default withNavigate(connect(mapStateToProps)(SignupForm));
