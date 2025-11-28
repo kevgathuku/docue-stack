@@ -30,7 +30,7 @@ class SignupForm extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    let { signupError, user, token } = this.props;
+    let { signupError, user, token, session } = this.props;
     if (signupError && prevProps.signupError !== this.props.signupError) {
       window.Materialize.toast(signupError.error, 2000, 'error-toast');
       return;
@@ -40,7 +40,9 @@ class SignupForm extends React.Component {
       localStorage.setItem('user', token);
     }
 
-    if (user && prevProps.user !== this.props.user) {
+    // Only redirect if user changed AND session is valid
+    // This prevents redirect loops when session is invalid but user object still exists in Redux
+    if (user && prevProps.user !== this.props.user && session.loggedIn) {
       // The signup was successful. Save user's info in localStorage
       localStorage.setItem('userInfo', JSON.stringify(user));
       window.Materialize.toast(
@@ -172,6 +174,7 @@ const mapStateToProps = (state) => {
     signupError: state.signupError,
     token: state.token,
     user: state.user,
+    session: state.session,
   };
 };
 

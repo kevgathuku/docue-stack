@@ -23,7 +23,7 @@ class Login extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { loginError, user, token } = this.props;
+    const { loginError, user, token, session } = this.props;
 
     if (loginError) {
       this.showLoginError();
@@ -34,8 +34,10 @@ class Login extends React.Component {
       localStorage.setItem('user', token);
     }
 
-    if (user && prevProps.user !== this.props.user) {
-      // The signup was successful. Save user's info in localStorage
+    // Only redirect if user changed AND session is valid
+    // This prevents redirect loops when session is invalid but user object still exists in Redux
+    if (user && prevProps.user !== this.props.user && session.loggedIn) {
+      // The login was successful. Save user's info in localStorage
       localStorage.setItem('userInfo', JSON.stringify(user));
       window.Materialize.toast(
         'Logged in Successfully!',
@@ -73,6 +75,7 @@ const mapStateToProps = (state) => {
     loginError: state.loginError,
     token: state.token,
     user: state.user,
+    session: state.session,
   };
 };
 

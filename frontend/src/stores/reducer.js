@@ -5,6 +5,7 @@ const initialState = {
   usersError: null,
   session: {
     loggedIn: false,
+    loading: false, // Start as false, will be set to true when session check starts
   },
   sessionError: '',
   loginError: '',
@@ -61,32 +62,45 @@ const reducer = (state = initialState, action) => {
         logoutResult: message,
       });
     }
+    case AppConstants.GET_SESSION_START:
+      return Object.assign({}, state, {
+        session: {
+          loggedIn: false,
+          loading: true,
+        },
+      });
     case AppConstants.GET_SESSION_ERROR:
-      return Object.assign({}, state, { sessionError: action.payload.error });
-    case AppConstants.GET_SESSION_SUCCESS:
-      {
-        const { loggedIn } = action.payload.session;
+      return Object.assign({}, state, {
+        sessionError: action.payload.error,
+        session: {
+          loggedIn: false,
+          loading: false,
+        },
+      });
+    case AppConstants.GET_SESSION_SUCCESS: {
+      const { loggedIn, user } = action.payload.session;
 
-        if (loggedIn === 'false') {
-          return Object.assign({}, state, {
-            token: '',
-            user: {},
-            session: {
-              loggedIn: false,
-            },
-          });
-        }
-
-        if (loggedIn === 'true') {
-          return Object.assign({}, state, {
-            session: {
-              loggedIn: true,
-            },
-            user: action.payload.session.user,
-          });
-        }
+      // Backend now returns proper boolean values
+      if (loggedIn) {
+        return Object.assign({}, state, {
+          session: {
+            loggedIn: true,
+            loading: false,
+          },
+          user: user,
+        });
       }
-      break;
+
+      // Not logged in - clear user data
+      return Object.assign({}, state, {
+        token: '',
+        user: {},
+        session: {
+          loggedIn: false,
+          loading: false,
+        },
+      });
+    }
     default:
       return state;
   }

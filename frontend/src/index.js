@@ -19,6 +19,7 @@ import { DefaultLayout } from './components/Landing/Main.jsx';
 import NotFound from './components/NotFound/NotFound.jsx';
 import RolesAdmin from './components/RolesAdmin/RolesAdmin.jsx';
 import UsersAdmin from './components/UsersAdmin/UsersAdmin.jsx';
+import PrivateRoute from './components/PrivateRoute.jsx';
 
 import 'normalize.css/normalize.css';
 import './styles/style.css';
@@ -34,17 +35,78 @@ root.render(
   <Provider store={store}>
     <Router>
       <Routes>
+        {/* Public routes */}
         <Route path="/" element={<DefaultLayout component={Landing} />} />
         <Route path="/auth" element={<DefaultLayout component={Auth} />} />
-        <Route path="/admin" element={<DefaultLayout component={Admin} />} />
-        <Route path="/admin/roles" element={<DefaultLayout component={RolesAdmin} />} />
-        <Route path="/admin/users" element={<DefaultLayout component={UsersAdmin} />} />
-        <Route path="/admin/roles/create" element={<DefaultLayout component={CreateRole} />} />
-        <Route path="/dashboard" element={<DefaultLayout component={Dashboard} />} />
-        <Route path="/documents/create" element={<DefaultLayout component={CreateDocument} />} />
-        <Route path="/documents/:id" element={<DefaultLayout component={DocumentPage} />} />
-        <Route path="/profile" element={<DefaultLayout component={Profile} />} />
         <Route path="/404" element={<DefaultLayout component={NotFound} />} />
+        
+        {/* Protected routes - require authentication */}
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <DefaultLayout component={Dashboard} />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <PrivateRoute>
+              <DefaultLayout component={Profile} />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/documents/create"
+          element={
+            <PrivateRoute>
+              <DefaultLayout component={CreateDocument} />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/documents/:id"
+          element={
+            <PrivateRoute>
+              <DefaultLayout component={DocumentPage} />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <PrivateRoute>
+              <DefaultLayout component={Admin} />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/roles"
+          element={
+            <PrivateRoute>
+              <DefaultLayout component={RolesAdmin} />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <PrivateRoute>
+              <DefaultLayout component={UsersAdmin} />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/roles/create"
+          element={
+            <PrivateRoute>
+              <DefaultLayout component={CreateRole} />
+            </PrivateRoute>
+          }
+        />
+        
+        {/* Catch all - redirect to 404 */}
         <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>
     </Router>

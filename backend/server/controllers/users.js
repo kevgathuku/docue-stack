@@ -307,24 +307,24 @@ module.exports = {
         
         if (!user) {
           res.json({
-            loggedIn: 'false'
+            loggedIn: false
           });
         } else {
           res.json({
             user: user,
-            loggedIn: user.loggedIn.toString()
+            loggedIn: user.loggedIn
           });
         }
       } catch {
         // If the token cannot be verified, return false
         res.json({
-          loggedIn: 'false'
+          loggedIn: false
         });
       }
     } else {
       // if there is no token, return a logged out status
       res.json({
-        loggedIn: 'false'
+        loggedIn: false
       });
     }
   }

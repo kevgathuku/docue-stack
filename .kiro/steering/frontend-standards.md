@@ -67,6 +67,54 @@ When updating frontend code:
 9. Update Elm to latest 0.19.x if needed
 10. Modernize CSS approach (CSS Modules, Tailwind, or styled-components)
 
+## Authentication Patterns
+
+### Critical: Session Validation Guard
+
+**ALWAYS check `session.loggedIn` before redirecting based on user data.**
+
+Redux state updates are async and can contain stale data during transitions. Never trust the user object alone.
+
+#### The Pattern
+
+```javascript
+// ❌ BAD - Can cause infinite redirect loops
+if (user && prevProps.user !== this.props.user) {
+  navigate('/dashboard');
+}
+
+// ✅ GOOD - Validates session is actually valid
+if (user && prevProps.user !== this.props.user && session.loggedIn) {
+  navigate('/dashboard');
+}
+```
+
+#### Why This Matters
+
+When a session becomes invalid:
+1. localStorage is cleared (instant)
+2. LOGOUT_SUCCESS is dispatched (async)
+3. Redux state updates (delayed)
+
+During step 2-3, Redux still has old user data but `session.loggedIn` is false. Without the guard, components redirect based on stale data, causing infinite loops.
+
+#### Component Responsibilities
+
+**PrivateRoute**: All route protection and redirects
+**NavBar**: Session validation and state cleanup (NO redirects)
+**Login/SignUp**: Form handling and success navigation (with session guard)
+
+#### When to Use
+
+Use the session validation guard whenever:
+- Redirecting after authentication
+- Making navigation decisions based on user data
+- Handling auth-related component updates
+
+**Key Rule**: `session.loggedIn` is the single source of truth for authentication state.
+
+See `frontend/AUTHENTICATION.md` for complete documentation.
+
 ## Testing
 
 - Jest for React unit tests

@@ -13,7 +13,6 @@ class NavBar extends React.Component {
     navigate: PropTypes.func,
     loggedIn: PropTypes.bool,
     logoutResult: PropTypes.string,
-    pathname: PropTypes.string,
     session: PropTypes.shape({
       loggedIn: PropTypes.bool,
     }),
@@ -44,24 +43,30 @@ class NavBar extends React.Component {
       this.props.navigate('/');
     }
 
-    if (session && prevProps.session !== session) {
-      // session contains 'true' + the user object or 'false'
-      if (session.loggedIn === false) {
-        // If there is a user token in localStorage, remove it
-        // because it is invalid now
+    // Use deep comparison to check if session actually changed
+    const sessionChanged =
+      prevProps.session.loggedIn !== session.loggedIn ||
+      prevProps.session.loading !== session.loading;
+
+    // Handle session invalidation - clear state only
+    // PrivateRoute will handle redirects
+    if (sessionChanged && !session.loading && session.loggedIn === false) {
+      const hadToken = !!localStorage.getItem('user');
+      
+      if (hadToken) {
+        // Token was invalid, clear it
         localStorage.removeItem('user');
         localStorage.removeItem('userInfo');
-
-        // If the user is not logged in and is not on the homepage
-        // redirect them to the login page
-        if (this.props.pathname !== '/') {
-          this.props.navigate('/auth');
-        }
-      } else if (session.loggedIn) {
-        // Redirect to the dashboard if logged in and on the auth page or homepage
-        if (this.props.pathname === '/auth' || this.props.pathname === '/') {
-          this.props.navigate('/dashboard');
-        }
+        
+        // Clear Redux state by dispatching logout success
+        // This prevents Login component from seeing stale user data
+        this.props.dispatch({
+          type: 'LOGOUT_SUCCESS',
+          payload: { logoutResult: { message: 'Session expired' } }
+        });
+        
+        // Note: PrivateRoute will handle redirect to /auth
+        // NavBar only clears state, doesn't navigate
       }
     }
   }

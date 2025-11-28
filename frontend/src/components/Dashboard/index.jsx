@@ -8,13 +8,20 @@ class Dashboard extends React.Component {
     super(props);
 
     this.state = {
-      docs: null
+      docs: null,
+      error: null
     };
   }
 
   componentDidMount() {
     // Get the token from localStorage
     let token = localStorage.getItem('user');
+    
+    if (!token) {
+      this.setState({ error: 'No authentication token found' });
+      return;
+    }
+    
     DocActions.getDocs(token);
     DocStore.addChangeListener(this.handleDocsResult, 'fetchDocs');
   }
@@ -33,22 +40,45 @@ class Dashboard extends React.Component {
   };
 
   render() {
+    const { docs, error } = this.state;
+    
+    if (error) {
+      return (
+        <div className="container">
+          <div className="row">
+            <div className="col s12">
+              <div className="card-panel red lighten-4">
+                <span className="red-text text-darken-4">
+                  <i className="material-icons left">error</i>
+                  {error}
+                </span>
+              </div>
+              <p className="center-align">
+                <a href="/auth" className="btn blue">
+                  Go to Login
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
     return (
       <div className="container">
         <div className="row">
           <h2 className="header center-align">All Documents</h2>
         </div>
         <div className="row">
-          {this.state.docs
-            ? <DocList docs={this.state.docs} />
-            : <p>Loading...</p>}
+          {docs ? <DocList docs={docs} /> : <p>Loading...</p>}
         </div>
         <div className="fixed-action-btn" style={{bottom: 45, right: 24}}>
-          <a className="btn-floating btn-large tooltipped pink"
-              data-delay="50"
-              data-position="left"
-              data-tooltip="Create Document"
-              href="/documents/create"
+          <a
+            className="btn-floating btn-large tooltipped pink"
+            data-delay="50"
+            data-position="left"
+            data-tooltip="Create Document"
+            href="/documents/create"
           >
             <i className="material-icons">add</i>
           </a>
