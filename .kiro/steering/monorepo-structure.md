@@ -21,14 +21,14 @@ This is a pnpm workspace monorepo with two main packages:
 ## Key Commands
 
 ### Backend
-- `pnpm --filter docue start` - Start backend dev server with nodemon
-- `pnpm --filter docue test` - Run backend tests with Jasmine
+- `pnpm --filter backend start` - Start backend dev server with nodemon
+- `pnpm --filter backend test` - Run backend tests with Jasmine
 - Backend runs on port 8000 by default
 
 ### Frontend
-- `pnpm --filter docue-frontend start` - Start frontend dev server
-- `pnpm --filter docue-frontend test` - Run frontend tests with Jest
-- `pnpm --filter docue-frontend test:elm` - Run Elm tests
+- `pnpm --filter frontend start` - Start frontend dev server
+- `pnpm --filter frontend test` - Run frontend tests with Jest
+- `pnpm --filter frontend test:elm` - Run Elm tests
 - Frontend runs on port 3000 and proxies API requests to localhost:8000
 
 ### Root

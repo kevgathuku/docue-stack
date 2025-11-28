@@ -51,11 +51,11 @@ jobs:
         run: pnpm install --frozen-lockfile
       
       - name: Run ESLint
-        run: pnpm --filter docue lint
+        run: pnpm --filter backend lint
         continue-on-error: true
       
       - name: Run backend tests
-        run: pnpm --filter docue test:simple
+        run: pnpm --filter backend test:simple
         env:
           NODE_ENV: test
           MONGODB_URL: mongodb://localhost:27017/docue-test

@@ -46,13 +46,13 @@ To run tests locally as they run in CI:
 
 ```bash
 # Backend tests
-NODE_ENV=test MONGODB_URL=mongodb://localhost:27017/docue-test pnpm --filter docue test:simple
+NODE_ENV=test MONGODB_URL=mongodb://localhost:27017/docue-test pnpm --filter backend test:simple
 
 # Frontend tests (when configured)
-pnpm --filter docue-frontend test:ci
+pnpm --filter frontend test:ci
 
 # Linting
-pnpm --filter docue lint
+pnpm --filter backend lint
 
 # Format check
 pnpm format

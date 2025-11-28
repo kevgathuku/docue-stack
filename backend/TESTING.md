@@ -81,13 +81,13 @@ Run each test suite with a unique database name:
 
 ```bash
 # Terminal 1
-NODE_ENV=test MONGO_TEST_URL=mongodb://localhost/docue-test-1 pnpm --filter docue test:simple
+NODE_ENV=test MONGO_TEST_URL=mongodb://localhost/docue-test-1 pnpm --filter backend test:simple
 
 # Terminal 2
-NODE_ENV=test MONGO_TEST_URL=mongodb://localhost/docue-test-2 pnpm --filter docue test:simple
+NODE_ENV=test MONGO_TEST_URL=mongodb://localhost/docue-test-2 pnpm --filter backend test:simple
 
 # Terminal 3
-NODE_ENV=test MONGO_TEST_URL=mongodb://localhost/docue-test-3 pnpm --filter docue test:simple
+NODE_ENV=test MONGO_TEST_URL=mongodb://localhost/docue-test-3 pnpm --filter backend test:simple
 ```
 
 ### Option 2: Different Databases AND Ports (For Running Actual Servers)
@@ -96,7 +96,7 @@ If you need to run actual server instances (not just tests):
 
 ```bash
 # Terminal 1 - Dev server
-PORT=8000 MONGODB_URL=mongodb://localhost/docue-dev pnpm --filter docue start
+PORT=8000 MONGODB_URL=mongodb://localhost/docue-dev pnpm --filter backend start
 
 # Terminal 2 - Test server instance 1
 PORT=8001 NODE_ENV=test MONGO_TEST_URL=mongodb://localhost/docue-test-1 node index.js
@@ -105,7 +105,7 @@ PORT=8001 NODE_ENV=test MONGO_TEST_URL=mongodb://localhost/docue-test-1 node ind
 PORT=8002 NODE_ENV=test MONGO_TEST_URL=mongodb://localhost/docue-test-2 node index.js
 
 # Terminal 4 - Run tests (uses supertest, no port needed)
-NODE_ENV=test MONGO_TEST_URL=mongodb://localhost/docue-test-3 pnpm --filter docue test:simple
+NODE_ENV=test MONGO_TEST_URL=mongodb://localhost/docue-test-3 pnpm --filter backend test:simple
 ```
 
 ### Option 3: Use Process ID in Database Name (Automatic)
@@ -114,7 +114,7 @@ The `test:parallel` script automatically uses a unique database per process:
 
 ```bash
 # Each run gets a unique database based on process ID
-pnpm --filter docue test:parallel
+pnpm --filter backend test:parallel
 ```
 
 This is defined in `package.json`:
@@ -128,13 +128,13 @@ If you need to run actual server instances (not tests) in parallel:
 
 ```bash
 # Terminal 1
-PORT=8001 MONGODB_URL=mongodb://localhost/docue-instance-1 pnpm --filter docue start
+PORT=8001 MONGODB_URL=mongodb://localhost/docue-instance-1 pnpm --filter backend start
 
 # Terminal 2
-PORT=8002 MONGODB_URL=mongodb://localhost/docue-instance-2 pnpm --filter docue start
+PORT=8002 MONGODB_URL=mongodb://localhost/docue-instance-2 pnpm --filter backend start
 
 # Terminal 3
-PORT=8003 MONGODB_URL=mongodb://localhost/docue-instance-3 pnpm --filter docue start
+PORT=8003 MONGODB_URL=mongodb://localhost/docue-instance-3 pnpm --filter backend start
 ```
 
 ### Option 3: Use Different Ports
@@ -143,10 +143,10 @@ If running multiple MongoDB instances:
 
 ```bash
 # Terminal 1 - MongoDB on default port
-NODE_ENV=test MONGO_TEST_URL=mongodb://localhost:27017/docue-test pnpm --filter docue test:simple
+NODE_ENV=test MONGO_TEST_URL=mongodb://localhost:27017/docue-test pnpm --filter backend test:simple
 
 # Terminal 2 - MongoDB on different port
-NODE_ENV=test MONGO_TEST_URL=mongodb://localhost:27018/docue-test pnpm --filter docue test:simple
+NODE_ENV=test MONGO_TEST_URL=mongodb://localhost:27018/docue-test pnpm --filter backend test:simple
 ```
 
 ## Test Database Cleanup
@@ -189,12 +189,12 @@ NODE_ENV='test'
 
 ```bash
 # Single test run
-pnpm --filter docue test:simple
+pnpm --filter backend test:simple
 
 # Parallel runs (each gets unique DB)
-pnpm --filter docue test:parallel &
-pnpm --filter docue test:parallel &
-pnpm --filter docue test:parallel &
+pnpm --filter backend test:parallel &
+pnpm --filter backend test:parallel &
+pnpm --filter backend test:parallel &
 ```
 
 ## CI/CD Configuration
@@ -203,7 +203,7 @@ In GitHub Actions, each job gets its own MongoDB instance, so no special configu
 
 ```yaml
 - name: Run backend tests
-  run: pnpm --filter docue test:simple
+  run: pnpm --filter backend test:simple
   env:
     NODE_ENV: test
     MONGODB_URL: mongodb://localhost:27017/docue-test
@@ -268,10 +268,10 @@ beforeEach((done) => {
 
 ```bash
 # Terminal 1 - Development server on port 8000
-PORT=8000 MONGODB_URL=mongodb://localhost/docue-dev pnpm --filter docue start
+PORT=8000 MONGODB_URL=mongodb://localhost/docue-dev pnpm --filter backend start
 
 # Terminal 2 - Run tests (uses supertest, no port conflict!)
-NODE_ENV=test MONGO_TEST_URL=mongodb://localhost/docue-test pnpm --filter docue test:simple
+NODE_ENV=test MONGO_TEST_URL=mongodb://localhost/docue-test pnpm --filter backend test:simple
 ```
 
 **No port conflict** because tests use supertest, not a real server.
@@ -281,13 +281,13 @@ NODE_ENV=test MONGO_TEST_URL=mongodb://localhost/docue-test pnpm --filter docue 
 ```bash
 # All three can run at the same time - no port conflicts!
 # Terminal 1
-NODE_ENV=test MONGO_TEST_URL=mongodb://localhost/docue-test-1 pnpm --filter docue test:simple
+NODE_ENV=test MONGO_TEST_URL=mongodb://localhost/docue-test-1 pnpm --filter backend test:simple
 
 # Terminal 2
-NODE_ENV=test MONGO_TEST_URL=mongodb://localhost/docue-test-2 pnpm --filter docue test:simple
+NODE_ENV=test MONGO_TEST_URL=mongodb://localhost/docue-test-2 pnpm --filter backend test:simple
 
 # Terminal 3
-NODE_ENV=test MONGO_TEST_URL=mongodb://localhost/docue-test-3 pnpm --filter docue test:simple
+NODE_ENV=test MONGO_TEST_URL=mongodb://localhost/docue-test-3 pnpm --filter backend test:simple
 ```
 
 ### Example 3: Run Multiple Actual Server Instances
@@ -314,7 +314,7 @@ cat > run-parallel-tests.sh << 'EOF'
 # Run 3 test suites in parallel (no port needed!)
 for i in {1..3}; do
   NODE_ENV=test MONGO_TEST_URL=mongodb://localhost/docue-test-$i \
-    pnpm --filter docue test:simple &
+    pnpm --filter backend test:simple &
 done
 
 # Wait for all to complete
@@ -330,8 +330,8 @@ chmod +x run-parallel-tests.sh
 
 ```bash
 # Run multiple times - each gets unique DB automatically
-pnpm --filter docue test:parallel &
-pnpm --filter docue test:parallel &
-pnpm --filter docue test:parallel &
+pnpm --filter backend test:parallel &
+pnpm --filter backend test:parallel &
+pnpm --filter backend test:parallel &
 wait
 ```

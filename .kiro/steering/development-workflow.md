@@ -18,10 +18,10 @@ inclusion: always
 **Full Stack Development:**
 ```bash
 # Terminal 1 - Backend
-pnpm --filter docue start
+pnpm --filter backend start
 
 # Terminal 2 - Frontend  
-pnpm --filter docue-frontend start
+pnpm --filter frontend start
 ```
 
 Access the app at `http://localhost:3000` (frontend proxies API to backend)
@@ -50,10 +50,10 @@ Access the app at `http://localhost:3000` (frontend proxies API to backend)
 ### Adding Dependencies
 ```bash
 # Add to backend
-pnpm --filter docue add <package>
+pnpm --filter backend add <package>
 
 # Add to frontend
-pnpm --filter docue-frontend add <package>
+pnpm --filter frontend add <package>
 
 # Add dev dependency
 pnpm --filter <package> add -D <package>
@@ -112,7 +112,7 @@ pnpm --filter <package> add -D <package>
 
 ### Elm Compilation
 - Elm files must be valid before webpack builds
-- Run `pnpm --filter docue-frontend test:elm` to check Elm code
+- Run `pnpm --filter frontend test:elm` to check Elm code
 - Elm compiler errors are usually very helpful
 
 ### Node Version Issues

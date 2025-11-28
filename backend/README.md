@@ -47,7 +47,7 @@ Users are categorized by roles. Each user must have a role defined for them.
  - Start the project by running
 
     ```bash
-    pnpm --filter docue start
+    pnpm --filter backend start
     ```
 
   It can be accessed on `http://localhost:8000`
@@ -60,16 +60,16 @@ To run the tests:
 
 ```bash
 # Run tests
-pnpm --filter docue test:simple
+pnpm --filter backend test:simple
 
 # Run tests with custom database (for parallel runs)
-NODE_ENV=test MONGO_TEST_URL=mongodb://localhost/docue-test-custom pnpm --filter docue test:simple
+NODE_ENV=test MONGO_TEST_URL=mongodb://localhost/docue-test-custom pnpm --filter backend test:simple
 
 # Run linter
-pnpm --filter docue lint
+pnpm --filter backend lint
 
 # Auto-fix linting issues
-pnpm --filter docue lint:fix
+pnpm --filter backend lint:fix
 ```
 
 **For parallel test execution and advanced testing scenarios, see [TESTING.md](TESTING.md)**
