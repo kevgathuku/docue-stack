@@ -2,7 +2,6 @@ describe('Documents Spec', () => {
   'use strict';
 
   const request = require('supertest');
-  const Promise = require('bluebird');
   const helper = require('./helper');
   const app = require('../index');
   const Roles = require('../server/models/roles');

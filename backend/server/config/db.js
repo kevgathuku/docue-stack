@@ -9,22 +9,13 @@ if (process.env.NODE_ENV === 'development') {
   require('dotenv').config();
 }
 
-// Use bluebird for Mongoose promises
-mongoose.Promise = require('bluebird');
-
-// Enable Promises for the native MongoDB Driver
-var options = {
-  promiseLibrary: require('bluebird')
-};
+// Mongoose 8.x uses native promises by default, no need to set mongoose.Promise
 
 if (process.env.NODE_ENV === 'test') {
-  mongoose.connect(process.env.MONGO_TEST_URL || process.env.MONGODB_URL, options);
+  mongoose.connect(process.env.MONGO_TEST_URL || process.env.MONGODB_URL);
 } else {
   // MONGOLAB_URI is the MongoDB url config in Heroku
-  mongoose.connect(
-    process.env.MONGODB_URL || process.env.MONGOLAB_URI,
-    options
-  );
+  mongoose.connect(process.env.MONGODB_URL || process.env.MONGOLAB_URI);
 }
 
 const db = mongoose.connection;

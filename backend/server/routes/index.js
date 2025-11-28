@@ -1,5 +1,4 @@
 const express = require('express'),
-  Promise = require('bluebird'),
   router = express.Router(),
   Documents = require('../models/documents'),
   Roles = require('../models/roles'),
@@ -18,9 +17,9 @@ const stats = (req, res) => {
     });
   } else {
     Promise.all([
-      Documents.count().exec(),
-      Users.count().exec(),
-      Roles.count().exec()
+      Documents.countDocuments().exec(),
+      Users.countDocuments().exec(),
+      Roles.countDocuments().exec()
     ])
       .then(function(counts) {
         const [docsCount, usersCount, rolesCount] = counts;

@@ -3,7 +3,6 @@ describe('User Spec', () => {
 
   const helper = require('./helper');
   const request = require('supertest');
-  const Promise = require('bluebird');
   const app = require('../index');
   const extractUserFromToken = require('../server/controllers/utils').extractUserFromToken;
   const Documents = require('../server/models/documents');

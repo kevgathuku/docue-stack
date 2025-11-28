@@ -1,6 +1,5 @@
 'use strict';
 
-const Promise = require('bluebird');
 const Documents = require('../server/models/documents');
 const Roles = require('../server/models/roles');
 const Users = require('../server/models/users');
@@ -9,21 +8,24 @@ const app = require('../index');
 
 const testPassword = 'youKnowNothing';
 
-const getLoginToken = (user, callback) => {
-  // Get a login token
-  request(app)
-    .post('/api/users/login')
-    .send({
-      username: user.username,
-      password: testPassword
-    })
-    .end((err, res) => {
-      // Call the callback with the generated token
-      callback(err, res.body.token);
-    });
+const getLoginToken = (user) => {
+  // Get a login token - returns a promise
+  return new Promise((resolve, reject) => {
+    request(app)
+      .post('/api/users/login')
+      .send({
+        username: user.username,
+        password: testPassword
+      })
+      .end((err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(res.body.token);
+        }
+      });
+  });
 };
-
-const getLoginTokenAsync = Promise.promisify(getLoginToken);
 
 const seedRoles = () => {
   // Users will be created with the first role
@@ -124,15 +126,15 @@ const seedDocuments = user => {
 
 // Utility function for emptying the database
 const clearDb = () => {
-  // Remove all docs
-  return Documents.remove({})
+  // Delete all docs (Mongoose 8.x uses deleteMany instead of remove)
+  return Documents.deleteMany({})
     .then(() => {
-      // Remove all roles
-      return Roles.remove({});
+      // Delete all roles
+      return Roles.deleteMany({});
     })
     .then(() => {
-      // Remove all users
-      return Users.remove({});
+      // Delete all users
+      return Users.deleteMany({});
     });
 };
 
@@ -153,7 +155,7 @@ const beforeEach = () => {
     })
     .then(user => {
       // Return a promise that resolves with the eventual login token
-      return getLoginTokenAsync(user);
+      return getLoginToken(user);
     });
 };
 
