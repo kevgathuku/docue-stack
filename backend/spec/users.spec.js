@@ -320,22 +320,22 @@ describe('User Spec', () => {
   });
 
   describe('User Documents', () => {
-    it('should get a user\'s documents', (done) => {
-      Documents.find({})
+    it('should get a user\'s documents', async (done) => {
+      const doc = await Documents.find({})
         .limit(1)
-        .exec((err, doc) => {
-          const userId = doc[0].ownerId;
-          request(app)
-            .get('/api/users/' + userId + '/documents')
-            .expect('Content-Type', /json/)
-            .set('x-access-token', token)
-            .expect(200)
-            .end((err, res) => {
-              expect(err).toBeNull();
-              // It should return the user's 3 documents
-              expect(res.body.length).toBe(3);
-              done();
-            });
+        .exec();
+      
+      const userId = doc[0].ownerId;
+      request(app)
+        .get('/api/users/' + userId + '/documents')
+        .expect('Content-Type', /json/)
+        .set('x-access-token', token)
+        .expect(200)
+        .end((err, res) => {
+          expect(err).toBeNull();
+          // It should return the user's 3 documents
+          expect(res.body.length).toBe(3);
+          done();
         });
     });
   });
