@@ -131,8 +131,9 @@ describe('Roles Spec', () => {
         .end((err, res) => {
           const allRoles = res.body.map(role => role.title);
           expect(err).toBeNull();
-          expect(allRoles[0]).toBe('viewer');
-          expect(allRoles[1]).toBe('staff');
+          expect(res.body.length).toBe(2);
+          expect(allRoles).toContain('viewer');
+          expect(allRoles).toContain('staff');
           done();
         });
     });
