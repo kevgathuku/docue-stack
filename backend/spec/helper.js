@@ -71,57 +71,40 @@ const seedUsers = role => {
   return Users.create(users);
 };
 
-const seedDocuments = user => {
-  const documents = [
-    {
-      title: 'Doc1',
-      content: '1Doc',
-      ownerId: user._id,
-      role: user.role
-    },
-    {
-      title: 'Doc2',
-      content: '2Doc',
-      ownerId: user._id,
-      role: user.role
-    },
-    {
-      title: 'Doc3',
-      content: '3Doc',
-      ownerId: user._id,
-      role: user.role
-    }
-  ];
+const seedDocuments = async user => {
+  // Create dates with clear separation to ensure proper ordering
+  const now = new Date();
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const dayAfterTomorrow = new Date(now);
+  dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2);
 
-  return Documents.create(documents[0])
-    .then(() => {
-      // First document was created successfully
-      // Create the second document
-      return Documents.create(documents[1]);
-    })
-    .then(doc1 => {
-      // Add one day to the second doc's timestamp
-      const date = new Date(doc1.dateCreated);
-      date.setDate(date.getDate() + 1);
-      doc1.dateCreated = date;
-      return doc1.save();
-    })
-    .then(() => {
-      // Second document updated successfully
-      // Create the final document
-      return Documents.create(documents[2]);
-    })
-    .then(doc2 => {
-      // Add 2 days to the third doc's timestamp
-      const date = new Date(doc2.dateCreated);
-      date.setDate(date.getDate() + 2);
-      doc2.dateCreated = date;
-      return doc2.save();
-    })
-    .then(() => {
-      // return a Promise that resolves with the provided user
-      return Promise.resolve(user);
-    });
+  // Create documents sequentially with explicit dates
+  await Documents.create({
+    title: 'Doc1',
+    content: '1Doc',
+    ownerId: user._id,
+    role: user.role,
+    dateCreated: now
+  });
+
+  await Documents.create({
+    title: 'Doc2',
+    content: '2Doc',
+    ownerId: user._id,
+    role: user.role,
+    dateCreated: tomorrow
+  });
+
+  await Documents.create({
+    title: 'Doc3',
+    content: '3Doc',
+    ownerId: user._id,
+    role: user.role,
+    dateCreated: dayAfterTomorrow
+  });
+
+  return user;
 };
 
 // Utility function for emptying the database

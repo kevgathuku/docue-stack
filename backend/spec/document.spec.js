@@ -165,6 +165,8 @@ describe('Documents Spec', () => {
         .get('/api/documents')
         .set('x-access-token', token)
         .end((err, res) => {
+          expect(err).toBeNull();
+          expect(res.body.length).toBe(3);
           expect(res.body[0].title).toBe('Doc3');
           expect(res.body[1].title).toBe('Doc2');
           expect(res.body[2].title).toBe('Doc1');
