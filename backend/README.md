@@ -46,6 +46,69 @@ pnpm --filter backend lint:fix
 
 **For parallel test execution and advanced testing scenarios, see [TESTING.md](TESTING.md)**
 
+## API Endpoints
+
+### Authentication
+
+**POST /api/users/login**
+- Login with username and password
+- Returns JWT token and user object
+
+**POST /api/users/logout**
+- Logout current user
+- Requires `x-access-token` header
+
+**GET /api/users/session**
+- Check if user is logged in
+- Returns `{ loggedIn: boolean, user?: object }`
+- **Important**: Returns proper boolean values (not strings)
+- No token: `{ loggedIn: false }`
+- Valid token: `{ loggedIn: true, user: {...} }`
+- Invalid token: `{ loggedIn: false }`
+
+### Users
+
+**POST /api/users**
+- Create new user
+- Returns user object and JWT token
+
+**GET /api/users**
+- Get all users (admin only)
+
+**GET /api/users/:id**
+- Get user by ID
+
+**PUT /api/users/:id**
+- Update user
+
+**DELETE /api/users/:id**
+- Delete user
+
+### Documents
+
+**GET /api/documents**
+- Get all documents
+
+**POST /api/documents**
+- Create new document
+
+**GET /api/documents/:id**
+- Get document by ID
+
+**PUT /api/documents/:id**
+- Update document
+
+**DELETE /api/documents/:id**
+- Delete document
+
+### Roles
+
+**GET /api/roles**
+- Get all roles
+
+**POST /api/roles**
+- Create new role (admin only)
+
 ## Continuous Integration
 
 This project uses GitHub Actions for CI. See `.github/workflows/` for configuration.
