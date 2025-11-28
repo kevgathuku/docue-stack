@@ -7,7 +7,6 @@
 let express = require('express'),
   compression = require('compression'),
   cors = require('cors'),
-  bodyParser = require('body-parser'),
   morgan = require('morgan'),
   app = express(),
   isProduction = process.env.NODE_ENV === 'production';
@@ -28,14 +27,14 @@ if (!isProduction) {
 // compress all requests
 app.use(compression());
 
-// configure app to use bodyParser()
+// configure app to parse request bodies
 // this will let us get the data from a POST
 app.use(
-  bodyParser.urlencoded({
+  express.urlencoded({
     extended: true
   })
 );
-app.use(bodyParser.json());
+app.use(express.json());
 
 // Enable CORS
 app.use(
