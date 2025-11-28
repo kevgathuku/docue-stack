@@ -8,23 +8,16 @@ const app = require('../index');
 
 const testPassword = 'youKnowNothing';
 
-const getLoginToken = (user) => {
-  // Get a login token - returns a promise
-  return new Promise((resolve, reject) => {
-    request(app)
-      .post('/api/users/login')
-      .send({
-        username: user.username,
-        password: testPassword
-      })
-      .end((err, res) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(res.body.token);
-        }
-      });
-  });
+const getLoginToken = async (user) => {
+  // Get a login token using async/await
+  const res = await request(app)
+    .post('/api/users/login')
+    .send({
+      username: user.username,
+      password: testPassword
+    });
+  
+  return res.body.token;
 };
 
 const seedRoles = () => {
@@ -108,38 +101,24 @@ const seedDocuments = async user => {
 };
 
 // Utility function for emptying the database
-const clearDb = () => {
+const clearDb = async () => {
   // Delete all docs (Mongoose 8.x uses deleteMany instead of remove)
-  return Documents.deleteMany({})
-    .then(() => {
-      // Delete all roles
-      return Roles.deleteMany({});
-    })
-    .then(() => {
-      // Delete all users
-      return Users.deleteMany({});
-    });
+  await Documents.deleteMany({});
+  await Roles.deleteMany({});
+  await Users.deleteMany({});
 };
 
 // Returns a promise of a generated token
-const beforeEach = () => {
+const beforeEach = async () => {
   // Empty the DB then fill in the Seed data
-  return clearDb()
-    .then(() => {
-      return seedRoles();
-    })
-    .then(roles => {
-      // Seed the users with the first role from the previous step
-      return seedUsers(roles[0]);
-    })
-    .then(users => {
-      // Seed the documents with the first user from the previous step
-      return seedDocuments(users[0]);
-    })
-    .then(user => {
-      // Return a promise that resolves with the eventual login token
-      return getLoginToken(user);
-    });
+  await clearDb();
+  const roles = await seedRoles();
+  // Seed the users with the first role from the previous step
+  const users = await seedUsers(roles[0]);
+  // Seed the documents with the first user from the previous step
+  const user = await seedDocuments(users[0]);
+  // Return the login token
+  return await getLoginToken(user);
 };
 
 module.exports.beforeEach = beforeEach;
