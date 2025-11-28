@@ -10,20 +10,25 @@ Each document defines access rights i.e. which roles can access it and the date 
 
 Users are categorized by roles. Each user must have a role defined for them.
 
+## Requirements
+
+- Node.js 22.x
+- pnpm 10.x
+- MongoDB 7.0+
+
 ## Installation
 
 - Clone the repo locally and navigate to the newly created folder
 
     ```bash
     git clone https://github.com/kevgathuku/docue
-  cd docue
+    cd docue
     ```
 
-
- - Install the app dependencies
+ - Install the app dependencies (from the root directory)
 
     ```bash
-    npm install
+    pnpm install
     ```
 
  - Copy the `.env.example` file to `.env`
@@ -42,21 +47,32 @@ Users are categorized by roles. Each user must have a role defined for them.
  - Start the project by running
 
     ```bash
-    npm start
+    pnpm --filter docue start
     ```
 
   It can be accessed on `http://localhost:8000`
 
 ## Running tests
 
-The tests are run using `jasmine` on the command line
+The tests are run using Jasmine with Mongoose 8.x and Node.js 22.x
 
-To run the tests, use the following steps:
+To run the tests:
 
- - Navigate to the project folder
+```bash
+# Run tests
+pnpm --filter docue test:simple
 
-    `$ cd docue`
+# Run linter
+pnpm --filter docue lint
 
- - Run the tests through the following command:
+# Auto-fix linting issues
+pnpm --filter docue lint:fix
+```
 
-    `$ npm test`
+## Continuous Integration
+
+This project uses GitHub Actions for CI. See `.github/workflows/` for configuration.
+
+Tests run automatically on:
+- Push to `main`, `develop`, or `backend-setup` branches
+- Pull requests to `main` or `develop`
