@@ -149,15 +149,110 @@ NODE_ENV=test MONGO_TEST_URL=mongodb://localhost:27017/docue-test pnpm --filter 
 NODE_ENV=test MONGO_TEST_URL=mongodb://localhost:27018/docue-test pnpm --filter backend test:simple
 ```
 
+## Writing Tests with Async/Await
+
+All tests in this project use modern **async/await** syntax instead of callbacks or `.then()` chains.
+
+### ✅ Correct: Async/Await Pattern
+
+```javascript
+describe('User Creation', () => {
+  it('should create a user successfully', async () => {
+    const res = await request(app)
+      .post('/api/users')
+      .send({
+        username: 'johnSnow',
+        firstname: 'John',
+        lastname: 'Snow',
+        email: 'snow@winterfell.org',
+        password: 'password123'
+      })
+      .set('Accept', 'application/json');
+    
+    expect(res.statusCode).toBe(201);
+    expect(res.body.user.username).toBe('johnSnow');
+  });
+});
+```
+
+### ❌ Incorrect: Old Callback Pattern (Don't Use)
+
+```javascript
+// DON'T DO THIS - Old pattern with done() callback
+it('should create a user', (done) => {
+  request(app)
+    .post('/api/users')
+    .send({ username: 'test' })
+    .end((err, res) => {
+      expect(res.statusCode).toBe(201);
+      done();
+    });
+});
+```
+
+### BeforeEach Hooks
+
+Use async/await in `beforeEach` hooks as well:
+
+```javascript
+describe('Document Tests', () => {
+  let token = null;
+
+  beforeEach(async () => {
+    token = await helper.beforeEach();
+  });
+
+  it('should fetch documents', async () => {
+    const res = await request(app)
+      .get('/api/documents')
+      .set('x-access-token', token);
+    
+    expect(res.statusCode).toBe(200);
+  });
+});
+```
+
+### Multiple Sequential Requests
+
+When you need to make multiple requests in sequence:
+
+```javascript
+it('should login and logout user successfully', async () => {
+  // First request - logout
+  const logoutRes = await request(app)
+    .post('/api/users/logout')
+    .set('x-access-token', userToken);
+  
+  expect(logoutRes.statusCode).toBe(200);
+  
+  // Second request - login
+  const loginRes = await request(app)
+    .post('/api/users/login')
+    .send({
+      username: user.username,
+      password: userPassword
+    });
+  
+  expect(loginRes.body.user.loggedIn).toBe(true);
+});
+```
+
+### Key Benefits of Async/Await
+
+1. **Cleaner code** - No callback nesting or `.then()` chains
+2. **Better error handling** - Errors propagate naturally
+3. **Easier debugging** - Stack traces are more readable
+4. **Modern standard** - Aligns with current JavaScript best practices
+
 ## Test Database Cleanup
 
 Tests automatically clean up the database in `beforeEach` hooks (see `spec/helper.js`):
 
 ```javascript
-const clearDb = () => {
-  return Documents.deleteMany({})
-    .then(() => Roles.deleteMany({}))
-    .then(() => Users.deleteMany({}));
+const clearDb = async () => {
+  await Documents.deleteMany({});
+  await Roles.deleteMany({});
+  await Users.deleteMany({});
 };
 ```
 
@@ -226,12 +321,9 @@ MONGO_TEST_URL=mongodb://localhost/docue-test-unique-name
 
 **Solution:** Check that `beforeEach` hooks are running:
 ```javascript
-beforeEach((done) => {
-  helper.beforeEach()
-    .then(token => {
-      // Test setup
-      done();
-    });
+beforeEach(async () => {
+  token = await helper.beforeEach();
+  // Additional test setup
 });
 ```
 
