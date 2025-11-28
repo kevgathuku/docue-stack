@@ -62,12 +62,17 @@ To run the tests:
 # Run tests
 pnpm --filter docue test:simple
 
+# Run tests with custom database (for parallel runs)
+NODE_ENV=test MONGO_TEST_URL=mongodb://localhost/docue-test-custom pnpm --filter docue test:simple
+
 # Run linter
 pnpm --filter docue lint
 
 # Auto-fix linting issues
 pnpm --filter docue lint:fix
 ```
+
+**For parallel test execution and advanced testing scenarios, see [TESTING.md](TESTING.md)**
 
 ## Continuous Integration
 

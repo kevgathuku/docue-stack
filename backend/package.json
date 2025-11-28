@@ -12,6 +12,7 @@
     "lint:fix": "eslint . --fix",
     "test": "NODE_ENV='test' npm run coverage",
     "test:simple": "NODE_ENV='test' node spec/run.js",
+    "test:parallel": "NODE_ENV='test' MONGO_TEST_URL=mongodb://localhost/docue-test-$$ node spec/run.js",
     "coverage": "nyc node spec/run.js && nyc report --reporter=text-lcov | coveralls",
     "codecov": "nyc report --reporter=text-lcov > coverage.lcov && codecov"
   },

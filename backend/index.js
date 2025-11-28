@@ -67,9 +67,11 @@ app.use((req, res) => {
   });
 });
 
-// START THE SERVER
-app.listen(port);
-console.log('Listening on port', port);
+// START THE SERVER only if this file is run directly (not required by tests)
+if (require.main === module) {
+  app.listen(port);
+  console.log('Listening on port', port);
+}
 
 // Export the app object
 module.exports = app;
