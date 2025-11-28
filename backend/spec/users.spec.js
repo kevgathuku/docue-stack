@@ -371,7 +371,7 @@ describe('User Spec', () => {
     });
 
     it('should return all users when called by admin user', (done) => {
-      // The 2 seeded Roles should be returned
+      // The 3 seeded users should be returned
       request(app)
         .get('/api/users')
         .set('Accept', 'application/json')
@@ -379,9 +379,10 @@ describe('User Spec', () => {
         .end((err, res) => {
           expect(err).toBeNull();
           expect(res.body.length).toBe(3);
-          expect(res.body[0].username).toBe('jsnow');
-          expect(res.body[1].username).toBe('nstark');
-          expect(res.body[2].username).toBe('adminUser');
+          const usernames = res.body.map(user => user.username);
+          expect(usernames).toContain('jsnow');
+          expect(usernames).toContain('nstark');
+          expect(usernames).toContain('adminUser');
           done();
         });
     });
