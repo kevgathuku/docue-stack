@@ -9,6 +9,13 @@ class Authenticate extends React.PureComponent {
     history: PropTypes.object,
   };
 
+  componentDidMount() {
+    // Initialize Materialize tabs
+    if (window.$) {
+      window.$('.tabs').tabs();
+    }
+  }
+
   render() {
     return (
       <div className="container">
