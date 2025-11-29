@@ -8,7 +8,7 @@ import * as serviceWorker from './serviceWorker';
 import Auth from './components/Auth/Auth.jsx';
 import Admin from './components/Admin/Admin.jsx';
 import CreateDocument from './components/CreateDocument/index.jsx';
-import CreateRole from './components/CreateRole/CreateRole.jsx';
+import CreateRole from './components/CreateRole/CreateRole.res.js';
 import DocumentPage from './components/DocumentPage/index.jsx';
 import Dashboard from './components/Dashboard/index.jsx';
 import Landing from './components/Landing/Landing.res.js';

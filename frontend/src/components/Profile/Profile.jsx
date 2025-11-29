@@ -8,20 +8,40 @@ const BASE_URL =
     ? 'http://localhost:8000'
     : 'https://docue.herokuapp.com';
 
-const user = JSON.parse(localStorage.getItem('userInfo'));
+// Helper to safely get user info from localStorage
+const getUserInfo = () => {
+  try {
+    const userInfo = localStorage.getItem('userInfo');
+    return userInfo ? JSON.parse(userInfo) : null;
+  } catch (error) {
+    console.error('Error parsing userInfo from localStorage:', error);
+    return null;
+  }
+};
 
 export default class Main extends React.PureComponent {
-  flags = {
-    token: localStorage.getItem('user'),
-    baseURL: BASE_URL,
-    user: {
-      id_: user._id,
-      email: user.email,
-      firstName: user.name.first,
-      lastName: user.name.last,
-      role: user.role ? user.role.title : ''
-    },
-  };
+  constructor(props) {
+    super(props);
+    const user = getUserInfo();
+    
+    // If no user info, redirect to login
+    if (!user) {
+      window.location.href = '/auth';
+      return;
+    }
+    
+    this.flags = {
+      token: localStorage.getItem('user'),
+      baseURL: BASE_URL,
+      user: {
+        id_: user._id,
+        email: user.email,
+        firstName: user.name.first,
+        lastName: user.name.last,
+        role: user.role ? user.role.title : ''
+      },
+    };
+  }
 
   setupPorts(ports) {
     // Receives tuple from Elm of message, displayLength, className

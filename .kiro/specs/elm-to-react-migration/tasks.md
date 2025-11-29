@@ -151,7 +151,7 @@ This plan outlines the step-by-step migration of 7 Elm components and 1 React co
   - Test error toast on failure
   - _Requirements: 11.1, 11.3_
 
-- [ ] 8. Migrate Admin component (moderate - API fetching)
+- [x] 8. Migrate Admin component (moderate - API fetching)
   - Create components/Admin/Admin.res
   - Implement stats state with useState
   - Implement API call on component mount with useEffect
