@@ -268,7 +268,7 @@ This plan outlines the step-by-step migration of 7 Elm components and 1 React co
   - Verify localStorage is updated and success toast is shown
   - _Requirements: 11.3_
 
-- [ ] 11.6 Write unit tests for Profile component
+- [x] 11.6 Write unit tests for Profile component
   - Test profile view renders user information
   - Test edit button toggles to edit form
   - Test cancel button returns to profile view
