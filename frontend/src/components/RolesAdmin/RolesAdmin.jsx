@@ -1,13 +1,13 @@
 import React from 'react';
 import Elm from '../../utils/ReactElm';
-
-import BaseActions from '../../actions/BaseActions';
 import * as ElmRolesAdmin from '../RolesAdmin.elm';
+
+const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 export default class extends React.Component {
   flags = {
     token: localStorage.getItem('user'),
-    baseURL: BaseActions.BASE_URL,
+    baseURL: BASE_URL,
   };
 
   setupPorts(ports) {

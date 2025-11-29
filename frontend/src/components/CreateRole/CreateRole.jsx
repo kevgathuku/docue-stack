@@ -1,31 +1,40 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Elm from '../../utils/ReactElm';
-import RoleActions from '../../actions/RoleActions';
-import RoleStore from '../../stores/RoleStore';
 import * as ElmCreateRole from '../CreateRole.elm';
 import { withNavigate } from '../../utils/withNavigate';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { createRole, selectCreatedRole, selectRolesError } from '../../features/roles/rolesSlice';
 
 const token = localStorage.getItem('user');
 
-class Main extends React.Component {
-  static propTypes = {
-    navigate: PropTypes.func,
-  };
+function Main({ navigate }) {
+  const dispatch = useAppDispatch();
+  const createdRole = useAppSelector(selectCreatedRole);
+  const error = useAppSelector(selectRolesError);
 
-  componentDidMount() {
-    RoleStore.addChangeListener(this.handleRoleCreateResult);
-  }
+  useEffect(() => {
+    if (createdRole) {
+      window.Materialize.toast(
+        'Role created successfully!',
+        2000,
+        'success-toast'
+      );
+      navigate('/admin/roles');
+    }
+  }, [createdRole, navigate]);
 
-  componentWillUnmount() {
-    RoleStore.removeChangeListener(this.handleRoleCreateResult);
-  }
+  useEffect(() => {
+    if (error) {
+      window.Materialize.toast(error, 2000, 'error-toast');
+    }
+  }, [error]);
 
-  flags = {
+  const flags = {
     token: token
   };
 
-  setupPorts(ports) {
+  const setupPorts = (ports) => {
     ports.handleSubmit.subscribe(function(title) {
       if (!title) {
         return window.Materialize.toast(
@@ -37,29 +46,15 @@ class Main extends React.Component {
       let role = {
         title: title
       };
-      RoleActions.create(role, token);
+      dispatch(createRole({ data: role, token }));
     });
-  }
-
-  handleRoleCreateResult = () => {
-    let data = RoleStore.getCreatedRole();
-    if (data) {
-      if (data.error) {
-        window.Materialize.toast(data.error, 2000, 'error-toast');
-      } else {
-        window.Materialize.toast(
-          'Role created successfully!',
-          2000,
-          'success-toast'
-        );
-        this.props.navigate('/admin/roles');
-      }
-    }
   };
 
-  render() {
-    return <Elm src={ElmCreateRole} flags={this.flags} ports={this.setupPorts} />;
-  }
+  return <Elm src={ElmCreateRole} flags={flags} ports={setupPorts} />;
 }
+
+Main.propTypes = {
+  navigate: PropTypes.func,
+};
 
 export default withNavigate(Main);

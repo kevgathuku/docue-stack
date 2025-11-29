@@ -53,6 +53,29 @@ This app uses both React and Elm:
 - Production builds optimized with code splitting
 - Service worker for PWA capabilities (workbox)
 
+## Package Manager
+
+**ALWAYS use `pnpm` for all frontend tasks, never `npm`.**
+
+This is a pnpm workspace monorepo. Use these commands:
+
+```bash
+# Install dependencies
+pnpm --filter frontend install
+
+# Run development server
+pnpm --filter frontend start
+
+# Run tests
+pnpm --filter frontend test
+
+# Run Elm tests
+pnpm --filter frontend test:elm
+
+# Build for production
+pnpm --filter frontend build
+```
+
 ## Modernization Priorities
 
 When updating frontend code:

@@ -93,7 +93,7 @@
   - **Property 7: Component re-render equivalence**
   - **Validates: Requirements 5.5**
 
-- [ ] 7. Migrate document components to Redux
+- [x] 7. Migrate document components to Redux
   - Update Dashboard component to use useSelector and useDispatch
   - Update DocumentPage component to use Redux hooks
   - Update CreateDocument component to use Redux hooks
@@ -107,7 +107,7 @@
   - Verify all document component tests pass
   - _Requirements: 6.1, 6.2_
 
-- [ ] 8. Migrate role and admin components to Redux
+- [x] 8. Migrate role and admin components to Redux
   - Update RolesAdmin component to use useSelector and useDispatch
   - Update CreateRole component to use Redux hooks
   - Update Admin component to use Redux hooks
@@ -115,7 +115,7 @@
   - Remove Flux store listeners from all role/admin components
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 5.3_
 
-- [ ] 8.1 Update tests for role and admin components
+- [x] 8.1 Update tests for role and admin components
   - Wrap components with Redux Provider in tests
   - Update test assertions for Redux state
   - Verify all role/admin component tests pass
