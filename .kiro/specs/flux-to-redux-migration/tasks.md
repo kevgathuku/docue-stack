@@ -7,29 +7,29 @@
   - Create typed hooks for useDispatch and useSelector
   - _Requirements: 1.1, 1.4, 1.5_
 
-- [ ] 2. Create auth slice from existing reducer
+- [x] 2. Create auth slice from existing reducer
   - Create authSlice.js with all authentication state and reducers
   - Convert existing reducer logic to Redux Toolkit slice format
   - Create async thunks for fetchUsers, signup, login, logout, getSession, updateProfile
   - Define selectors for auth state access
   - _Requirements: 2.3, 3.3, 8.2, 8.5_
 
-- [ ] 2.1 Write unit tests for auth slice
+- [x] 2.1 Write unit tests for auth slice
   - Test reducer logic for all action types
   - Test async thunk success and failure scenarios
   - Test selector functions
   - _Requirements: 6.3, 6.4_
 
-- [ ] 2.2 Write property test for auth state equivalence
+- [x] 2.2 Write property test for auth state equivalence
   - **Property 1: State management equivalence (auth)**
   - **Property 4: Authentication functionality preservation**
   - **Validates: Requirements 2.3, 5.1, 5.4**
 
-- [ ] 2.3 Write property test for async thunk state transitions
+- [x] 2.3 Write property test for async thunk state transitions
   - **Property 2: Async thunk state transitions**
   - **Validates: Requirements 3.4**
 
-- [ ] 2.4 Write property test for error handling
+- [x] 2.4 Write property test for error handling
   - **Property 3: Error handling preservation**
   - **Validates: Requirements 3.5**
 

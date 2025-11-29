@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
-import authReducer from '../stores/reducer';
+import authReducer from '../features/auth/authSlice';
 
 // Placeholder reducers - will be replaced with actual slices in subsequent tasks
 const placeholderDocumentsReducer = (state = {}, action) => state;
