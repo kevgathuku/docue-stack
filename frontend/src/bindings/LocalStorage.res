@@ -1,10 +1,6 @@
 // ReScript bindings for localStorage
 // These bindings provide type-safe access to browser localStorage
 
-// Get item from localStorage (returns nullable)
-@scope("localStorage") @val
-external getItem: string => Nullable.t<string> = "getItem"
-
 // Set item in localStorage
 @scope("localStorage") @val
 external setItem: (string, string) => unit = "setItem"
@@ -17,9 +13,11 @@ external removeItem: string => unit = "removeItem"
 @scope("localStorage") @val
 external clear: unit => unit = "clear"
 
-// Helper to get item as option - uses raw JS t
-let getItemOption = (key: string): option<string> => {
-  let value = %raw(`localStorage.getItem(key)`)
+// Helper to get item as option - uses raw JS to avoid runtime dependencies
+// Note: _key is prefixed with _ to silence "unused variable" warning
+// The variable IS used inside the raw JS, but compiler can't see it
+let getItemOption = (_key: string): option<string> => {
+  let value = %raw(`localStorage.getItem(_key)`)
   if %raw(`value === null || value === undefined`) {
     None
   } else {

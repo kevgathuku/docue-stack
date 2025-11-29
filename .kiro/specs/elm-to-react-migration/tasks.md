@@ -144,7 +144,7 @@ This plan outlines the step-by-step migration of 7 Elm components and 1 React co
   - Verify Redux action is dispatched with correct payload
   - _Requirements: 11.4_
 
-- [ ]* 7.3 Write unit tests for CreateRole component
+- [ ] 7.3 Write unit tests for CreateRole component
   - Test component renders title input
   - Test form submission
   - Test navigation on success
