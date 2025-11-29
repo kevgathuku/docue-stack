@@ -176,7 +176,6 @@ const authSlice = createSlice({
           loggedIn: true,
           loading: false,
         };
-        console.log('[authSlice] Login successful, session set to:', state.session);
       })
       .addCase(login.rejected, (state, action) => {
         state.loginError = action.payload;

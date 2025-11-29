@@ -140,12 +140,12 @@ Components using Elm (Login, CreateRole, etc.) need special handling:
 - Test the React wrapper behavior
 - Don't test Elm internals (use elm-test for that)
 
-### 5. Flux/Store Components
+### 5. Redux/Store Components
 
-Components using Flux stores need:
-- Mock store methods
-- Mock action creators
-- Test component behavior, not store logic
+Components using Redux need:
+- Wrap components with Redux Provider in tests
+- Use mock store from @reduxjs/toolkit or configureStore for testing
+- Test component behavior with real Redux state, not store logic
 
 ## Recommended Approach
 

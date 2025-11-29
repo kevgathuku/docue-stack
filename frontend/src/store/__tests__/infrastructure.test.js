@@ -52,14 +52,20 @@ describe('Redux Infrastructure Setup', () => {
       // The store will have __REDUX_DEVTOOLS_EXTENSION__ support if configured
     });
 
-    test('RootState type should be exported', () => {
+    test('RootState should be exported', () => {
       expect(RootState).toBeDefined();
       expect(typeof RootState).toBe('function');
+      // RootState is store.getState function
+      const state = RootState();
+      expect(state).toHaveProperty('auth');
+      expect(state).toHaveProperty('documents');
+      expect(state).toHaveProperty('roles');
     });
 
-    test('AppDispatch type should be exported', () => {
+    test('AppDispatch should be exported', () => {
       expect(AppDispatch).toBeDefined();
       expect(typeof AppDispatch).toBe('function');
+      // AppDispatch is store.dispatch function
     });
   });
 

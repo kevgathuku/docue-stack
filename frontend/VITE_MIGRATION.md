@@ -285,11 +285,11 @@ No special configuration needed beyond the plugin!
 
 ## Potential Issues & Solutions
 
-### Issue 1: Flux Store Pattern
+### Issue 1: Redux Store Pattern
 
-**Problem**: Flux uses CommonJS patterns
+**Problem**: Redux Toolkit uses modern ESM patterns
 
-**Solution**: Flux works fine with Vite, no changes needed
+**Solution**: Redux Toolkit works seamlessly with Vite, no changes needed. The application has been migrated from Flux to Redux Toolkit.
 
 ### Issue 2: Materialize jQuery
 

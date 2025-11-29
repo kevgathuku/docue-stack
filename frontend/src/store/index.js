@@ -3,8 +3,9 @@ import authReducer from '../features/auth/authSlice';
 import documentsReducer from '../features/documents/documentsSlice';
 import rolesReducer from '../features/roles/rolesSlice';
 
-// Vite uses import.meta.env instead of process.env
-const isDevelopment = import.meta.env.MODE !== 'production';
+// Support both Vite (import.meta.env) and Jest (process.env)
+// In test environment, use process.env
+const isDevelopment = process.env.NODE_ENV !== 'production';
 
 export const store = configureStore({
   reducer: {
@@ -23,7 +24,7 @@ export const store = configureStore({
 });
 
 // Log store creation for debugging
-if (isDevelopment) {
+if (isDevelopment && typeof window !== 'undefined') {
   console.log('[Redux Store] Store created successfully');
   console.log('[Redux Store] Initial state:', store.getState());
   console.log('[Redux Store] DevTools enabled:', !!window.__REDUX_DEVTOOLS_EXTENSION__);
