@@ -51,20 +51,20 @@
   - **Property 5: Document operations preservation**
   - **Validates: Requirements 2.1, 5.2**
 
-- [ ] 4. Create roles slice from RoleStore
+- [x] 4. Create roles slice from RoleStore
   - Create rolesSlice.js with role state and reducers
   - Convert RoleStore logic to Redux Toolkit slice format
   - Create async thunks for getRoles and createRole
   - Define selectors for roles state access
   - _Requirements: 2.2, 3.2, 8.2, 8.5_
 
-- [ ] 4.1 Write unit tests for roles slice
+- [x] 4.1 Write unit tests for roles slice
   - Test reducer logic for all role operations
   - Test async thunk success and failure scenarios
   - Test selector functions
   - _Requirements: 6.3, 6.4_
 
-- [ ] 4.2 Write property test for roles state equivalence
+- [x] 4.2 Write property test for roles state equivalence
   - **Property 1: State management equivalence (roles)**
   - **Property 6: Role operations preservation**
   - **Validates: Requirements 2.2, 5.3**
