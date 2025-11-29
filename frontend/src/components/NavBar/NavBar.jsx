@@ -131,7 +131,8 @@ class NavBar extends React.Component {
                     <li>
                       <Link to="/dashboard">All Documents</Link>
                     </li>
-                    {this.props.user.role &&
+                    {this.props.user &&
+                    this.props.user.role &&
                     this.props.user.role.title === 'admin' ? (
                       <li>
                         <Link to="/admin">Settings</Link>
