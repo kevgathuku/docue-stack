@@ -86,21 +86,23 @@ describe('Verification: ReScript implementation matches our test', () => {
     expect(content).toContain('export {');
     expect(content).toContain('getItemOption');
     
-    // Verify it uses Primitive_option.fromNullable (the null->undefined converter)
-    expect(content).toContain('Primitive_option.fromNullable');
+    // Verify it uses inline null/undefined check (no runtime dependencies)
     expect(content).toContain('localStorage.getItem');
+    expect(content).toContain('null');
+    expect(content).toContain('undefined');
   });
 
   test('implementation logic matches ReScript pattern', () => {
-    // The ReScript code does: Primitive_option.fromNullable(localStorage.getItem(key))
-    // fromNullable converts: null -> undefined, value -> value
+    // The ReScript code now uses inline null/undefined check
+    // Converts: null/undefined -> undefined (None), value -> value (Some)
     
-    const fromNullable = (value) => value === null ? undefined : value;
+    const convertToOption = (value) => (value === null || value === undefined) ? undefined : value;
     
     // Test the conversion logic
-    expect(fromNullable(null)).toBeUndefined();
-    expect(fromNullable('value')).toBe('value');
-    expect(fromNullable('')).toBe('');
-    expect(fromNullable('0')).toBe('0');
+    expect(convertToOption(null)).toBeUndefined();
+    expect(convertToOption(undefined)).toBeUndefined();
+    expect(convertToOption('value')).toBe('value');
+    expect(convertToOption('')).toBe('');
+    expect(convertToOption('0')).toBe('0');
   });
 });

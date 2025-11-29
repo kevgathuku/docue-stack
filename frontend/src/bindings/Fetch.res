@@ -2,7 +2,7 @@
 // These bindings provide type-safe HTTP requests
 
 // HTTP methods
-type method = 
+type method =
   | GET
   | POST
   | PUT
@@ -54,49 +54,61 @@ external status: response => int = "status"
 let createAuthHeaders = (token: option<string>): dict<string> => {
   let headers = Dict.make()
   Dict.set(headers, "Content-Type", "application/json")
-  
+
   switch token {
   | Some(t) => Dict.set(headers, "x-access-token", t)
   | None => ()
   }
-  
+
   headers
 }
 
 // Helper to make GET request
 let get = (url: string, token: option<string>): promise<response> => {
-  fetch(url, {
-    method: methodToString(GET),
-    headers: createAuthHeaders(token),
-    body: None,
-  })
+  fetch(
+    url,
+    {
+      method: methodToString(GET),
+      headers: createAuthHeaders(token),
+      body: None,
+    },
+  )
 }
 
 // Helper to make POST request
 let post = (url: string, body: JSON.t, token: option<string>): promise<response> => {
-  fetch(url, {
-    method: methodToString(POST),
-    headers: createAuthHeaders(token),
-    body: Some(JSON.stringify(body)),
-  })
+  fetch(
+    url,
+    {
+      method: methodToString(POST),
+      headers: createAuthHeaders(token),
+      body: Some(JSON.stringify(body)),
+    },
+  )
 }
 
 // Helper to make PUT request
 let put = (url: string, body: JSON.t, token: option<string>): promise<response> => {
-  fetch(url, {
-    method: methodToString(PUT),
-    headers: createAuthHeaders(token),
-    body: Some(JSON.stringify(body)),
-  })
+  fetch(
+    url,
+    {
+      method: methodToString(PUT),
+      headers: createAuthHeaders(token),
+      body: Some(JSON.stringify(body)),
+    },
+  )
 }
 
 // Helper to make DELETE request
 let delete = (url: string, token: option<string>): promise<response> => {
-  fetch(url, {
-    method: methodToString(DELETE),
-    headers: createAuthHeaders(token),
-    body: None,
-  })
+  fetch(
+    url,
+    {
+      method: methodToString(DELETE),
+      headers: createAuthHeaders(token),
+      body: None,
+    },
+  )
 }
 
 // Example usage:

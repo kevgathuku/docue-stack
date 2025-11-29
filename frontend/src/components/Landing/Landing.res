@@ -10,9 +10,7 @@ let make = () => {
             <span className="bold"> {React.string("Docue    ")} </span>
             <span className="thin"> {React.string("is the simplest way for")} </span>
             <br />
-            <span className="thin">
-              {React.string("you to manage your documents online")}
-            </span>
+            <span className="thin"> {React.string("you to manage your documents online")} </span>
           </h1>
         </div>
       </div>

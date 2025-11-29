@@ -17,9 +17,14 @@ external removeItem: string => unit = "removeItem"
 @scope("localStorage") @val
 external clear: unit => unit = "clear"
 
-// Helper to get item as option
+// Helper to get item as option - uses raw JS t
 let getItemOption = (key: string): option<string> => {
-  getItem(key)->Nullable.toOption
+  let value = %raw(`localStorage.getItem(key)`)
+  if %raw(`value === null || value === undefined`) {
+    None
+  } else {
+    Some(value)
+  }
 }
 
 // Example usage:

@@ -29,7 +29,8 @@ let decodeRole: JSON.t => result<role, string> = json => {
       let accessLevel = Dict.get(obj, "accessLevel")
 
       switch (id, title, accessLevel) {
-      | (Some(idJson), Some(titleJson), Some(accessLevelJson)) => switch (
+      | (Some(idJson), Some(titleJson), Some(accessLevelJson)) =>
+        switch (
           JSON.Decode.string(idJson),
           JSON.Decode.string(titleJson),
           JSON.Decode.float(accessLevelJson),

@@ -118,7 +118,7 @@ This plan outlines the step-by-step migration of 7 Elm components and 1 React co
   - **Note**: Current tests don't cover Requirements 1.4 (error toast display) - this gap was discovered during property test implementation
   - _Requirements: 1.4, 11.3_
 
-- [ ] 7. Migrate CreateRole component (moderate - form with Redux)
+- [x] 7. Migrate CreateRole component (moderate - form with Redux)
   - Create components/CreateRole/CreateRole.res
   - Implement form state with useReducer
   - Implement title input handler

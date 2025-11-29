@@ -46,7 +46,8 @@ let decodeDocument: JSON.t => result<document, string> = json => {
       let lastModified = Dict.get(obj, "lastModified")
 
       switch (id, title, ownerId) {
-      | (Some(idJson), Some(titleJson), Some(ownerIdJson)) => switch (
+      | (Some(idJson), Some(titleJson), Some(ownerIdJson)) =>
+        switch (
           JSON.Decode.string(idJson),
           JSON.Decode.string(titleJson),
           JSON.Decode.string(ownerIdJson),
@@ -60,7 +61,8 @@ let decodeDocument: JSON.t => result<document, string> = json => {
 
             // Decode optional role
             let roleOpt = switch role {
-            | Some(roleJson) => switch JSON.Decode.null(roleJson) {
+            | Some(roleJson) =>
+              switch JSON.Decode.null(roleJson) {
               | Some(_) => None
               | None => JSON.Decode.string(roleJson)
               }

@@ -27,8 +27,8 @@ type action =
 // Reducer for managing form state
 let reducer = (state, action) => {
   switch action {
-  | UpdateEmail(email) => {...state, email: email}
-  | UpdatePassword(password) => {...state, password: password}
+  | UpdateEmail(email) => {...state, email}
+  | UpdatePassword(password) => {...state, password}
   | Submit => state
   | LoginAttempted => {...state, loginAttempted: true}
   | ResetAttempt => {...state, loginAttempted: false}
@@ -46,43 +46,43 @@ let initialState = {
 let make = () => {
   // Local form state
   let (state, dispatch) = React.useReducer(reducer, initialState)
-  
+
   // Redux hooks
   let reduxDispatch = useDispatch()
   let navigate = useNavigate()
-  
+
   // Select auth state from Redux store
   let loginError = useSelector((store: {..}) => {
     store["auth"]["loginError"]
   })
-  
+
   let token = useSelector((store: {..}) => {
     store["auth"]["token"]
   })
-  
+
   let user = useSelector((store: {..}) => {
     store["auth"]["user"]
   })
-  
+
   let session = useSelector((store: {..}) => {
     store["auth"]["session"]
   })
-  
+
   // Handle form submission
   let handleSubmit = evt => {
     ReactEvent.Form.preventDefault(evt)
     dispatch(LoginAttempted)
-    
+
     // Create login payload
     let credentials = {
       "username": state.email,
       "password": state.password,
     }
-    
+
     // Dispatch Redux login action
     reduxDispatch(login(credentials))
   }
-  
+
   // Effect to handle login success/error
   React.useEffect4(() => {
     if state.loginAttempted {
@@ -94,38 +94,38 @@ let make = () => {
           dispatch(ResetAttempt)
         }
       }
-      
+
       // Handle login success
       switch (token, user, session) {
       | ("", _, _) => ()
       | (token, _user, session) => {
           // Check if session is valid
           let loggedIn = session["loggedIn"]
-          
+
           if loggedIn {
             // Store token in localStorage
             LocalStorage.setItem("user", token)
-            
+
             // Store user info in localStorage
             let userJson = %raw(`JSON.stringify(user)`)
             LocalStorage.setItem("userInfo", userJson)
-            
+
             // Show success message
             showSuccess("Logged in Successfully!")
-            
+
             // Navigate to dashboard
             navigate("/dashboard")
-            
+
             // Reset attempt flag
             dispatch(ResetAttempt)
           }
         }
       }
     }
-    
+
     None
   }, (loginError, token, user, state.loginAttempted))
-  
+
   // Render form
   <div className="row">
     <form className="col s12" onSubmit={handleSubmit}>
@@ -161,10 +161,7 @@ let make = () => {
       </div>
       <div className="col s12">
         <div className="container center">
-          <button
-            className="btn waves-effect header-btn blue"
-            name="action"
-            type_="submit">
+          <button className="btn waves-effect header-btn blue" name="action" type_="submit">
             {React.string("Login")}
           </button>
         </div>

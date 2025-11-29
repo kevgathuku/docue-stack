@@ -71,10 +71,8 @@ let decodeUserName: JSON.t => result<userName, string> = json => {
       let last = Dict.get(obj, "last")
 
       switch (first, last) {
-      | (Some(firstJson), Some(lastJson)) => switch (
-          JSON.Decode.string(firstJson),
-          JSON.Decode.string(lastJson),
-        ) {
+      | (Some(firstJson), Some(lastJson)) =>
+        switch (JSON.Decode.string(firstJson), JSON.Decode.string(lastJson)) {
         | (Some(firstStr), Some(lastStr)) => Ok({first: firstStr, last: lastStr})
         | _ => Error("Invalid name fields")
         }
@@ -94,7 +92,8 @@ let decodeUserRole: JSON.t => result<userRole, string> = json => {
       let accessLevel = Dict.get(obj, "accessLevel")
 
       switch (id, title, accessLevel) {
-      | (Some(idJson), Some(titleJson), Some(accessLevelJson)) => switch (
+      | (Some(idJson), Some(titleJson), Some(accessLevelJson)) =>
+        switch (
           JSON.Decode.string(idJson),
           JSON.Decode.string(titleJson),
           JSON.Decode.float(accessLevelJson),
@@ -126,7 +125,8 @@ let decodeUser: JSON.t => result<user, string> = json => {
       let loggedIn = Dict.get(obj, "loggedIn")
 
       switch (id, username, name, email) {
-      | (Some(idJson), Some(usernameJson), Some(nameJson), Some(emailJson)) => switch (
+      | (Some(idJson), Some(usernameJson), Some(nameJson), Some(emailJson)) =>
+        switch (
           JSON.Decode.string(idJson),
           JSON.Decode.string(usernameJson),
           decodeUserName(nameJson),
@@ -135,9 +135,11 @@ let decodeUser: JSON.t => result<user, string> = json => {
         | (Some(idStr), Some(usernameStr), Ok(nameObj), Some(emailStr)) => {
             // Decode optional role
             let roleOpt = switch role {
-            | Some(roleJson) => switch JSON.Decode.null(roleJson) {
+            | Some(roleJson) =>
+              switch JSON.Decode.null(roleJson) {
               | Some(_) => None
-              | None => switch decodeUserRole(roleJson) {
+              | None =>
+                switch decodeUserRole(roleJson) {
                 | Ok(r) => Some(r)
                 | Error(_) => None
                 }
