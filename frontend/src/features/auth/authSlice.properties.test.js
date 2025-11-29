@@ -1,13 +1,11 @@
 import * as fc from 'fast-check';
-import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './authSlice';
-import reducer from '../../stores/reducer';
 
 /**
  * Property-Based Tests for Auth Slice
  * 
  * These tests verify that the Redux Toolkit auth slice maintains
- * behavioral equivalence with the original Flux reducer.
+ * correct state management behavior for all authentication operations.
  */
 
 describe('Auth Slice Property-Based Tests', () => {
@@ -17,10 +15,9 @@ describe('Auth Slice Property-Based Tests', () => {
    * **Validates: Requirements 2.3, 5.1, 5.4**
    * 
    * For any action dispatched to the Redux auth slice, the resulting state
-   * should be equivalent to the state that would have been produced by the
-   * corresponding Flux reducer.
+   * should maintain correct authentication state and data integrity.
    */
-  describe('Property 1 & 4: State management equivalence and authentication preservation', () => {
+  describe('Property 1 & 4: State management and authentication preservation', () => {
     // Arbitraries for generating test data
     const userArb = fc.record({
       _id: fc.string({ minLength: 1 }),
@@ -37,29 +34,24 @@ describe('Auth Slice Property-Based Tests', () => {
       fc.constant(null)
     );
 
-    it('should produce equivalent state for fetchUsers actions', () => {
+    it('should correctly handle fetchUsers fulfilled actions', () => {
       fc.assert(
         fc.property(usersArrayArb, (users) => {
-          // Test fulfilled action
           const fulfilledAction = {
             type: 'auth/fetchUsers/fulfilled',
             payload: users,
           };
 
-          const reduxState = authReducer(undefined, fulfilledAction);
-          const fluxState = reducer(undefined, {
-            type: 'FETCH_USERS_SUCCESS',
-            payload: { users },
-          });
+          const state = authReducer(undefined, fulfilledAction);
 
-          expect(reduxState.users).toEqual(fluxState.users);
-          expect(reduxState.usersError).toEqual(fluxState.usersError);
+          expect(state.users).toEqual(users);
+          expect(state.usersError).toBeNull();
         }),
         { numRuns: 100 }
       );
     });
 
-    it('should produce equivalent state for fetchUsers error actions', () => {
+    it('should correctly handle fetchUsers rejected actions', () => {
       fc.assert(
         fc.property(fc.string({ minLength: 1 }), (error) => {
           const rejectedAction = {
@@ -67,19 +59,15 @@ describe('Auth Slice Property-Based Tests', () => {
             payload: error,
           };
 
-          const reduxState = authReducer(undefined, rejectedAction);
-          const fluxState = reducer(undefined, {
-            type: 'FETCH_USERS_ERROR',
-            payload: { error },
-          });
+          const state = authReducer(undefined, rejectedAction);
 
-          expect(reduxState.usersError).toEqual(fluxState.usersError);
+          expect(state.usersError).toBe(error);
         }),
         { numRuns: 100 }
       );
     });
 
-    it('should produce equivalent state for signup actions', () => {
+    it('should correctly handle signup fulfilled actions', () => {
       fc.assert(
         fc.property(tokenArb, userArb, (token, user) => {
           const fulfilledAction = {
@@ -87,21 +75,17 @@ describe('Auth Slice Property-Based Tests', () => {
             payload: { token, user },
           };
 
-          const reduxState = authReducer(undefined, fulfilledAction);
-          const fluxState = reducer(undefined, {
-            type: 'SIGNUP_SUCCESS',
-            payload: { signupResult: { token, user } },
-          });
+          const state = authReducer(undefined, fulfilledAction);
 
-          expect(reduxState.token).toEqual(fluxState.token);
-          expect(reduxState.user).toEqual(fluxState.user);
-          expect(reduxState.signupError).toEqual(fluxState.signupError);
+          expect(state.token).toBe(token);
+          expect(state.user).toEqual(user);
+          expect(state.signupError).toBeNull();
         }),
         { numRuns: 100 }
       );
     });
 
-    it('should produce equivalent state for signup error actions', () => {
+    it('should correctly handle signup rejected actions', () => {
       fc.assert(
         fc.property(fc.string({ minLength: 1 }), (error) => {
           const rejectedAction = {
@@ -109,19 +93,15 @@ describe('Auth Slice Property-Based Tests', () => {
             payload: error,
           };
 
-          const reduxState = authReducer(undefined, rejectedAction);
-          const fluxState = reducer(undefined, {
-            type: 'SIGNUP_ERROR',
-            payload: { error },
-          });
+          const state = authReducer(undefined, rejectedAction);
 
-          expect(reduxState.signupError).toEqual(fluxState.signupError);
+          expect(state.signupError).toBe(error);
         }),
         { numRuns: 100 }
       );
     });
 
-    it('should produce equivalent state for login actions', () => {
+    it('should correctly handle login fulfilled actions', () => {
       fc.assert(
         fc.property(tokenArb, userArb, (token, user) => {
           const fulfilledAction = {
@@ -129,21 +109,17 @@ describe('Auth Slice Property-Based Tests', () => {
             payload: { token, user },
           };
 
-          const reduxState = authReducer(undefined, fulfilledAction);
-          const fluxState = reducer(undefined, {
-            type: 'LOGIN_SUCCESS',
-            payload: { loginResult: { token, user } },
-          });
+          const state = authReducer(undefined, fulfilledAction);
 
-          expect(reduxState.token).toEqual(fluxState.token);
-          expect(reduxState.user).toEqual(fluxState.user);
-          expect(reduxState.loginError).toEqual(fluxState.loginError);
+          expect(state.token).toBe(token);
+          expect(state.user).toEqual(user);
+          expect(state.loginError).toBe('');
         }),
         { numRuns: 100 }
       );
     });
 
-    it('should produce equivalent state for login error actions', () => {
+    it('should correctly handle login rejected actions', () => {
       fc.assert(
         fc.property(fc.string({ minLength: 1 }), (error) => {
           const rejectedAction = {
@@ -151,19 +127,15 @@ describe('Auth Slice Property-Based Tests', () => {
             payload: error,
           };
 
-          const reduxState = authReducer(undefined, rejectedAction);
-          const fluxState = reducer(undefined, {
-            type: 'LOGIN_ERROR',
-            payload: { error },
-          });
+          const state = authReducer(undefined, rejectedAction);
 
-          expect(reduxState.loginError).toEqual(fluxState.loginError);
+          expect(state.loginError).toBe(error);
         }),
         { numRuns: 100 }
       );
     });
 
-    it('should produce equivalent state for logout actions', () => {
+    it('should correctly handle logout fulfilled actions', () => {
       fc.assert(
         fc.property(fc.string({ minLength: 1 }), (message) => {
           // Start with logged in state
@@ -178,29 +150,18 @@ describe('Auth Slice Property-Based Tests', () => {
             payload: { message },
           };
 
-          const reduxState = authReducer(initialState, fulfilledAction);
-          const fluxState = reducer(
-            {
-              ...reducer(undefined, {}),
-              token: 'some-token',
-              user: { _id: '1', username: 'test' },
-            },
-            {
-              type: 'LOGOUT_SUCCESS',
-              payload: { logoutResult: { message } },
-            }
-          );
+          const state = authReducer(initialState, fulfilledAction);
 
-          expect(reduxState.token).toEqual(fluxState.token);
-          expect(reduxState.user).toEqual(fluxState.user);
-          expect(reduxState.logoutResult).toEqual(fluxState.logoutResult);
-          expect(reduxState.logoutError).toEqual(fluxState.logoutError);
+          expect(state.token).toBe('');
+          expect(state.user).toEqual({});
+          expect(state.logoutResult).toBe(message);
+          expect(state.logoutError).toBe('');
         }),
         { numRuns: 100 }
       );
     });
 
-    it('should produce equivalent state for logout error actions', () => {
+    it('should correctly handle logout rejected actions', () => {
       fc.assert(
         fc.property(fc.string({ minLength: 1 }), (error) => {
           const rejectedAction = {
@@ -208,37 +169,31 @@ describe('Auth Slice Property-Based Tests', () => {
             payload: error,
           };
 
-          const reduxState = authReducer(undefined, rejectedAction);
-          const fluxState = reducer(undefined, {
-            type: 'LOGOUT_ERROR',
-            payload: { error },
-          });
+          const state = authReducer(undefined, rejectedAction);
 
-          expect(reduxState.logoutError).toEqual(fluxState.logoutError);
+          expect(state.logoutError).toBe(error);
         }),
         { numRuns: 100 }
       );
     });
 
-    it('should produce equivalent state for getSession pending actions', () => {
+    it('should correctly handle getSession pending actions', () => {
       fc.assert(
         fc.property(fc.constant(null), () => {
           const pendingAction = {
             type: 'auth/getSession/pending',
           };
 
-          const reduxState = authReducer(undefined, pendingAction);
-          const fluxState = reducer(undefined, {
-            type: 'GET_SESSION_START',
-          });
+          const state = authReducer(undefined, pendingAction);
 
-          expect(reduxState.session).toEqual(fluxState.session);
+          expect(state.session.loading).toBe(true);
+          expect(state.session.loggedIn).toBe(false);
         }),
         { numRuns: 100 }
       );
     });
 
-    it('should produce equivalent state for getSession success when logged in', () => {
+    it('should correctly handle getSession fulfilled when logged in', () => {
       fc.assert(
         fc.property(userArb, (user) => {
           const fulfilledAction = {
@@ -246,21 +201,18 @@ describe('Auth Slice Property-Based Tests', () => {
             payload: { loggedIn: true, user },
           };
 
-          const reduxState = authReducer(undefined, fulfilledAction);
-          const fluxState = reducer(undefined, {
-            type: 'GET_SESSION_SUCCESS',
-            payload: { session: { loggedIn: true, user } },
-          });
+          const state = authReducer(undefined, fulfilledAction);
 
-          expect(reduxState.session).toEqual(fluxState.session);
-          expect(reduxState.user).toEqual(fluxState.user);
-          expect(reduxState.sessionError).toEqual(fluxState.sessionError);
+          expect(state.session.loading).toBe(false);
+          expect(state.session.loggedIn).toBe(true);
+          expect(state.user).toEqual(user);
+          expect(state.sessionError).toBe('');
         }),
         { numRuns: 100 }
       );
     });
 
-    it('should produce equivalent state for getSession success when not logged in', () => {
+    it('should correctly handle getSession fulfilled when not logged in', () => {
       fc.assert(
         fc.property(fc.constant(null), () => {
           const fulfilledAction = {
@@ -268,21 +220,18 @@ describe('Auth Slice Property-Based Tests', () => {
             payload: { loggedIn: false },
           };
 
-          const reduxState = authReducer(undefined, fulfilledAction);
-          const fluxState = reducer(undefined, {
-            type: 'GET_SESSION_SUCCESS',
-            payload: { session: { loggedIn: false } },
-          });
+          const state = authReducer(undefined, fulfilledAction);
 
-          expect(reduxState.session).toEqual(fluxState.session);
-          expect(reduxState.token).toEqual(fluxState.token);
-          expect(reduxState.user).toEqual(fluxState.user);
+          expect(state.session.loading).toBe(false);
+          expect(state.session.loggedIn).toBe(false);
+          expect(state.token).toBe('');
+          expect(state.user).toEqual({});
         }),
         { numRuns: 100 }
       );
     });
 
-    it('should produce equivalent state for getSession error actions', () => {
+    it('should correctly handle getSession rejected actions', () => {
       fc.assert(
         fc.property(fc.string({ minLength: 1 }), (error) => {
           const rejectedAction = {
@@ -290,20 +239,17 @@ describe('Auth Slice Property-Based Tests', () => {
             payload: error,
           };
 
-          const reduxState = authReducer(undefined, rejectedAction);
-          const fluxState = reducer(undefined, {
-            type: 'GET_SESSION_ERROR',
-            payload: { error },
-          });
+          const state = authReducer(undefined, rejectedAction);
 
-          expect(reduxState.session).toEqual(fluxState.session);
-          expect(reduxState.sessionError).toEqual(fluxState.sessionError);
+          expect(state.session.loading).toBe(false);
+          expect(state.session.loggedIn).toBe(false);
+          expect(state.sessionError).toBe(error);
         }),
         { numRuns: 100 }
       );
     });
 
-    it('should produce equivalent state for updateProfile actions', () => {
+    it('should correctly handle updateProfile fulfilled actions', () => {
       fc.assert(
         fc.property(userArb, usersArrayArb, (updatedUser, users) => {
           // Ensure the updated user is in the users array
@@ -319,28 +265,19 @@ describe('Auth Slice Property-Based Tests', () => {
             payload: updatedUser,
           };
 
-          const reduxState = authReducer(initialState, fulfilledAction);
-          const fluxState = reducer(
-            {
-              ...reducer(undefined, {}),
-              users: usersWithTarget,
-            },
-            {
-              type: 'PROFILE_UPDATE_SUCCESS',
-              payload: { user: updatedUser },
-            }
-          );
+          const state = authReducer(initialState, fulfilledAction);
 
-          expect(reduxState.profileUpdateError).toEqual(
-            fluxState.profileUpdateError
-          );
-          expect(reduxState.users).toEqual(fluxState.users);
+          expect(state.profileUpdateError).toBe('');
+          expect(state.users).toContainEqual(updatedUser);
+          // Verify the user was updated in the array
+          const updatedInArray = state.users.find(u => u._id === updatedUser._id);
+          expect(updatedInArray).toEqual(updatedUser);
         }),
         { numRuns: 100 }
       );
     });
 
-    it('should produce equivalent state for updateProfile error actions', () => {
+    it('should correctly handle updateProfile rejected actions', () => {
       fc.assert(
         fc.property(fc.string({ minLength: 1 }), (error) => {
           const rejectedAction = {
@@ -348,21 +285,15 @@ describe('Auth Slice Property-Based Tests', () => {
             payload: error,
           };
 
-          const reduxState = authReducer(undefined, rejectedAction);
-          const fluxState = reducer(undefined, {
-            type: 'PROFILE_UPDATE_ERROR',
-            payload: { error },
-          });
+          const state = authReducer(undefined, rejectedAction);
 
-          expect(reduxState.profileUpdateError).toEqual(
-            fluxState.profileUpdateError
-          );
+          expect(state.profileUpdateError).toBe(error);
         }),
         { numRuns: 100 }
       );
     });
 
-    it('should maintain state equivalence across action sequences', () => {
+    it('should maintain correct state across action sequences', () => {
       fc.assert(
         fc.property(
           tokenArb,
@@ -380,23 +311,15 @@ describe('Auth Slice Property-Based Tests', () => {
               payload: { message },
             };
 
-            // Redux sequence
-            let reduxState = authReducer(undefined, loginAction);
-            reduxState = authReducer(reduxState, logoutAction);
+            // Execute sequence
+            let state = authReducer(undefined, loginAction);
+            expect(state.token).toBe(token);
+            expect(state.user).toEqual(user);
 
-            // Flux sequence
-            let fluxState = reducer(undefined, {
-              type: 'LOGIN_SUCCESS',
-              payload: { loginResult: { token, user } },
-            });
-            fluxState = reducer(fluxState, {
-              type: 'LOGOUT_SUCCESS',
-              payload: { logoutResult: { message } },
-            });
-
-            expect(reduxState.token).toEqual(fluxState.token);
-            expect(reduxState.user).toEqual(fluxState.user);
-            expect(reduxState.logoutResult).toEqual(fluxState.logoutResult);
+            state = authReducer(state, logoutAction);
+            expect(state.token).toBe('');
+            expect(state.user).toEqual({});
+            expect(state.logoutResult).toBe(message);
           }
         ),
         { numRuns: 100 }
@@ -711,7 +634,7 @@ describe('Auth Slice Property-Based Tests', () => {
    * **Validates: Requirements 3.5**
    * 
    * For any API call that fails, the error should be captured in the Redux state
-   * in the same format as the Flux implementation.
+   * in the correct format.
    */
   describe('Property 3: Error handling preservation', () => {
     const errorArb = fc.oneof(
@@ -722,148 +645,111 @@ describe('Auth Slice Property-Based Tests', () => {
       })
     );
 
-    it('should capture fetchUsers errors in the same format as Flux', () => {
+    it('should capture fetchUsers errors correctly', () => {
       fc.assert(
         fc.property(errorArb, (error) => {
           const errorString = typeof error === 'string' ? error : error.message;
 
-          const reduxAction = {
+          const action = {
             type: 'auth/fetchUsers/rejected',
             payload: errorString,
           };
 
-          const fluxAction = {
-            type: 'FETCH_USERS_ERROR',
-            payload: { error: errorString },
-          };
+          const state = authReducer(undefined, action);
 
-          const reduxState = authReducer(undefined, reduxAction);
-          const fluxState = reducer(undefined, fluxAction);
-
-          expect(reduxState.usersError).toEqual(fluxState.usersError);
+          expect(state.usersError).toBe(errorString);
         }),
         { numRuns: 100 }
       );
     });
 
-    it('should capture signup errors in the same format as Flux', () => {
+    it('should capture signup errors correctly', () => {
       fc.assert(
         fc.property(errorArb, (error) => {
           const errorString = typeof error === 'string' ? error : error.message;
 
-          const reduxAction = {
+          const action = {
             type: 'auth/signup/rejected',
             payload: errorString,
           };
 
-          const fluxAction = {
-            type: 'SIGNUP_ERROR',
-            payload: { error: errorString },
-          };
+          const state = authReducer(undefined, action);
 
-          const reduxState = authReducer(undefined, reduxAction);
-          const fluxState = reducer(undefined, fluxAction);
-
-          expect(reduxState.signupError).toEqual(fluxState.signupError);
+          expect(state.signupError).toBe(errorString);
         }),
         { numRuns: 100 }
       );
     });
 
-    it('should capture login errors in the same format as Flux', () => {
+    it('should capture login errors correctly', () => {
       fc.assert(
         fc.property(errorArb, (error) => {
           const errorString = typeof error === 'string' ? error : error.message;
 
-          const reduxAction = {
+          const action = {
             type: 'auth/login/rejected',
             payload: errorString,
           };
 
-          const fluxAction = {
-            type: 'LOGIN_ERROR',
-            payload: { error: errorString },
-          };
+          const state = authReducer(undefined, action);
 
-          const reduxState = authReducer(undefined, reduxAction);
-          const fluxState = reducer(undefined, fluxAction);
-
-          expect(reduxState.loginError).toEqual(fluxState.loginError);
+          expect(state.loginError).toBe(errorString);
         }),
         { numRuns: 100 }
       );
     });
 
-    it('should capture logout errors in the same format as Flux', () => {
+    it('should capture logout errors correctly', () => {
       fc.assert(
         fc.property(errorArb, (error) => {
           const errorString = typeof error === 'string' ? error : error.message;
 
-          const reduxAction = {
+          const action = {
             type: 'auth/logout/rejected',
             payload: errorString,
           };
 
-          const fluxAction = {
-            type: 'LOGOUT_ERROR',
-            payload: { error: errorString },
-          };
+          const state = authReducer(undefined, action);
 
-          const reduxState = authReducer(undefined, reduxAction);
-          const fluxState = reducer(undefined, fluxAction);
-
-          expect(reduxState.logoutError).toEqual(fluxState.logoutError);
+          expect(state.logoutError).toBe(errorString);
         }),
         { numRuns: 100 }
       );
     });
 
-    it('should capture getSession errors in the same format as Flux', () => {
+    it('should capture getSession errors correctly', () => {
       fc.assert(
         fc.property(errorArb, (error) => {
           const errorString = typeof error === 'string' ? error : error.message;
 
-          const reduxAction = {
+          const action = {
             type: 'auth/getSession/rejected',
             payload: errorString,
           };
 
-          const fluxAction = {
-            type: 'GET_SESSION_ERROR',
-            payload: { error: errorString },
-          };
+          const state = authReducer(undefined, action);
 
-          const reduxState = authReducer(undefined, reduxAction);
-          const fluxState = reducer(undefined, fluxAction);
-
-          expect(reduxState.sessionError).toEqual(fluxState.sessionError);
-          expect(reduxState.session).toEqual(fluxState.session);
+          expect(state.sessionError).toBe(errorString);
+          expect(state.session.loading).toBe(false);
+          expect(state.session.loggedIn).toBe(false);
         }),
         { numRuns: 100 }
       );
     });
 
-    it('should capture updateProfile errors in the same format as Flux', () => {
+    it('should capture updateProfile errors correctly', () => {
       fc.assert(
         fc.property(errorArb, (error) => {
           const errorString = typeof error === 'string' ? error : error.message;
 
-          const reduxAction = {
+          const action = {
             type: 'auth/updateProfile/rejected',
             payload: errorString,
           };
 
-          const fluxAction = {
-            type: 'PROFILE_UPDATE_ERROR',
-            payload: { error: errorString },
-          };
+          const state = authReducer(undefined, action);
 
-          const reduxState = authReducer(undefined, reduxAction);
-          const fluxState = reducer(undefined, fluxAction);
-
-          expect(reduxState.profileUpdateError).toEqual(
-            fluxState.profileUpdateError
-          );
+          expect(state.profileUpdateError).toBe(errorString);
         }),
         { numRuns: 100 }
       );

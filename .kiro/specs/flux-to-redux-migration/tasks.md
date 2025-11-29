@@ -124,7 +124,7 @@
 - [x] 9. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 10. Remove Flux infrastructure and dependencies
+- [x] 10. Remove Flux infrastructure and dependencies
   - Delete AppDispatcher module (dispatcher/AppDispatcher.js)
   - Delete BaseStore module (stores/BaseStore.js)
   - Delete DocStore module (stores/DocStore.js)
