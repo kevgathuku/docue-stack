@@ -5,7 +5,7 @@ import rolesReducer from '../features/roles/rolesSlice';
 
 // Support both Vite (import.meta.env) and Jest (process.env)
 // In test environment, use process.env
-const isDevelopment = process.env.NODE_ENV !== 'production';
+const isDevelopment = process.env.NODE_ENV == 'development';
 
 export const store = configureStore({
   reducer: {
