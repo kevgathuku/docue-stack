@@ -38,13 +38,21 @@ Components → Dispatch(Actions/Thunks) → Store → Components
 
 ### Migration Strategy
 
-The migration will be performed incrementally to minimize risk:
+The migration will be performed incrementally to minimize risk and ensure zero breaking changes:
 
-1. **Phase 1**: Install Redux dependencies alongside Flux
-2. **Phase 2**: Create Redux slices parallel to existing stores
-3. **Phase 3**: Migrate components one by one to use Redux
-4. **Phase 4**: Update tests to work with Redux
-5. **Phase 5**: Remove Flux code and dependencies
+1. **Phase 1**: Install Redux dependencies alongside Flux (coexistence period begins)
+2. **Phase 2**: Create Redux slices parallel to existing stores with exact state compatibility
+3. **Phase 3**: Migrate components one by one to use Redux hooks while Flux remains functional
+4. **Phase 4**: Update tests to work with Redux Provider and mock store
+5. **Phase 5**: Remove Flux code and dependencies once all components migrated
+
+**Key Design Decision:** Both Flux and Redux will coexist during migration. This allows:
+- Incremental component migration without breaking the application
+- Easy rollback if issues are discovered
+- Testing both implementations side-by-side for equivalence
+- No "big bang" deployment risk
+
+**Rationale:** The existing application has no type safety (Flow/PropTypes are inconsistent), making a gradual migration safer than attempting to migrate everything at once.
 
 ## Components and Interfaces
 
@@ -126,13 +134,15 @@ export const useAppSelector = useSelector;
 
 ### Auth Slice State
 
+The auth slice must preserve the exact state structure from the existing reducer to ensure zero breaking changes for components:
+
 ```javascript
 {
   users: User[] | null,
   usersError: Error | null,
   session: {
     loggedIn: boolean,
-    loading: boolean,
+    loading: boolean,  // Starts false, true during session check
   },
   sessionError: string,
   loginError: string,
@@ -142,32 +152,46 @@ export const useAppSelector = useSelector;
   profileUpdateResult: any | null,
   profileUpdateError: string,
   token: string,
-  user: User,
+  user: User | {},
+  loggedIn: {},  // Legacy field, may be unused
 }
 ```
+
+**State Compatibility Requirements (Requirement 9):**
+- Session loading pattern: GET_SESSION_START sets loading=true, success/error sets loading=false
+- Error clearing: Success operations clear corresponding error fields (e.g., LOGIN_SUCCESS clears loginError)
+- Profile updates: Must update both `user` object and the matching user in `users` array
+- Logout: Clears token and user, sets logoutResult message
+- Login/Signup: Sets both token and user fields, clears loginError on success
 
 ### Documents Slice State
 
+The documents slice mirrors the DocStore structure with added loading/error states for better UX:
+
 ```javascript
 {
-  doc: Document | null,
-  docs: Document[] | null,
-  docCreateResult: any | null,
+  doc: Document | null,           // Single document for detail view
+  docs: Document[] | null,        // List of documents
+  docCreateResult: any | null,    // Result from create operation
   docDeleteResult: { data: any, statusCode: number } | null,
   docEditResult: { data: any, statusCode: number } | null,
-  loading: boolean,
-  error: Error | null,
+  loading: boolean,               // Loading state for async operations
+  error: Error | null,            // Error state for failed operations
 }
 ```
 
+**Note:** The DocStore uses different event names for emitChange ('fetchDocs', 'getDoc', 'editDoc') which components listen to. Redux will use a single state tree with selectors instead.
+
 ### Roles Slice State
+
+The roles slice mirrors the RoleStore structure with added loading/error states:
 
 ```javascript
 {
-  createdRole: Role | null,
-  roles: Role[] | null,
-  loading: boolean,
-  error: Error | null,
+  createdRole: Role | null,       // Most recently created role
+  roles: Role[] | null,           // List of all roles
+  loading: boolean,               // Loading state for async operations
+  error: Error | null,            // Error state for failed operations
 }
 ```
 
@@ -333,12 +357,84 @@ During migration, we'll maintain both Flux and Redux implementations temporarily
 3. **Phase 3**: Migrate components one at a time, testing each
 4. **Phase 4**: Remove Flux code once all tests pass
 
+**Testing Requirements Coverage:**
+- **Requirement 6.1**: Components wrapped with Redux Provider in tests
+- **Requirement 6.2**: Redux mock store for testing async thunks
+- **Requirement 6.3**: Slice reducer tests with various action types
+- **Requirement 6.4**: Selector function tests for correct state access
+- **Requirement 6.5**: Maintain or improve existing test coverage (~80%)
+
+**Design Decision:** Use fast-check for property-based testing
+- **Rationale:** JavaScript ecosystem standard for PBT, good TypeScript support
+- **Alternative Considered:** jsverify (less maintained, older API)
+- **Benefit:** Generates hundreds of test cases automatically, catches edge cases unit tests miss
+
 ### Test Coverage Goals
 
 - Maintain existing test coverage (currently ~80%)
 - Add property-based tests for critical state transitions
 - Ensure all async thunks have success and failure tests
 - Test all component migrations with Redux Provider
+
+## Auth Slice Compatibility Requirements
+
+**Critical Design Constraint (Requirement 9):** The auth slice must maintain exact compatibility with the existing reducer state structure and behavior to ensure zero breaking changes.
+
+### State Structure Preservation
+
+The auth slice will preserve all fields from the existing reducer:
+- `users`, `usersError` - for admin user management
+- `session` object with `loggedIn` and `loading` flags
+- `sessionError`, `loginError`, `logoutError`, `signupError`, `profileUpdateError` - granular error tracking
+- `logoutResult`, `profileUpdateResult` - operation results
+- `token`, `user` - current user authentication state
+- `loggedIn` - legacy field (may be unused but preserved for safety)
+
+### State Transition Compatibility
+
+The auth slice must replicate these exact state transitions:
+
+**Session Check Pattern:**
+```javascript
+// GET_SESSION_START
+session: { loggedIn: false, loading: true }
+
+// GET_SESSION_SUCCESS (logged in)
+session: { loggedIn: true, loading: false }, user: <user_data>
+
+// GET_SESSION_SUCCESS (not logged in)
+session: { loggedIn: false, loading: false }, token: '', user: {}
+
+// GET_SESSION_ERROR
+session: { loggedIn: false, loading: false }, sessionError: <error>
+```
+
+**Login Pattern:**
+```javascript
+// LOGIN_SUCCESS
+loginError: '',  // Clear previous error
+token: <token>,
+user: <user>
+```
+
+**Profile Update Pattern:**
+```javascript
+// PROFILE_UPDATE_SUCCESS
+profileUpdateError: '',  // Clear previous error
+users: users.map(u => u._id === updated._id ? updated : u),  // Update in array
+user: <updated_user>  // Update current user if it's the same
+```
+
+**Logout Pattern:**
+```javascript
+// LOGOUT_SUCCESS
+logoutError: '',
+token: '',
+user: {},
+logoutResult: <message>
+```
+
+**Design Rationale:** Components depend on these exact state shapes and transitions. Any deviation could cause runtime errors or incorrect behavior, especially since the codebase lacks TypeScript or comprehensive PropTypes validation.
 
 ## Implementation Notes
 
@@ -366,23 +462,99 @@ root.render(
 
 ### Migration Order
 
+The migration order is carefully chosen to minimize risk and validate the approach early:
+
 1. **Auth slice** (most critical, affects all authenticated routes)
+   - **Rationale:** Auth is foundational - if this works, the pattern is validated
+   - **Risk:** High impact if broken, but well-tested existing reducer to reference
+   - **Benefit:** Validates the Redux setup and async thunk patterns early
+
 2. **Documents slice** (most complex, multiple operations)
+   - **Rationale:** Tests the pattern with CRUD operations and multiple event types
+   - **Risk:** Medium - most used feature, but auth is already working
+   - **Benefit:** Proves the approach scales to complex state management
+
 3. **Roles slice** (simpler, fewer operations)
+   - **Rationale:** Straightforward migration to complete the pattern
+   - **Risk:** Low - simple operations, pattern already proven
+   - **Benefit:** Quick win to finish the migration
 
 ### Component Migration Pattern
 
-For each component:
+For each component, follow this systematic approach:
 
-1. Import Redux hooks instead of Flux stores
-2. Replace `addChangeListener`/`removeChangeListener` with `useSelector`
-3. Replace action calls with `useDispatch` + thunk dispatch
-4. Update tests to use Redux Provider
-5. Verify functionality manually and with tests
+1. **Import Redux hooks instead of Flux stores**
+   ```javascript
+   // Before
+   import DocStore from '../stores/DocStore';
+   
+   // After
+   import { useAppSelector, useAppDispatch } from '../store/hooks';
+   import { selectDocuments, selectDocumentsLoading } from '../features/documents/documentsSlice';
+   ```
+
+2. **Replace `addChangeListener`/`removeChangeListener` with `useSelector`**
+   ```javascript
+   // Before (class component)
+   componentDidMount() {
+     DocStore.addChangeListener(this.onChange, 'fetchDocs');
+   }
+   componentWillUnmount() {
+     DocStore.removeChangeListener(this.onChange, 'fetchDocs');
+   }
+   onChange = () => {
+     this.setState({ docs: DocStore.getDocs() });
+   }
+   
+   // After (functional component with hooks)
+   const docs = useAppSelector(selectDocuments);
+   const loading = useAppSelector(selectDocumentsLoading);
+   ```
+
+3. **Replace action calls with `useDispatch` + thunk dispatch**
+   ```javascript
+   // Before
+   import DocActions from '../actions/DocActions';
+   DocActions.getDocs();
+   
+   // After
+   const dispatch = useAppDispatch();
+   dispatch(fetchDocuments());
+   ```
+
+4. **Update tests to use Redux Provider**
+   ```javascript
+   // Wrap component with Provider and mock store
+   import { Provider } from 'react-redux';
+   import { configureStore } from '@reduxjs/toolkit';
+   
+   const mockStore = configureStore({ reducer: { documents: documentsReducer } });
+   render(<Provider store={mockStore}><Component /></Provider>);
+   ```
+
+5. **Verify functionality manually and with tests**
+   - Run component tests
+   - Manually test in browser
+   - Check Redux DevTools for state updates
+   - Verify no console errors or warnings
+
+**Note:** Some components may need conversion from class to functional components to use hooks effectively, though this is optional and can be done incrementally.
 
 ### Backward Compatibility
 
 During migration, some components may still use Flux while others use Redux. This is acceptable as a temporary state. The store configurations are independent and won't conflict.
+
+**Design Decision:** Maintain dual state management temporarily
+- **Rationale:** Allows incremental migration without breaking existing functionality
+- **Trade-off:** Temporary code duplication and slightly larger bundle size
+- **Mitigation:** Clear migration checklist to track progress and ensure complete cleanup
+- **Exit Strategy:** Once all components migrated and tests pass, remove Flux in a single cleanup commit
+
+**Compatibility Considerations:**
+- Flux stores and Redux store operate independently - no shared state
+- Components can be migrated one at a time without affecting others
+- Both AppDispatcher and Redux store can coexist in the same application
+- Tests can be updated incrementally as components are migrated
 
 ### Performance Considerations
 
@@ -391,20 +563,56 @@ During migration, some components may still use Flux while others use Redux. Thi
 - Use shallow equality checks for object/array selections
 - Consider using `useAppSelector` with equality function for complex selections
 
-### Code Organization
+### Code Organization (Requirement 8)
+
+**Design Decision:** Use feature-based organization with Redux Toolkit conventions
 
 ```
 frontend/src/
   store/
-    index.js           # Store configuration
-    hooks.js           # Typed hooks
-  features/
+    index.js           # Store configuration with configureStore
+    hooks.js           # Typed hooks (useAppDispatch, useAppSelector)
+  features/            # Feature-based organization (Requirement 8.1)
     auth/
-      authSlice.js     # Slice, thunks, selectors
+      authSlice.js     # Slice, thunks, selectors, reducer export
+      authSlice.test.js
+      authSlice.properties.test.js
     documents/
       documentsSlice.js
+      documentsSlice.test.js
+      documentsSlice.properties.test.js
     roles/
       rolesSlice.js
+      rolesSlice.test.js
+      rolesSlice.properties.test.js
+```
+
+**Rationale:** 
+- Feature-based structure scales better than type-based (actions/, reducers/, etc.)
+- Colocates related code (slice logic, tests, selectors)
+- Follows Redux Toolkit official recommendations
+- Clear separation of concerns (Requirement 8.4)
+
+**Slice File Structure (Requirements 8.2, 8.3, 8.5):**
+```javascript
+// 1. Imports
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+
+// 2. Async thunks (Requirement 8.3 - automatic action naming)
+export const fetchItems = createAsyncThunk('domain/fetchItems', ...);
+
+// 3. Slice definition
+const slice = createSlice({
+  name: 'domain',  // Automatic action naming: domain/actionName
+  initialState,
+  reducers: { /* sync actions */ },
+  extraReducers: { /* async thunk handlers */ }
+});
+
+// 4. Exports (Requirement 8.5)
+export const { syncAction1, syncAction2 } = slice.actions;  // Actions
+export const selectItems = (state) => state.domain.items;   // Selectors (Requirement 8.2)
+export default slice.reducer;                                // Reducer
 ```
 
 ### Selector Patterns
@@ -460,15 +668,26 @@ localStorage.setItem('userInfo', JSON.stringify(action.payload.user));
 - [ ] Migrate admin components (Admin, UsersAdmin)
 - [ ] Update all component tests
 
-### Phase 4: Cleanup
+### Phase 4: Cleanup (Requirement 7)
+
+Complete removal of all Flux infrastructure:
+
 - [ ] Remove Flux store listeners from all components
-- [ ] Delete AppDispatcher
-- [ ] Delete BaseStore
-- [ ] Delete DocStore
-- [ ] Delete RoleStore
-- [ ] Remove flux package dependency
-- [ ] Remove eventemitter3 package dependency
-- [ ] Update documentation
+- [ ] Delete AppDispatcher (`dispatcher/AppDispatcher.js`)
+- [ ] Delete BaseStore (`stores/BaseStore.js`)
+- [ ] Delete DocStore (`stores/DocStore.js`)
+- [ ] Delete RoleStore (`stores/RoleStore.js`)
+- [ ] Delete action files (`actions/BaseActions.js`, `actions/DocActions.js`, `actions/RoleActions.js`)
+- [ ] Remove flux package from `package.json`
+- [ ] Remove eventemitter3 package from `package.json`
+- [ ] Remove AppConstants that are no longer used
+- [ ] Update documentation to reference Redux instead of Flux
+
+**Verification Steps:**
+- Search codebase for any remaining Flux imports
+- Verify no EventEmitter usage remains
+- Check that AppDispatcher has no remaining references
+- Confirm bundle size reduction after removing dependencies
 
 ### Phase 5: Verification
 - [ ] Run all unit tests

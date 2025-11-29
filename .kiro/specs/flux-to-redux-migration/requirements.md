@@ -28,11 +28,11 @@ This document outlines the requirements for migrating the frontend state managem
 
 #### Acceptance Criteria
 
-1. WHEN the migration is complete THEN the Application SHALL use Redux Toolkit as the state management solution
-2. WHEN the migration is complete THEN the Application SHALL remove all Flux dependencies including the flux package and AppDispatcher
-3. WHEN the migration is complete THEN the Application SHALL maintain a single Redux store instead of multiple Flux stores
-4. WHEN the migration is complete THEN the Application SHALL use Redux Toolkit's configureStore instead of manual store configuration
-5. WHEN Redux DevTools Extension is available THEN the Application SHALL enable Redux DevTools for state debugging
+1. WHEN the migration completes THEN the Application SHALL use Redux Toolkit as the state management solution
+2. WHEN the migration completes THEN the Application SHALL remove all Flux dependencies including the flux package and AppDispatcher module
+3. WHEN the migration completes THEN the Application SHALL maintain a single Redux store replacing multiple Flux stores
+4. WHEN the migration completes THEN the Application SHALL use Redux Toolkit configureStore function for store configuration
+5. WHERE Redux DevTools Extension is installed, the Application SHALL enable Redux DevTools for state debugging
 
 ### Requirement 2
 
@@ -76,11 +76,11 @@ This document outlines the requirements for migrating the frontend state managem
 
 #### Acceptance Criteria
 
-1. WHEN users authenticate THEN the System SHALL maintain login, logout, and session management functionality
-2. WHEN users manage documents THEN the System SHALL maintain create, read, update, and delete document operations
-3. WHEN users manage roles THEN the System SHALL maintain role creation and retrieval functionality
-4. WHEN users update profiles THEN the System SHALL maintain profile update functionality
-5. WHEN state changes occur THEN the System SHALL trigger component re-renders equivalently to the Flux implementation
+1. WHEN users authenticate THEN the Application SHALL maintain login, logout, and session management functionality
+2. WHEN users manage documents THEN the Application SHALL maintain create, read, update, and delete document operations
+3. WHEN users manage roles THEN the Application SHALL maintain role creation and retrieval functionality
+4. WHEN users update profiles THEN the Application SHALL maintain profile update functionality
+5. WHEN state changes occur THEN the Application SHALL trigger component re-renders with the same behavior as the Flux implementation
 
 ### Requirement 6
 
@@ -118,3 +118,15 @@ This document outlines the requirements for migrating the frontend state managem
 3. WHEN naming actions THEN the Application SHALL use Redux Toolkit's automatic action naming conventions
 4. WHEN structuring the store THEN the Application SHALL use feature-based organization with clear separation of concerns
 5. WHEN exporting from slices THEN the Application SHALL export actions, selectors, and the reducer from each slice file
+
+### Requirement 9
+
+**User Story:** As a developer, I want the new Redux store to maintain compatibility with the existing reducer state structure, so that components can access state without breaking changes.
+
+#### Acceptance Criteria
+
+1. WHEN creating the auth slice THEN the Application SHALL preserve the existing reducer state structure including users, session, token, user, and error fields
+2. WHEN handling authentication actions THEN the Application SHALL maintain the same state transitions as the existing reducer for login, logout, signup, session, and profile update operations
+3. WHEN session checks execute THEN the Application SHALL maintain the session loading state pattern with GET_SESSION_START, GET_SESSION_SUCCESS, and GET_SESSION_ERROR equivalents
+4. WHEN authentication operations complete THEN the Application SHALL clear error fields on success operations matching the existing reducer behavior
+5. WHEN profile updates succeed THEN the Application SHALL update both the user object and the users array matching the existing reducer logic
