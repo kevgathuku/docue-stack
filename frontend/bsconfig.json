@@ -1,0 +1,38 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "sources": [
+    {
+      "dir": "src/components",
+      "subdirs": true
+    },
+    {
+      "dir": "src/bindings",
+      "subdirs": false
+    },
+    {
+      "dir": "src/features",
+      "subdirs": true
+    },
+    {
+      "dir": "src/utils",
+      "subdirs": false
+    }
+  ],
+  "package-specs": {
+    "module": "es6",
+    "in-source": true
+  },
+  "suffix": ".res.js",
+  "dependencies": [
+    "@rescript/react"
+  ],
+  "jsx": {
+    "version": 4,
+    "mode": "automatic"
+  },
+  "warnings": {
+    "error": "+101"
+  },
+  "compiler-flags": []
+}

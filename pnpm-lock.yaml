@@ -127,6 +127,12 @@ importers:
       '@babel/preset-react':
         specifier: ^7.25.9
         version: 7.28.5(@babel/core@7.28.5)
+      '@rescript/core':
+        specifier: ^1.6.1
+        version: 1.6.1(rescript@12.0.0)
+      '@rescript/react':
+        specifier: ^0.14.0
+        version: 0.14.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@testing-library/jest-dom':
         specifier: ^6.9.1
         version: 6.9.1
@@ -172,6 +178,9 @@ importers:
       nock:
         specifier: ^9.0.2
         version: 9.6.1
+      rescript:
+        specifier: ^12.0.0
+        version: 12.0.0
       sessionstorage:
         specifier: ^0.0.1
         version: 0.0.1
@@ -1214,6 +1223,50 @@ packages:
   '@remix-run/router@1.23.1':
     resolution: {integrity: sha512-vDbaOzF7yT2Qs4vO6XV1MHcJv+3dgR1sT+l3B8xxOVhUC336prMvqrvsLL/9Dnw2xr6Qhz4J0dmS0llNAbnUmQ==}
     engines: {node: '>=14.0.0'}
+
+  '@rescript/core@1.6.1':
+    resolution: {integrity: sha512-vyb5k90ck+65Fgui+5vCja/mUfzKaK3kOPT4Z6aAJdHLH1eljEi1zKhXroCiCtpNLSWp8k4ulh1bdB5WS0hvqA==}
+    peerDependencies:
+      rescript: '>=11.1.0'
+
+  '@rescript/darwin-arm64@12.0.0':
+    resolution: {integrity: sha512-N2zNj/Uh0zrg8BJGWxdQjYTDf0d2ZV8D+Vmct8xORaUcEZvAkvZb+xA66UxP2QGhWmATcHmBth7oJ48xpWz/Vg==}
+    engines: {node: '>=20.11.0'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@rescript/darwin-x64@12.0.0':
+    resolution: {integrity: sha512-Qx/ao3Fl2lx3rF8mbRsyRK5HGAx8pmzyCdpSIAaUun5wLBnsJbNqgvqUH7VeI2TwaczHvcIljrYmnB7T5LJdFQ==}
+    engines: {node: '>=20.11.0'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@rescript/linux-arm64@12.0.0':
+    resolution: {integrity: sha512-H65csj/0uqqjYy235m0h5CFxbrsas6RoVfjy5Xjf91Vyg/r5R/QIGQvhMtFvl4QojYsa1wXzXGcujwXh+S15xQ==}
+    engines: {node: '>=20.11.0'}
+    cpu: [arm64]
+    os: [linux]
+
+  '@rescript/linux-x64@12.0.0':
+    resolution: {integrity: sha512-WizQwyfMadxF096foZYU3I4zxcnNIc9XP7TP4fqdfe0v6OvQ5yHMI/uIfOsJ1GfNALce2UxvgS0pn67uxc55uA==}
+    engines: {node: '>=20.11.0'}
+    cpu: [x64]
+    os: [linux]
+
+  '@rescript/react@0.14.0':
+    resolution: {integrity: sha512-ncOHWK7ujQmff+QMYKRmtwETvJVolzkwRpDa0MFenEXdUz9ZYywNbq+xH9F9RDQeSwC3/4s9JeUQVyTu4fMpHw==}
+    peerDependencies:
+      react: '>=19.0.0'
+      react-dom: '>=19.0.0'
+
+  '@rescript/runtime@12.0.0':
+    resolution: {integrity: sha512-STRbYHT5rnW61vWn2+Bdtj620XaprnoBSbPbkvOYZ+Zs8nfqtpBjhNw+JNpGQLXf73crk6MhxFGPxL2o5vb8TQ==}
+
+  '@rescript/win32-x64@12.0.0':
+    resolution: {integrity: sha512-kkqj4kQGbni5YglWoPm76M6hUuzKJHDEiLce5EZxW2Q4FrkS9dNRgm02c2Ck1cz/uKCS3m+ZoKQGIMMXTvo5Jw==}
+    engines: {node: '>=20.11.0'}
+    cpu: [x64]
+    os: [win32]
 
   '@rolldown/pluginutils@1.0.0-beta.27':
     resolution: {integrity: sha512-+d0F4MKMCbeVUJwG96uQ4SgAznZNSq93I3V+9NHA4OpvqG8mRCpGdKmK8l/dl02h2CCDHwW2FqilnTyDcAnqjA==}
@@ -4856,6 +4909,11 @@ packages:
   requires-port@1.0.0:
     resolution: {integrity: sha512-KigOCHcocU3XODJxsu8i/j8T9tzT4adHiecwORRQ0ZZFcp7ahwXuRU1m+yuO90C5ZUyGeGfocHDI14M3L3yDAQ==}
 
+  rescript@12.0.0:
+    resolution: {integrity: sha512-DGcZI2L5W0c6FuEnspLE0MIe1UtTt1VsW/vQfzBFCEBxSsQtoA6YRHUB8Puwnb30PHqZiFK1ADhn6UgA8LWK0A==}
+    engines: {node: '>=20.11.0'}
+    hasBin: true
+
   reselect@5.1.1:
     resolution: {integrity: sha512-K/BG6eIky/SBpzfHZv/dd+9JBFiS4SWV7FIujVyJRux6e45+73RaUHXLmIR1f7WOMaQ0U1km6qwklRQxpJJY0w==}
 
@@ -7150,6 +7208,32 @@ snapshots:
       react-redux: 9.2.0(@types/react@19.2.7)(react@18.3.1)(redux@5.0.1)
 
   '@remix-run/router@1.23.1': {}
+
+  '@rescript/core@1.6.1(rescript@12.0.0)':
+    dependencies:
+      rescript: 12.0.0
+
+  '@rescript/darwin-arm64@12.0.0':
+    optional: true
+
+  '@rescript/darwin-x64@12.0.0':
+    optional: true
+
+  '@rescript/linux-arm64@12.0.0':
+    optional: true
+
+  '@rescript/linux-x64@12.0.0':
+    optional: true
+
+  '@rescript/react@0.14.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+
+  '@rescript/runtime@12.0.0': {}
+
+  '@rescript/win32-x64@12.0.0':
+    optional: true
 
   '@rolldown/pluginutils@1.0.0-beta.27': {}
 
@@ -11393,6 +11477,16 @@ snapshots:
   require-main-filename@2.0.0: {}
 
   requires-port@1.0.0: {}
+
+  rescript@12.0.0:
+    dependencies:
+      '@rescript/runtime': 12.0.0
+    optionalDependencies:
+      '@rescript/darwin-arm64': 12.0.0
+      '@rescript/darwin-x64': 12.0.0
+      '@rescript/linux-arm64': 12.0.0
+      '@rescript/linux-x64': 12.0.0
+      '@rescript/win32-x64': 12.0.0
 
   reselect@5.1.1: {}
 

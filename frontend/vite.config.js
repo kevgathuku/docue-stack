@@ -31,7 +31,7 @@ export default defineConfig({
     },
   },
   resolve: {
-    extensions: ['.js', '.jsx', '.elm'],
+    extensions: ['.js', '.jsx', '.elm', '.res.js'],
   },
   esbuild: {
     loader: 'jsx',

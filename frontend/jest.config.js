@@ -8,7 +8,11 @@ export default {
   },
   transform: {
     '^.+\\.(js|jsx)$': ['babel-jest', { configFile: './babel.config.cjs' }],
+    '^.+\\.res\\.js$': ['babel-jest', { configFile: './babel.config.cjs' }],
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(@rescript)/)',
+  ],
   collectCoverageFrom: [
     'src/**/*.{js,jsx}',
     '!src/index.js',

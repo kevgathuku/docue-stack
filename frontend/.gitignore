@@ -62,3 +62,8 @@ repl-temp-*
 
 tmp
 .firebase/
+
+# RESCRIPT
+**/lib/
+**/*.res.mjs
+.bsb.lock
