@@ -33,20 +33,20 @@
   - **Property 3: Error handling preservation**
   - **Validates: Requirements 3.5**
 
-- [ ] 3. Create documents slice from DocStore
+- [x] 3. Create documents slice from DocStore
   - Create documentsSlice.js with document state and reducers
   - Convert DocStore logic to Redux Toolkit slice format
   - Create async thunks for getDocs, getDoc, createDoc, editDoc, deleteDoc
   - Define selectors for documents state access
   - _Requirements: 2.1, 3.1, 8.2, 8.5_
 
-- [ ] 3.1 Write unit tests for documents slice
+- [x] 3.1 Write unit tests for documents slice
   - Test reducer logic for all document operations
   - Test async thunk success and failure scenarios
   - Test selector functions
   - _Requirements: 6.3, 6.4_
 
-- [ ] 3.2 Write property test for documents state equivalence
+- [x] 3.2 Write property test for documents state equivalence
   - **Property 1: State management equivalence (documents)**
   - **Property 5: Document operations preservation**
   - **Validates: Requirements 2.1, 5.2**
