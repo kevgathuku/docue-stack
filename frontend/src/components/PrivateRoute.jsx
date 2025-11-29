@@ -55,7 +55,7 @@ export default function PrivateRoute({ children }) {
   }
 
   // If we have a token but session is not validated yet, wait
-  // NavBar will call getSession() which will update session.loading to true
+  // The useEffect above will call getSession() which will update session.loading to true
   // This handles the initial page load case
   if (token && !session.loading && !session.loggedIn) {
     console.log('[PrivateRoute] Token exists but session not validated, showing loading');

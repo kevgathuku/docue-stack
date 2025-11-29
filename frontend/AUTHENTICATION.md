@@ -14,19 +14,24 @@ This application uses JWT-based authentication with protected routes. The authen
    - **Returns boolean values** (not strings)
 
 2. **PrivateRoute Component** (`src/components/PrivateRoute.jsx`)
-   - Protects authenticated routes
+   - **PRIMARY RESPONSIBILITY**: Route protection and session validation
    - Checks localStorage for token
+   - Triggers `getSession()` to validate token with backend
    - Shows loading state during session validation
+   - Makes all redirect decisions based on session state
+   - **This is the ONLY component that validates sessions**
 
 3. **NavBar Component** (`src/components/NavBar/NavBar.jsx`)
-   - Initiates session check on mount
-   - Handles session invalidation
-   - Clears state when tokens expire
+   - **PRIMARY RESPONSIBILITY**: UI rendering and logout handling
+   - Displays navigation based on Redux state
+   - Handles logout flow (clears localStorage and Redux)
+   - Initializes Materialize UI components
+   - **Does NOT validate sessions** (handled by PrivateRoute)
 
 4. **Login/SignUp Components**
    - Handle authentication form submission
    - Navigate to dashboard on success
-   - Only redirect when session is valid
+   - Only redirect when `session.loggedIn` is true (Session Validation Guard pattern)
 
 ## Authentication Flow
 
@@ -49,21 +54,83 @@ This application uses JWT-based authentication with protected routes. The authen
 2. PrivateRoute checks localStorage for token
 3. If no token → Redirect to /auth immediately
 4. If token exists → Show loading state
-5. NavBar calls getSession() to validate token
-6. If valid → Render protected content
-7. If invalid → Clear state and redirect to /auth
+5. PrivateRoute calls getSession() to validate token with backend
+6. Backend validates JWT and returns {loggedIn: true/false, user: {...}}
+7. Redux updates session state based on response
+8. If valid (session.loggedIn = true) → Render protected content
+9. If invalid (session.loggedIn = false) → Redirect to /auth
 ```
 
 ### Session Invalidation
 ```
-1. User has expired/invalid token
-2. NavBar detects session.loggedIn = false
-3. NavBar dispatches LOGOUT_SUCCESS action
-4. Clears localStorage (token, userInfo)
-5. Clears Redux state (token, user)
-6. PrivateRoute detects invalid session
+1. User has expired/invalid token in localStorage
+2. User navigates to protected route
+3. PrivateRoute triggers getSession(token)
+4. Backend returns {loggedIn: false}
+5. Redux updates: session.loggedIn = false, clears token and user
+6. PrivateRoute detects session.loggedIn = false
 7. PrivateRoute redirects to /auth
 ```
+
+## Architectural Solution: Centralized Session Validation
+
+### The Problem: Race Conditions
+
+**Previous Architecture** (caused infinite loops):
+- NavBar validated sessions on mount
+- PrivateRoute also validated sessions
+- Both components made redirect decisions
+- Race conditions between competing validation logic
+- Unpredictable behavior depending on which component mounted first
+
+### The Solution: Single Responsibility
+
+**Current Architecture** (eliminates race conditions):
+- **PrivateRoute**: ONLY component that validates sessions
+- **NavBar**: ONLY handles UI rendering and logout
+- **Login/SignUp**: ONLY handle authentication forms with Session Validation Guard
+
+### Key Principle
+
+**One component, one responsibility, one source of truth.**
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    PrivateRoute                         │
+│  • Validates sessions with backend                      │
+│  • Makes ALL redirect decisions                         │
+│  • Shows loading states                                 │
+│  • Single source of truth for route protection          │
+└─────────────────────────────────────────────────────────┘
+                           │
+                           ├─ Triggers: getSession(token)
+                           ├─ Reads: session.loggedIn
+                           └─ Controls: <Navigate to="/auth" />
+
+┌─────────────────────────────────────────────────────────┐
+│                       NavBar                            │
+│  • Renders UI based on Redux state                      │
+│  • Handles logout (clears localStorage + Redux)         │
+│  • Initializes Materialize components                   │
+│  • NO session validation                                │
+│  • NO redirect decisions                                │
+└─────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────┐
+│                   Login/SignUp                          │
+│  • Handles authentication forms                         │
+│  • Redirects ONLY when session.loggedIn = true          │
+│  • Uses Session Validation Guard pattern                │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Benefits
+
+✅ **No Race Conditions**: Only one component validates sessions
+✅ **Predictable Behavior**: Clear, linear flow
+✅ **No Infinite Loops**: Single source of redirect decisions
+✅ **Easy to Debug**: One place to look for session logic
+✅ **Maintainable**: Clear separation of concerns
 
 ## Bug Fixes Applied
 
@@ -80,26 +147,31 @@ res.json({ loggedIn: false })  // Not 'false'
 res.json({ loggedIn: user.loggedIn })  // Not user.loggedIn.toString()
 ```
 
-### Bug 2: Stale Redux State (FIXED)
+### Bug 2: Race Conditions Between Components (FIXED)
 
-**Problem**: When session became invalid, NavBar cleared localStorage but not Redux state. Login/SignUp components saw stale user data and redirected to dashboard, creating an infinite loop.
+**Problem**: Both NavBar and PrivateRoute were trying to validate sessions and make redirect decisions, causing race conditions and competing navigation logic.
 
-**Impact**: Infinite redirect loop between `/auth` and `/dashboard`.
+**Impact**: Infinite redirect loops, flickering between pages, unpredictable behavior.
 
-**Fix**: NavBar now dispatches LOGOUT_SUCCESS to clear Redux state:
+**Fix**: Centralized all session validation in PrivateRoute:
 ```javascript
+// frontend/src/components/PrivateRoute.jsx
+// ONLY PrivateRoute validates sessions
+useEffect(() => {
+  if (token && !session.loading && !session.loggedIn) {
+    dispatch(getSession(token));
+  }
+}, [token, session.loading, session.loggedIn, dispatch]);
+
 // frontend/src/components/NavBar/NavBar.jsx
-if (hadToken && session.loggedIn === false) {
-  localStorage.removeItem('user');
-  localStorage.removeItem('userInfo');
-  
-  // Clear Redux state
-  this.props.dispatch({
-    type: 'LOGOUT_SUCCESS',
-    payload: { logoutResult: { message: 'Session expired' } }
-  });
+// NavBar ONLY handles logout, no session validation
+componentDidMount() {
+  // Note: Session validation is now handled by PrivateRoute
+  // PrivateRoute triggers getSession() when it mounts with a token
 }
 ```
+
+**Key Principle**: Single Responsibility - only ONE component validates sessions.
 
 ### Bug 3: Stale Redux State Redirects (FIXED)
 
@@ -211,26 +283,84 @@ if (user && prevProps.user !== this.props.user && session.loggedIn) {
 
 ## Component Responsibilities
 
-### PrivateRoute (Route Protection)
-- **Fast path**: Check localStorage first for immediate feedback
+### PrivateRoute (Route Protection & Session Validation)
+- **Token check**: Check localStorage for token first
+- **Session validation**: Call `getSession(token)` to validate with backend
 - **Loading state**: Show indicator during session validation
-- **Redirect**: Send to /auth if not authenticated or token invalid
+- **Redirect decisions**: Send to /auth if not authenticated or token invalid
 - **Render**: Show protected content if authenticated
-- **Responsibility**: All route protection and navigation logic
+- **Responsibility**: **ALL route protection, session validation, and navigation logic**
+- **Key Point**: This is the ONLY component that validates sessions
 
-### NavBar (Session Management)
-- **Session check**: Call getSession() on mount to validate token
-- **State cleanup**: Clear localStorage and Redux when session invalid
-- **Logout handling**: Process explicit user logout
-- **UI rendering**: Show user menu and navigation
-- **Responsibility**: Session validation and state management (NO redirects)
+**Implementation**:
+```javascript
+// Triggers session validation on mount
+useEffect(() => {
+  if (token && !session.loading && !session.loggedIn) {
+    dispatch(getSession(token));
+  }
+}, [token, session.loading, session.loggedIn, dispatch]);
+
+// Renders based on validation state
+if (!token) return <Navigate to="/auth" />;
+if (session.loading) return <LoadingIndicator />;
+if (session.loggedIn) return children;
+return <Navigate to="/auth" />;
+```
+
+### NavBar (UI Rendering & Logout)
+- **UI rendering**: Show user menu and navigation based on Redux state
+- **Logout handling**: Process explicit user logout (clear localStorage and Redux)
+- **Materialize init**: Initialize Materialize UI components
+- **Responsibility**: **ONLY UI rendering and logout handling**
+- **Key Point**: Does NOT validate sessions, does NOT make redirect decisions
+
+**Implementation**:
+```javascript
+componentDidMount() {
+  // Initialize Materialize components
+  window.$('.dropdown-button').dropdown();
+  window.$('.button-collapse').sideNav();
+  
+  // Note: Session validation is now handled by PrivateRoute
+}
+
+componentDidUpdate(prevProps) {
+  const { logoutResult } = this.props;
+  
+  // Handle logout - clear localStorage and redirect to home
+  if (logoutResult && prevProps.logoutResult !== logoutResult) {
+    localStorage.removeItem('user');
+    localStorage.removeItem('userInfo');
+    this.props.navigate('/');
+  }
+  
+  // Note: Session invalidation is now handled by PrivateRoute
+}
+```
 
 ### Login/SignUp (Authentication Forms)
 - **Form handling**: Submit credentials to backend
 - **Success navigation**: Redirect to dashboard after successful auth
-- **Session validation**: Only redirect if session.loggedIn is true
+- **Session validation guard**: Only redirect if `session.loggedIn` is true
 - **Toast messages**: Show success/error feedback
 - **Responsibility**: Handle authentication flow and success navigation
+
+**Implementation (ReScript)**:
+```rescript
+// Only redirect when session is validated
+let loggedIn = session["loggedIn"]
+
+switch (token, loggedIn) {
+| ("", _) => () // No token, do nothing
+| (_, false) => () // Token exists but session not validated, wait
+| (token, true) => {
+    // Token exists AND session is validated - safe to redirect
+    LocalStorage.setItem("user", token)
+    navigate("/dashboard")
+  }
+}
+```
 
 ## Testing
 
@@ -298,9 +428,9 @@ if (process.env.NODE_ENV === 'development') {
 
 **Causes**:
 1. Backend returning string instead of boolean (`"false"` is truthy)
-2. Stale Redux state not cleared on logout
+2. Multiple components competing for session validation and navigation
 3. Login/SignUp redirecting without checking `session.loggedIn`
-4. Multiple components competing for navigation control
+4. Race conditions between NavBar and PrivateRoute
 
 **How to Debug**:
 ```javascript
@@ -312,9 +442,10 @@ console.log('Will redirect?', user && prevProps.user !== user && session.loggedI
 
 **Solution**: All fixed in current implementation
 - Backend returns proper booleans
-- NavBar dispatches LOGOUT_SUCCESS to clear Redux
-- Login/SignUp check `session.loggedIn` before redirecting
-- PrivateRoute handles all route protection
+- **PrivateRoute is the ONLY component that validates sessions**
+- NavBar only handles UI rendering and logout
+- Login/SignUp check `session.loggedIn` before redirecting (Session Validation Guard)
+- Single responsibility principle eliminates race conditions
 
 ### Issue: Login Redirects Even When Not Logged In
 **Symptoms**: Visiting /auth immediately redirects to /dashboard, then back to /auth
@@ -472,15 +603,15 @@ The user object is just data—it can be stale. Always validate against `session
 ## Related Files
 
 ### Frontend
-- `src/components/PrivateRoute.jsx` - Route protection
-- `src/components/NavBar/NavBar.jsx` - Session management
-- `src/components/Login/Login.jsx` - Login form
+- `src/components/PrivateRoute.jsx` - **Route protection and session validation** (PRIMARY)
+- `src/components/NavBar/NavBar.jsx` - UI rendering and logout handling
+- `src/components/Login/Login.res` - Login form (ReScript)
 - `src/components/SignUp/SignUp.jsx` - Signup form
-- `src/stores/reducer.js` - Session state
-- `src/actions/actionCreators.js` - Auth actions
+- `src/features/auth/authSlice.js` - Redux Toolkit auth slice (session state management)
+- `src/store/hooks.js` - Redux hooks (useAppDispatch, useAppSelector)
 
 ### Backend
-- `server/controllers/users.js` - Auth endpoints
+- `server/controllers/users.js` - Auth endpoints (login, logout, session)
 - `server/models/users.js` - User model
 - `index.js` - JWT configuration
 
@@ -531,15 +662,222 @@ The user object is just data—it can be stale. Always validate against `session
 }
 ```
 
+## Implementation Details
+
+### PrivateRoute.jsx - Complete Implementation
+
+```javascript
+import { Navigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+import { selectSession, getSession } from '../features/auth/authSlice';
+import { useAppSelector, useAppDispatch } from '../store/hooks';
+
+export default function PrivateRoute({ children }) {
+  const dispatch = useAppDispatch();
+  const session = useAppSelector(selectSession);
+  const location = useLocation();
+  const token = localStorage.getItem('user');
+
+  // Trigger session validation when component mounts with a token
+  useEffect(() => {
+    if (token && !session.loading && !session.loggedIn) {
+      console.log('[PrivateRoute] Triggering session validation');
+      dispatch(getSession(token));
+    }
+  }, [token, session.loading, session.loggedIn, dispatch]);
+
+  // 1. No token → redirect immediately
+  if (!token) {
+    return <Navigate to="/auth" state={{ from: location }} replace />;
+  }
+
+  // 2. Session check in progress → show loading
+  if (session.loading) {
+    return (
+      <div className="container">
+        <div className="progress">
+          <div className="indeterminate"></div>
+        </div>
+        <p className="center-align">Checking authentication...</p>
+      </div>
+    );
+  }
+
+  // 3. Session validated and logged in → allow access
+  if (session.loggedIn) {
+    return children;
+  }
+
+  // 4. Token exists but not validated yet → show loading
+  if (token && !session.loading && !session.loggedIn) {
+    return (
+      <div className="container">
+        <div className="progress">
+          <div className="indeterminate"></div>
+        </div>
+        <p className="center-align">Validating session...</p>
+      </div>
+    );
+  }
+
+  // 5. Fallback → redirect to auth
+  return <Navigate to="/auth" state={{ from: location }} replace />;
+}
+```
+
+**Key Features**:
+- ✅ Triggers `getSession(token)` via useEffect
+- ✅ Handles all 5 possible states
+- ✅ Shows descriptive loading messages
+- ✅ Preserves location for post-login redirect
+- ✅ Only component that validates sessions
+
+### NavBar.jsx - Simplified Implementation
+
+```javascript
+componentDidMount() {
+  // Initialize Materialize components
+  window.$('.dropdown-button').dropdown();
+  window.$('.button-collapse').sideNav();
+  
+  // Note: Session validation is now handled by PrivateRoute
+  // PrivateRoute triggers getSession() when it mounts with a token
+}
+
+componentDidUpdate(prevProps) {
+  window.$('.dropdown-button').dropdown();
+  
+  const { logoutResult } = this.props;
+
+  // Handle logout - clear localStorage and redirect to home
+  if (logoutResult && prevProps.logoutResult !== logoutResult) {
+    localStorage.removeItem('user');
+    localStorage.removeItem('userInfo');
+    this.props.navigate('/');
+  }
+
+  // Note: Session invalidation is now handled by PrivateRoute
+  // PrivateRoute waits for /api/users/session response before redirecting
+  // This prevents race conditions and infinite redirect loops
+}
+```
+
+**Key Features**:
+- ✅ Only handles logout flow
+- ✅ No session validation logic
+- ✅ No redirect decisions (except after explicit logout)
+- ✅ Clear comments explaining the architecture
+
+### authSlice.js - Session State Management
+
+```javascript
+// Initial state always starts with session.loggedIn = false
+const loadInitialState = () => {
+  try {
+    const token = localStorage.getItem('user');
+    const userInfo = localStorage.getItem('userInfo');
+    
+    if (token && userInfo) {
+      return {
+        token,
+        user: JSON.parse(userInfo),
+        session: {
+          loggedIn: false, // Will be validated by getSession
+          loading: false,
+        },
+      };
+    }
+  } catch (error) {
+    console.error('Error loading initial auth state:', error);
+  }
+  
+  return {
+    token: '',
+    user: {},
+    session: { loggedIn: false, loading: false },
+  };
+};
+
+// Session validation reducer
+.addCase(getSession.pending, (state) => {
+  state.session = { loggedIn: false, loading: true };
+})
+.addCase(getSession.fulfilled, (state, action) => {
+  const { loggedIn, user } = action.payload;
+  
+  if (loggedIn) {
+    state.session = { loggedIn: true, loading: false };
+    state.user = user;
+  } else {
+    state.token = '';
+    state.user = {};
+    state.session = { loggedIn: false, loading: false };
+  }
+  state.sessionError = '';
+})
+.addCase(getSession.rejected, (state, action) => {
+  state.sessionError = action.payload;
+  state.session = { loggedIn: false, loading: false };
+})
+```
+
+**Key Features**:
+- ✅ Always starts with `session.loggedIn = false`
+- ✅ Requires backend validation before setting to true
+- ✅ Clears token and user on invalid session
+- ✅ Proper loading states
+
+### Login.res - Session Validation Guard
+
+```rescript
+// Effect to handle login success/error
+React.useEffect5(() => {
+  if state.loginAttempted {
+    // Handle login error
+    switch loginError {
+    | "" => ()
+    | error => {
+        showError(error)
+        dispatch(ResetAttempt)
+      }
+    }
+
+    // Handle login success - MUST check session.loggedIn
+    let loggedIn = session["loggedIn"]
+    
+    switch (token, loggedIn) {
+    | ("", _) => () // No token, do nothing
+    | (_, false) => () // Token exists but session not validated, wait
+    | (token, true) => {
+        // Token exists AND session is validated - safe to redirect
+        LocalStorage.setItem("user", token)
+        LocalStorage.setItem("userInfo", %raw(`JSON.stringify(user)`))
+        showSuccess("Logged in Successfully!")
+        navigate("/dashboard")
+        dispatch(ResetAttempt)
+      }
+    }
+  }
+  None
+}, (loginError, token, session, user, state.loginAttempted))
+```
+
+**Key Features**:
+- ✅ Only redirects when `session.loggedIn = true`
+- ✅ Waits for backend validation
+- ✅ Prevents redirects with stale data
+- ✅ Session Validation Guard pattern
+
 ## Summary
 
 The authentication system is now robust and free of redirect loops. Key improvements:
 
-✅ Backend returns proper boolean values
-✅ Redux state cleared on session invalidation  
-✅ Components have clear, separated responsibilities
-✅ Fast localStorage checks prevent unnecessary loading
-✅ Session validation happens in background
-✅ No competing redirects between components
+✅ **Centralized Session Validation**: Only PrivateRoute validates sessions
+✅ **No Race Conditions**: Single component responsible for validation
+✅ **Clear Separation of Concerns**: Each component has one responsibility
+✅ **Backend Returns Proper Booleans**: No truthy string issues
+✅ **Session Validation Guard**: Login/SignUp check `session.loggedIn` before redirecting
+✅ **Proper Loading States**: Clear feedback during validation
+✅ **Single Source of Truth**: `session.loggedIn` is authoritative
 
 The system provides a smooth user experience with proper loading states, clear error messages, and reliable authentication checks.
