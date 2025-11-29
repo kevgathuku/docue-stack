@@ -1,17 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
 
 import { handleFieldChange } from '../../utils/componentHelpers';
-import { initiateSignup } from '../../actions/actionCreators';
+import { signup, selectSignupError, selectToken, selectUser, selectSession } from '../../features/auth/authSlice';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { withNavigate } from '../../utils/withNavigate';
 
 class SignupForm extends React.Component {
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
-    history: PropTypes.object,
-    signupError: PropTypes.object,
+    navigate: PropTypes.func,
+    signupError: PropTypes.any,
     token: PropTypes.string,
     user: PropTypes.object,
+    session: PropTypes.object,
   };
 
   constructor(props) {
@@ -25,29 +27,38 @@ class SignupForm extends React.Component {
       password: null,
       passwordConfirm: null,
       result: null,
+      signupAttempted: false,
     };
   }
 
   componentDidUpdate(prevProps) {
-    let { signupError, user, token } = this.props;
+    let { signupError, user, token, session } = this.props;
     if (signupError && prevProps.signupError !== this.props.signupError) {
-      window.Materialize.toast(signupError.error, 2000, 'error-toast');
+      const errorMessage = typeof signupError === 'object' && signupError.error 
+        ? signupError.error 
+        : signupError;
+      window.Materialize.toast(errorMessage, 2000, 'error-toast');
       return;
     }
 
-    if (token && prevProps.token !== this.props.token) {
+    // The signup was successful - token changed indicates a fresh signup
+    // Only handle if this component initiated the signup
+    if (this.state.signupAttempted && token && prevProps.token !== token) {
       localStorage.setItem('user', token);
-    }
-
-    if (user && prevProps.user !== this.props.user) {
-      // The signup was successful. Save user's info in localStorage
-      localStorage.setItem('userInfo', JSON.stringify(user));
-      window.Materialize.toast(
-        'Your Account has been created successfully!',
-        2000,
-        'success-toast'
-      );
-      this.props.history.push('/dashboard');
+      
+      // Only redirect and show toast if session is valid and we have user data
+      if (user && session.loggedIn) {
+        localStorage.setItem('userInfo', JSON.stringify(user));
+        window.Materialize.toast(
+          'Your Account has been created successfully!',
+          2000,
+          'success-toast'
+        );
+        this.props.navigate('/dashboard');
+      }
+      
+      // Reset the flag
+      this.setState({ signupAttempted: false });
     }
   }
 
@@ -77,7 +88,9 @@ class SignupForm extends React.Component {
         email: this.state.email,
         password: this.state.password,
       };
-      this.props.dispatch(initiateSignup(userPayload));
+      // Set flag before dispatching signup
+      this.setState({ signupAttempted: true });
+      this.props.dispatch(signup(userPayload));
     }
   };
 
@@ -166,12 +179,24 @@ class SignupForm extends React.Component {
   }
 }
 
-const mapStateToProps = (state) => {
-  return {
-    signupError: state.signupError,
-    token: state.token,
-    user: state.user,
-  };
-};
+// Wrapper component to use hooks with class component
+function SignupFormWithRedux(props) {
+  const dispatch = useAppDispatch();
+  const signupError = useAppSelector(selectSignupError);
+  const token = useAppSelector(selectToken);
+  const user = useAppSelector(selectUser);
+  const session = useAppSelector(selectSession);
 
-export default connect(mapStateToProps)(SignupForm);
+  return (
+    <SignupForm
+      {...props}
+      dispatch={dispatch}
+      signupError={signupError}
+      token={token}
+      user={user}
+      session={session}
+    />
+  );
+}
+
+export default withNavigate(SignupFormWithRedux);

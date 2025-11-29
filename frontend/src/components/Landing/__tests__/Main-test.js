@@ -1,34 +1,81 @@
 'use strict';
 
-import React from 'react';
-import { shallow } from 'enzyme';
-import expect from 'expect';
-import expectJSX from 'expect-jsx';
-import Main from '../Main.jsx';
-import NavBar from '../../NavBar/NavBar.jsx';
-expect.extend(expectJSX);
+import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import authReducer from '../../../features/auth/authSlice';
+import { DefaultLayout } from '../Main.jsx';
 
-describe('Main component', function() {
-  it('renders the children components', function() {
-    // It renders the provided child components
-    const component = shallow(
-      <Main
-        children={<div>'Child Component'</div>}
-        location={{ pathname: '/' }}
-      />
-    );
-    expect(component.contains(<div>'Child Component'</div>)).toEqual(true);
+describe('DefaultLayout component', function() {
+  let mockStore;
+
+  beforeEach(function() {
+    // Create a mock store with auth slice
+    mockStore = configureStore({
+      reducer: {
+        auth: authReducer,
+      },
+    });
+
+    // Mock jQuery functions for NavBar
+    window.$ = jest.fn((selector) => ({
+      dropdown: jest.fn(),
+      sideNav: jest.fn(),
+    }));
+
+    // Mock localStorage
+    Storage.prototype.getItem = jest.fn();
+    Storage.prototype.setItem = jest.fn();
+    Storage.prototype.removeItem = jest.fn();
   });
 
-  it('renders the NavBar component', function() {
-    // It renders the NavBar component and the provided child components
-    const component = shallow(
-      <Main
-        children={<div>'Child Component'</div>}
-        location={{ pathname: '/' }}
-      />
+  const TestComponent = () => <div data-testid="test-component">Test Content</div>;
+
+  const renderWithProviders = (initialRoute = '/dashboard') => {
+    return render(
+      <Provider store={mockStore}>
+        <MemoryRouter initialEntries={[initialRoute]}>
+          <DefaultLayout component={TestComponent} />
+        </MemoryRouter>
+      </Provider>
     );
-    expect(component.contains(<NavBar pathname={'/'} />)).toEqual(true);
-    expect(component.contains(<div>'Child Component'</div>)).toEqual(true);
+  };
+
+  it('renders the component passed as prop', function() {
+    renderWithProviders('/dashboard');
+    
+    // Should render the test component
+    expect(screen.getByTestId('test-component')).toBeInTheDocument();
+    expect(screen.getByText('Test Content')).toBeInTheDocument();
+  });
+
+  it('renders the NavBar component on non-home pages', function() {
+    const { container } = renderWithProviders('/dashboard');
+    
+    // NavBar should be rendered on non-home pages
+    const nav = container.querySelector('nav');
+    expect(nav).toBeInTheDocument();
+    
+    // Component should also be rendered
+    expect(screen.getByTestId('test-component')).toBeInTheDocument();
+  });
+
+  it('does not render NavBar on home page', function() {
+    const { container } = renderWithProviders('/');
+    
+    // NavBar should NOT be rendered on home page
+    const nav = container.querySelector('nav');
+    expect(nav).not.toBeInTheDocument();
+    
+    // But component should still be rendered
+    expect(screen.getByTestId('test-component')).toBeInTheDocument();
+  });
+
+  it('wraps content with Provider', function() {
+    renderWithProviders('/dashboard');
+    
+    // Component should render successfully (Provider is working)
+    expect(screen.getByTestId('test-component')).toBeInTheDocument();
   });
 });

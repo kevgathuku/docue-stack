@@ -65,3 +65,23 @@ fileMatchPattern: "backend/**/*"
 - Hash passwords with 10 salt rounds: `bcrypt.hash(password, 10, callback)`
 - Compare passwords: `bcrypt.compareSync(password, hash)`
 - Always hash in pre-save hooks, only when password is modified
+
+## API Response Standards
+
+### Session Endpoint
+
+The `/api/users/session` endpoint MUST return proper boolean values:
+
+```javascript
+// ✅ CORRECT - Return boolean
+res.json({ loggedIn: false })
+res.json({ loggedIn: true, user: userObject })
+
+// ❌ WRONG - Never return strings
+res.json({ loggedIn: 'false' })  // String "false" is truthy in JavaScript!
+res.json({ loggedIn: user.loggedIn.toString() })
+```
+
+**Why This Matters**: The frontend relies on boolean values for authentication logic. Returning strings causes infinite redirect loops because `"false"` is truthy in JavaScript.
+
+**Test Coverage**: All session endpoint tests verify `typeof loggedIn === 'boolean'`

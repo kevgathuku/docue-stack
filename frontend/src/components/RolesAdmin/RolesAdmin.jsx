@@ -1,13 +1,16 @@
 import React from 'react';
 import Elm from '../../utils/ReactElm';
+import * as ElmRolesAdmin from '../RolesAdmin.elm';
 
-import BaseActions from '../../actions/BaseActions';
-import ElmComponents from '../RolesAdmin.elm';
+const BASE_URL =
+  process.env.NODE_ENV === 'development'
+    ? 'http://localhost:8000'
+    : 'https://docue.herokuapp.com';
 
 export default class extends React.Component {
   flags = {
     token: localStorage.getItem('user'),
-    baseURL: BaseActions.BASE_URL,
+    baseURL: BASE_URL,
   };
 
   setupPorts(ports) {
@@ -19,7 +22,7 @@ export default class extends React.Component {
   render() {
     return (
       <Elm
-        src={ElmComponents.Elm.RolesAdmin}
+        src={ElmRolesAdmin}
         flags={this.flags}
         ports={this.setupPorts}
       />

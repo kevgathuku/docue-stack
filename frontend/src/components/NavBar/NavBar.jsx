@@ -1,20 +1,29 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 
-import { getSession, initiateLogout } from '../../actions/actionCreators';
+import { 
+  getSession, 
+  logout, 
+  selectToken, 
+  selectUser, 
+  selectLogoutResult, 
+  selectSession 
+} from '../../features/auth/authSlice';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import logoSrc from '../../images/favicon.png';
+import { withNavigate } from '../../utils/withNavigate';
 
 class NavBar extends React.Component {
   // Receive the current pathname as a prop
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
-    history: PropTypes.object,
+    navigate: PropTypes.func,
     loggedIn: PropTypes.bool,
     logoutResult: PropTypes.string,
-    pathname: PropTypes.string,
     session: PropTypes.shape({
       loggedIn: PropTypes.bool,
+      loading: PropTypes.bool,
     }),
     token: PropTypes.string,
     user: PropTypes.object,
@@ -22,8 +31,14 @@ class NavBar extends React.Component {
 
   componentDidMount() {
     const token = localStorage.getItem('user');
-    // Send a request to check if the user is logged in
-    this.props.dispatch(getSession(token));
+    const { session } = this.props;
+    
+    // Only check session if we have a token but don't know the session state yet
+    // If session.loggedIn is already true, we don't need to check again
+    // If there's no token, no need to check
+    if (token && !session.loggedIn && !session.loading) {
+      this.props.dispatch(getSession(token));
+    }
 
     window.$('.dropdown-button').dropdown();
     window.$('.button-collapse').sideNav();
@@ -40,27 +55,27 @@ class NavBar extends React.Component {
       localStorage.removeItem('user');
       localStorage.removeItem('userInfo');
 
-      this.props.history.push('/');
+      this.props.navigate('/');
     }
 
-    if (session && prevProps.session !== session) {
-      // session contains 'true' + the user object or 'false'
-      if (session.loggedIn === false) {
-        // If there is a user token in localStorage, remove it
-        // because it is invalid now
+    // Use deep comparison to check if session actually changed
+    const sessionChanged =
+      prevProps.session.loggedIn !== session.loggedIn ||
+      prevProps.session.loading !== session.loading;
+
+    // Handle session invalidation - clear state only
+    // PrivateRoute will handle redirects
+    if (sessionChanged && !session.loading && session.loggedIn === false) {
+      const hadToken = !!localStorage.getItem('user');
+      
+      if (hadToken) {
+        // Token was invalid, clear it
         localStorage.removeItem('user');
         localStorage.removeItem('userInfo');
-
-        // If the user is not logged in and is not on the homepage
-        // redirect them to the login page
-        if (this.props.pathname !== '/') {
-          this.props.history.push('/auth');
-        }
-      } else if (session.loggedIn) {
-        // Redirect to the dashboard if logged in and on the auth page or homepage
-        if (this.props.pathname === '/auth' || this.props.pathname === '/') {
-          this.props.history.push('/dashboard');
-        }
+        
+        // Note: PrivateRoute will handle redirect to /auth
+        // NavBar only clears localStorage, doesn't dispatch actions or navigate
+        // The Redux state will be cleared naturally when user logs in again
       }
     }
   }
@@ -68,17 +83,17 @@ class NavBar extends React.Component {
   handleLogoutSubmit = (event) => {
     event.preventDefault();
     const token = localStorage.getItem('user');
-    this.props.dispatch(initiateLogout(token));
+    this.props.dispatch(logout(token));
   };
 
   render() {
     return this.props.pathname === '/' ? null : (
       <nav className="transparent black-text" role="navigation">
         <div className="nav-wrapper container">
-          <a className="brand-logo brand-logo-small" href="/">
+          <Link className="brand-logo brand-logo-small" to="/">
             <img alt="Docue Logo" id="header-logo" src={logoSrc} />
             {'      Docue'}
-          </a>
+          </Link>
           <a href="#" data-activates="mobile-demo" className="button-collapse">
             <i className="material-icons" style={{ color: 'grey' }}>
               menu
@@ -86,22 +101,22 @@ class NavBar extends React.Component {
           </a>
           <ul className="side-nav" id="mobile-demo">
             <li>
-              <a href="/">Home</a>
+              <Link to="/">Home</Link>
             </li>
             <li>
               {this.props.loggedIn ? (
-                <a href="/profile">Profile</a>
+                <Link to="/profile">Profile</Link>
               ) : (
-                <a href="/auth">Login</a>
+                <Link to="/auth">Login</Link>
               )}
             </li>
             <li>
               {this.props.loggedIn ? (
-                <a href="/#" onClick={this.handleLogoutSubmit}>
+                <a href="#" onClick={this.handleLogoutSubmit}>
                   Logout
                 </a>
               ) : (
-                <a href="/auth">Sign Up</a>
+                <Link to="/auth">Sign Up</Link>
               )}
             </li>
           </ul>
@@ -111,21 +126,22 @@ class NavBar extends React.Component {
                 <div>
                   <ul id="dropdown" className="dropdown-content">
                     <li>
-                      <a href="/profile">My Profile</a>
+                      <Link to="/profile">My Profile</Link>
                     </li>
                     <li>
-                      <a href="/dashboard">All Documents</a>
+                      <Link to="/dashboard">All Documents</Link>
                     </li>
-                    {this.props.user.role &&
+                    {this.props.user &&
+                    this.props.user.role &&
                     this.props.user.role.title === 'admin' ? (
                       <li>
-                        <a href="/admin">Settings</a>
+                        <Link to="/admin">Settings</Link>
                       </li>
                     ) : null}
                     <li className="divider" />
                     <li>
                       <a
-                        href="/#"
+                        href="#"
                         id="logout-btn"
                         onClick={this.handleLogoutSubmit}
                       >
@@ -153,14 +169,26 @@ class NavBar extends React.Component {
   }
 }
 
-const mapStateToProps = (state) => {
-  return {
-    token: state.token,
-    user: state.user,
-    loggedIn: state.user._id && state.session.loggedIn,
-    logoutResult: state.logoutResult,
-    session: state.session,
-  };
-};
+// Wrapper component to use hooks with class component
+function NavBarWithRedux(props) {
+  const dispatch = useAppDispatch();
+  const token = useAppSelector(selectToken);
+  const user = useAppSelector(selectUser);
+  const logoutResult = useAppSelector(selectLogoutResult);
+  const session = useAppSelector(selectSession);
+  const loggedIn = user._id && session.loggedIn;
 
-export default connect(mapStateToProps)(NavBar);
+  return (
+    <NavBar
+      {...props}
+      dispatch={dispatch}
+      token={token}
+      user={user}
+      loggedIn={loggedIn}
+      logoutResult={logoutResult}
+      session={session}
+    />
+  );
+}
+
+export default withNavigate(NavBarWithRedux);

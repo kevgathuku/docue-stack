@@ -370,7 +370,8 @@ describe('User Spec', () => {
         .get('/api/users/session');
       
       expect(res.statusCode).toBe(200);
-      expect(res.body.loggedIn).toBe('false');
+      expect(res.body.loggedIn).toBe(false);
+      expect(typeof res.body.loggedIn).toBe('boolean');
     });
 
     it('should return true if the user is logged in', async () => {
@@ -379,7 +380,10 @@ describe('User Spec', () => {
         .set('x-access-token', token);
       
       expect(res.statusCode).toBe(200);
-      expect(res.body.loggedIn).toBe('true');
+      expect(res.body.loggedIn).toBe(true);
+      expect(typeof res.body.loggedIn).toBe('boolean');
+      expect(res.body.user).toBeDefined();
+      expect(res.body.user._id).toBeDefined();
     });
 
     it('should return false if the token is invalid', async () => {
@@ -388,7 +392,8 @@ describe('User Spec', () => {
         .set('x-access-token', 'i-will-hack-you');
       
       expect(res.statusCode).toBe(200);
-      expect(res.body.loggedIn).toBe('false');
+      expect(res.body.loggedIn).toBe(false);
+      expect(typeof res.body.loggedIn).toBe('boolean');
     });
 
     it('should return false if the user is logged out', async () => {
@@ -404,7 +409,8 @@ describe('User Spec', () => {
         .set('x-access-token', token);
       
       expect(sessionRes.statusCode).toBe(200);
-      expect(sessionRes.body.loggedIn).toBe('false');
+      expect(sessionRes.body.loggedIn).toBe(false);
+      expect(typeof sessionRes.body.loggedIn).toBe('boolean');
     });
 
   });

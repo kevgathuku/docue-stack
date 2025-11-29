@@ -4,7 +4,7 @@ var env = process.env.NODE_ENV || 'development';
 
 // load .env only in dev mode
 if (env === 'development') {
-  require('dotenv').load();
+  require('dotenv').config();
 }
 
 const Roles = require('../server/models/roles');

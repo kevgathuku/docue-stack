@@ -1,15 +1,19 @@
 import React from 'react';
-import BaseActions from '../../actions/BaseActions';
 import Elm from '../../utils/ReactElm';
-import ElmComponents from '../Admin.elm';
+import * as ElmAdmin from '../Admin.elm';
+
+const BASE_URL =
+  process.env.NODE_ENV === 'development'
+    ? 'http://localhost:8000'
+    : 'https://docue.herokuapp.com';
 
 export default class Main extends React.Component {
   flags = {
     token: localStorage.getItem('user'),
-    baseURL: BaseActions.BASE_URL
+    baseURL: BASE_URL
   };
 
   render() {
-    return <Elm src={ElmComponents.Elm.Admin} flags={this.flags} />;
+    return <Elm src={ElmAdmin} flags={this.flags} />;
   }
 }
