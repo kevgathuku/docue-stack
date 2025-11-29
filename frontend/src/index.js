@@ -12,7 +12,7 @@ import CreateRole from './components/CreateRole/CreateRole.res.js';
 import DocumentPage from './components/DocumentPage/index.jsx';
 import Dashboard from './components/Dashboard/index.jsx';
 import Landing from './components/Landing/Landing.res.js';
-import Profile from './components/Profile/Profile.jsx';
+import Profile from './components/Profile/Profile.res.js';
 import { DefaultLayout } from './components/Landing/Main.jsx';
 import NotFound from './components/NotFound/NotFound.res.js';
 import RolesAdmin from './components/RolesAdmin/RolesAdmin.res.js';

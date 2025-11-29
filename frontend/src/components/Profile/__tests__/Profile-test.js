@@ -1,56 +1,46 @@
 'use strict';
 
 import { jest } from '@jest/globals';
-
-// Mock Elm module using unstable_mockModule for ESM
-await jest.unstable_mockModule('../../Profile.elm', () => ({
-  Elm: {
-    Profile: {
-      init: jest.fn(() => ({
-        ports: {
-          materializeToast: {
-            subscribe: jest.fn(),
-          },
-          updateCachedUserInfo: {
-            subscribe: jest.fn(),
-          },
-        },
-      })),
-    },
-  },
-}));
-
-// Import after mocking
-const { render } = await import('@testing-library/react');
+import { render, screen } from '@testing-library/react';
+import Profile from '../Profile.res.js';
 
 describe('Profile', function() {
-  let Profile;
   const mockUser = {
-    _id: 1,
+    _id: '123',
+    username: 'khaled',
     name: {
       first: 'Khaled',
       last: 'Another One',
     },
     role: {
+      _id: '456',
       title: 'viewer',
+      accessLevel: 1,
     },
     email: 'khaled@anotherone.com',
   };
 
-  beforeAll(async function() {
-    // Mock localStorage BEFORE importing Profile component
-    Storage.prototype.getItem = jest.fn((key) => {
-      if (key === 'userInfo') return JSON.stringify(mockUser);
-      if (key === 'user') return 'faketoken';
-      return null;
-    });
-
-    // Now import the Profile component after mocks are set up
-    Profile = (await import('../Profile.jsx')).default;
-  });
+  let localStorageMock;
 
   beforeEach(function() {
-    jest.clearAllMocks();
+    // Create a proper mock for localStorage
+    localStorageMock = {
+      getItem: jest.fn((key) => {
+        if (key === 'userInfo') return JSON.stringify(mockUser);
+        if (key === 'user') return 'faketoken';
+        return null;
+      }),
+      setItem: jest.fn(),
+      removeItem: jest.fn(),
+      clear: jest.fn(),
+    };
+
+    // Replace global localStorage
+    Object.defineProperty(global, 'localStorage', {
+      value: localStorageMock,
+      writable: true,
+      configurable: true,
+    });
   });
 
   describe('Component Rendering', function() {
@@ -61,17 +51,31 @@ describe('Profile', function() {
 
     it('uses localStorage to get user info', function() {
       render(<Profile />);
-      // localStorage.getItem was called during module load
-      // Just verify the component renders successfully with the mocked data
-      expect(Storage.prototype.getItem).toHaveBeenCalled();
+      expect(localStorageMock.getItem).toHaveBeenCalled();
     });
 
-    it('initializes Elm component with user data', async function() {
-      const ElmProfile = await import('../../Profile.elm');
+    it('displays user profile information', function() {
       render(<Profile />);
       
-      // Verify Elm was initialized
-      expect(ElmProfile.Elm.Profile.init).toHaveBeenCalled();
+      // Check that the profile view is rendered
+      expect(screen.getByText('My Profile')).toBeInTheDocument();
+      
+      // Check that user name is displayed
+      expect(screen.getByText('Khaled Another One')).toBeInTheDocument();
+      
+      // Check that email is displayed
+      expect(screen.getByText(/Email: khaled@anotherone.com/)).toBeInTheDocument();
+      
+      // Check that role is displayed
+      expect(screen.getByText(/Role: viewer/)).toBeInTheDocument();
+    });
+
+    it('shows loading state when no user info', function() {
+      localStorageMock.getItem = jest.fn(() => null);
+      
+      render(<Profile />);
+      
+      expect(screen.getByText('Loading profile...')).toBeInTheDocument();
     });
   });
 });
