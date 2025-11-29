@@ -11,7 +11,7 @@ import CreateDocument from './components/CreateDocument/index.jsx';
 import CreateRole from './components/CreateRole/CreateRole.jsx';
 import DocumentPage from './components/DocumentPage/index.jsx';
 import Dashboard from './components/Dashboard/index.jsx';
-import Landing from './components/Landing/Landing.jsx';
+import Landing from './components/Landing/Landing.res.js';
 import Profile from './components/Profile/Profile.jsx';
 import { DefaultLayout } from './components/Landing/Main.jsx';
 import NotFound from './components/NotFound/NotFound.jsx';

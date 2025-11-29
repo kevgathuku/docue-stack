@@ -41,7 +41,7 @@ This plan outlines the step-by-step migration of 7 Elm components and 1 React co
   - Add JSON decoders for each type
   - _Requirements: 8.1, 8.3_
 
-- [ ] 4. Migrate Landing component (simplest - static)
+- [x] 4. Migrate Landing component (simplest - static)
   - Create components/Landing/Landing.res
   - Implement static hero section with title and CTA button
   - Export component for JavaScript interop
@@ -49,7 +49,7 @@ This plan outlines the step-by-step migration of 7 Elm components and 1 React co
   - Manually test rendering and styling
   - _Requirements: 6.1, 6.2, 6.3_
 
-- [ ]* 4.1 Write unit tests for Landing component
+- [x] 4.1 Write unit tests for Landing component
   - Test component renders hero section
   - Test "Get Started" button has correct href
   - Test CSS classes match original Elm version
