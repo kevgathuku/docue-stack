@@ -24,23 +24,23 @@ export default class Main extends React.PureComponent {
     super(props);
     const user = getUserInfo();
     
-    // If no user info, redirect to login
-    if (!user) {
-      window.location.href = '/auth';
-      return;
-    }
-    
-    this.flags = {
-      token: localStorage.getItem('user'),
-      baseURL: BASE_URL,
-      user: {
-        id_: user._id,
-        email: user.email,
-        firstName: user.name.first,
-        lastName: user.name.last,
-        role: user.role ? user.role.title : ''
-      },
+    this.state = {
+      hasUser: !!user,
     };
+    
+    if (user) {
+      this.flags = {
+        token: localStorage.getItem('user'),
+        baseURL: BASE_URL,
+        user: {
+          id_: user._id,
+          email: user.email,
+          firstName: user.name.first,
+          lastName: user.name.last,
+          role: user.role ? user.role.title : ''
+        },
+      };
+    }
   }
 
   setupPorts(ports) {
@@ -70,6 +70,18 @@ export default class Main extends React.PureComponent {
   }
 
   render() {
+    // If no user info, show loading (PrivateRoute will handle redirect)
+    if (!this.state.hasUser) {
+      return (
+        <div className="container">
+          <div className="progress">
+            <div className="indeterminate"></div>
+          </div>
+          <p className="center-align">Loading profile...</p>
+        </div>
+      );
+    }
+
     return <Elm src={ElmProfile} flags={this.flags} ports={this.setupPorts} />;
   }
 }

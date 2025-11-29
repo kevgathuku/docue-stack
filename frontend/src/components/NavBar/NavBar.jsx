@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
 import { 
-  getSession, 
   logout, 
   selectToken, 
   selectUser, 
@@ -30,54 +29,30 @@ class NavBar extends React.Component {
   };
 
   componentDidMount() {
-    const token = localStorage.getItem('user');
-    const { session } = this.props;
-    
-    // Only check session if we have a token but don't know the session state yet
-    // If session.loggedIn is already true, we don't need to check again
-    // If there's no token, no need to check
-    if (token && !session.loggedIn && !session.loading) {
-      this.props.dispatch(getSession(token));
-    }
-
+    // Initialize Materialize components
     window.$('.dropdown-button').dropdown();
     window.$('.button-collapse').sideNav();
+    
+    // Note: Session validation is now handled by PrivateRoute
+    // PrivateRoute triggers getSession() when it mounts with a token
   }
 
   componentDidUpdate(prevProps) {
     window.$('.dropdown-button').dropdown();
     // window.$('.button-collapse').sideNav();
 
-    const { logoutResult, session } = this.props;
+    const { logoutResult } = this.props;
 
+    // Handle logout - clear localStorage and redirect to home
     if (logoutResult && prevProps.logoutResult !== logoutResult) {
-      // Remove the user's token and info
       localStorage.removeItem('user');
       localStorage.removeItem('userInfo');
-
       this.props.navigate('/');
     }
 
-    // Use deep comparison to check if session actually changed
-    const sessionChanged =
-      prevProps.session.loggedIn !== session.loggedIn ||
-      prevProps.session.loading !== session.loading;
-
-    // Handle session invalidation - clear state only
-    // PrivateRoute will handle redirects
-    if (sessionChanged && !session.loading && session.loggedIn === false) {
-      const hadToken = !!localStorage.getItem('user');
-      
-      if (hadToken) {
-        // Token was invalid, clear it
-        localStorage.removeItem('user');
-        localStorage.removeItem('userInfo');
-        
-        // Note: PrivateRoute will handle redirect to /auth
-        // NavBar only clears localStorage, doesn't dispatch actions or navigate
-        // The Redux state will be cleared naturally when user logs in again
-      }
-    }
+    // Note: Session invalidation is now handled by PrivateRoute
+    // PrivateRoute waits for /api/users/session response before redirecting
+    // This prevents race conditions and infinite redirect loops
   }
 
   handleLogoutSubmit = (event) => {

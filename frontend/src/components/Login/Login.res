@@ -84,7 +84,9 @@ let make = () => {
   }
 
   // Effect to handle login success/error
-  React.useEffect4(() => {
+  // Dependencies: loginError, token, session, loginAttempted
+  React.useEffect5(() => {
+    // Only process if user attempted to login
     if state.loginAttempted {
       // Handle login error
       switch loginError {
@@ -95,36 +97,37 @@ let make = () => {
         }
       }
 
-      // Handle login success
-      switch (token, user, session) {
-      | ("", _, _) => ()
-      | (token, _user, session) => {
-          // Check if session is valid
-          let loggedIn = session["loggedIn"]
+      // Handle login success - MUST check session.loggedIn
+      // This prevents infinite redirects when Redux state has stale data
+      let loggedIn = session["loggedIn"]
+      
+      switch (token, loggedIn) {
+      | ("", _) => () // No token, do nothing
+      | (_, false) => () // Token exists but session not validated, wait
+      | (token, true) => {
+          // Token exists AND session is validated - safe to redirect
+          
+          // Store token in localStorage
+          LocalStorage.setItem("user", token)
 
-          if loggedIn {
-            // Store token in localStorage
-            LocalStorage.setItem("user", token)
+          // Store user info in localStorage
+          let userJson = %raw(`JSON.stringify(user)`)
+          LocalStorage.setItem("userInfo", userJson)
 
-            // Store user info in localStorage
-            let userJson = %raw(`JSON.stringify(user)`)
-            LocalStorage.setItem("userInfo", userJson)
+          // Show success message
+          showSuccess("Logged in Successfully!")
 
-            // Show success message
-            showSuccess("Logged in Successfully!")
+          // Navigate to dashboard
+          navigate("/dashboard")
 
-            // Navigate to dashboard
-            navigate("/dashboard")
-
-            // Reset attempt flag
-            dispatch(ResetAttempt)
-          }
+          // Reset attempt flag
+          dispatch(ResetAttempt)
         }
       }
     }
 
     None
-  }, (loginError, token, user, state.loginAttempted))
+  }, (loginError, token, session, user, state.loginAttempted))
 
   // Render form
   <div className="row">

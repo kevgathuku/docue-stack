@@ -76,21 +76,20 @@ function Login(props) {
         Materialize.showError(loginError);
         dispatch("ResetAttempt");
       }
-      if (token !== "") {
-        let loggedIn = session.loggedIn;
-        if (loggedIn) {
-          localStorage.setItem("user", token);
-          let userJson = (JSON.stringify(user));
-          localStorage.setItem("userInfo", userJson);
-          Materialize.showSuccess("Logged in Successfully!");
-          navigate("/dashboard");
-          dispatch("ResetAttempt");
-        }
+      let loggedIn = session.loggedIn;
+      if (token !== "" && loggedIn) {
+        localStorage.setItem("user", token);
+        let userJson = (JSON.stringify(user));
+        localStorage.setItem("userInfo", userJson);
+        Materialize.showSuccess("Logged in Successfully!");
+        navigate("/dashboard");
+        dispatch("ResetAttempt");
       }
     }
   }, [
     loginError,
     token,
+    session,
     user,
     state.loginAttempted
   ]);
