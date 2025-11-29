@@ -17,7 +17,7 @@ This plan outlines the step-by-step migration of 7 Elm components and 1 React co
 
 ## Tasks
 
-- [ ] 1. Set up ReScript infrastructure
+- [x] 1. Set up ReScript infrastructure
   - Install ReScript compiler and React bindings
   - Configure bsconfig.json for project structure
   - Update Vite configuration to handle ReScript files

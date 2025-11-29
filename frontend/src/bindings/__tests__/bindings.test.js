@@ -22,6 +22,16 @@ describe('ReScript Bindings', () => {
       const bindingPath = resolve(__dirname, '../ReactRouter.res.js');
       expect(existsSync(bindingPath)).toBe(true);
     });
+
+    it('should compile Materialize binding', () => {
+      const bindingPath = resolve(__dirname, '../Materialize.res.js');
+      expect(existsSync(bindingPath)).toBe(true);
+    });
+
+    it('should compile Fetch binding', () => {
+      const bindingPath = resolve(__dirname, '../Fetch.res.js');
+      expect(existsSync(bindingPath)).toBe(true);
+    });
   });
 
   describe('LocalStorage operations (direct)', () => {
