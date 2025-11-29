@@ -1,10 +1,9 @@
 'use strict';
 
 import { jest } from '@jest/globals';
-import { render } from '@testing-library/react';
 
-// Mock Elm module BEFORE any imports
-jest.mock('../../Profile.elm', () => ({
+// Mock Elm module using unstable_mockModule for ESM
+await jest.unstable_mockModule('../../Profile.elm', () => ({
   Elm: {
     Profile: {
       init: jest.fn(() => ({
@@ -21,6 +20,9 @@ jest.mock('../../Profile.elm', () => ({
   },
 }));
 
+// Import after mocking
+const { render } = await import('@testing-library/react');
+
 describe('Profile', function() {
   let Profile;
   const mockUser = {
@@ -35,7 +37,7 @@ describe('Profile', function() {
     email: 'khaled@anotherone.com',
   };
 
-  beforeAll(function() {
+  beforeAll(async function() {
     // Mock localStorage BEFORE importing Profile component
     Storage.prototype.getItem = jest.fn((key) => {
       if (key === 'userInfo') return JSON.stringify(mockUser);
@@ -44,7 +46,7 @@ describe('Profile', function() {
     });
 
     // Now import the Profile component after mocks are set up
-    Profile = require('../Profile.jsx').default;
+    Profile = (await import('../Profile.jsx')).default;
   });
 
   beforeEach(function() {
@@ -64,8 +66,8 @@ describe('Profile', function() {
       expect(Storage.prototype.getItem).toHaveBeenCalled();
     });
 
-    it('initializes Elm component with user data', function() {
-      const ElmProfile = require('../../Profile.elm');
+    it('initializes Elm component with user data', async function() {
+      const ElmProfile = await import('../../Profile.elm');
       render(<Profile />);
       
       // Verify Elm was initialized

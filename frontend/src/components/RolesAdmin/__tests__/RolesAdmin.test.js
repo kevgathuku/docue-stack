@@ -1,6 +1,5 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import expect from 'expect';
 import RolesAdmin from '../RolesAdmin.jsx';
 
 describe('RolesAdmin', function() {

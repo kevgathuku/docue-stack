@@ -4,7 +4,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import expect from 'expect';
 import UsersAdmin from '../UsersAdmin.jsx';
 import authReducer from '../../../features/auth/authSlice';
 import rolesReducer from '../../../features/roles/rolesSlice';

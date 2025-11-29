@@ -1,15 +1,10 @@
 'use strict';
 
 import { jest } from '@jest/globals';
-import { render } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
-import authReducer from '../../../features/auth/authSlice';
-import Login from '../Login.jsx';
 
-// Mock Elm module
-jest.mock('../../Login.elm', () => ({
+// Mock Elm module BEFORE importing Login component
+// Using unstable_mockModule for ESM compatibility
+await jest.unstable_mockModule('../../Login.elm', () => ({
   Elm: {
     Login: {
       init: jest.fn(() => ({
@@ -22,6 +17,14 @@ jest.mock('../../Login.elm', () => ({
     },
   },
 }));
+
+// Import after mocking
+const { render } = await import('@testing-library/react');
+const { BrowserRouter } = await import('react-router-dom');
+const { Provider } = await import('react-redux');
+const { configureStore } = await import('@reduxjs/toolkit');
+const authReducer = (await import('../../../features/auth/authSlice')).default;
+const Login = (await import('../Login.jsx')).default;
 
 describe('Login', function() {
   let mockStore;

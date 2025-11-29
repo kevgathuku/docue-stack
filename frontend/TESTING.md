@@ -5,10 +5,11 @@
 This document consolidates all testing information for the frontend, including Jest ESM migration, ReScript binding testing, and testing strategies.
 
 **Current Status:**
-- ✅ 20/26 test suites passing (77%)
+- ✅ 26/26 test suites passing (100%)
+- ✅ 228 tests passing
 - ✅ ESM mode is now the default
 - ✅ ReScript bindings fully tested
-- ⚠️ 6 Elm integration tests blocked by Jest ESM limitations
+- ✅ All Elm integration tests migrated to ESM
 
 ## Table of Contents
 
@@ -41,20 +42,19 @@ pnpm test:elm
 ### Test Results
 
 ```
-Test Suites: 20 passed, 6 failed, 26 total
-Tests:       177 passed, 47 failed, 224 total
+Test Suites: 26 passed, 26 total
+Tests:       228 passed, 228 total
 ```
 
-**Passing:** All modern React, Redux, and ReScript tests
-**Failing:** Elm integration tests (expected - see Known Issues)
+**Status:** ✅ All tests passing in ESM mode!
 
 ---
 
 ## Jest ESM Migration
 
-### Status: 77% Complete (20/26 suites)
+### Status: 100% Complete (26/26 suites) ✅
 
-We successfully migrated Jest to ES6 modules to enable direct testing of ReScript bindings and modern JavaScript code.
+We successfully migrated all Jest tests to ES6 modules, enabling direct testing of ReScript bindings and modern JavaScript code.
 
 ### Issues Fixed
 
@@ -141,11 +141,13 @@ const __dirname = dirname(__filename);
 
 ## Known Issues
 
-### Hard Blocker: jest.mock() with Factory Functions
+### Solution: jest.unstable_mockModule()
 
-**6 test suites still failing** due to Jest ESM limitations with `jest.mock()` factory functions.
+**Status:** ✅ All tests migrated successfully
 
-#### The Problem
+Jest provides an experimental ESM mocking API that solved the `jest.mock()` limitations.
+
+#### The Old Problem
 
 ```javascript
 // This pattern doesn't work in ESM mode
@@ -158,32 +160,63 @@ jest.mock('../../Profile.elm', () => ({
 }));
 ```
 
-**Why it fails:**
+**Why it failed:**
 1. `jest.mock()` is hoisted to the top of the file (before imports)
 2. The factory function needs `jest.fn()` which requires `jest` to be imported
 3. In ESM, `import` statements are also hoisted
 4. This creates a circular dependency that can't be resolved
 
-#### Affected Tests
+#### The Solution: jest.unstable_mockModule()
 
-All Elm integration tests:
-- ❌ `Profile/__tests__/Profile-test.js`
-- ❌ `Login/__tests__/Login-test.js`
-- ❌ `DocumentPage/__tests__/DocumentPage.test.js`
-- ❌ `RolesAdmin/__tests__/RolesAdmin.test.js`
-- ❌ `CreateRole/__tests__/CreateRole.test.js`
-- ❌ `UsersAdmin/__tests__/UsersAdmin.test.js`
+Jest provides an **experimental** ESM mocking API that works with top-level await:
 
-#### Workaround
+```javascript
+import { jest } from '@jest/globals';
 
-These tests work fine in CommonJS mode:
-```bash
-pnpm test:commonjs
+// Mock BEFORE importing the module that uses it
+await jest.unstable_mockModule('../../Profile.elm', () => ({
+  Elm: {
+    Profile: {
+      init: jest.fn(() => ({
+        ports: {
+          materializeToast: { subscribe: jest.fn() },
+          updateCachedUserInfo: { subscribe: jest.fn() },
+        },
+      })),
+    },
+  },
+}));
+
+// Import AFTER mocking
+const { render } = await import('@testing-library/react');
+const Profile = (await import('../Profile.jsx')).default;
+
+describe('Profile', () => {
+  // Tests work normally
+});
 ```
 
-#### Long-term Solution
+**Key differences:**
+1. ✅ Uses `await jest.unstable_mockModule()` instead of `jest.mock()`
+2. ✅ All imports must use `await import()` (dynamic imports)
+3. ✅ Mock is set up before the module is imported
+4. ✅ `jest.fn()` works because `jest` is already imported
 
-As we migrate away from Elm to React/ReScript, these tests will be replaced with modern component tests that don't require complex mocking.
+**Status:** Experimental but proven! All tests migrated successfully. ✅
+
+#### Test Status
+
+All tests migrated successfully:
+- ✅ `Profile/__tests__/Profile-test.js` - Fixed with `unstable_mockModule`
+- ✅ `Login/__tests__/Login-test.js` - Fixed with `unstable_mockModule`
+- ✅ `DocumentPage/__tests__/DocumentPage.test.js` - Fixed with `unstable_mockModule`
+- ✅ `RolesAdmin/__tests__/RolesAdmin.test.js` - Fixed (removed invalid `expect` import)
+- ✅ `CreateRole/__tests__/CreateRole.test.js` - Fixed (removed invalid `expect` import)
+- ✅ `UsersAdmin/__tests__/UsersAdmin.test.js` - Fixed (removed invalid `expect` import)
+
+#### Additional Fix: Invalid `expect` Import
+
+Some tests had `import expect from 'expect'` which doesn't work in ESM mode with Jest. The `expect` function is a global provided by Jest, so the import was removed.
 
 ---
 

@@ -9,7 +9,6 @@
     "preview": "vite preview",
     "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
     "test:ci": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage --ci",
-    "test:commonjs": "jest",
     "test:elm": "elm-test",
     "res:build": "rescript build",
     "res:watch": "rescript watch",
