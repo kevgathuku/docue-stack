@@ -177,10 +177,9 @@ import Login from '../Login.elm';
 
 - [Authentication Patterns](AUTHENTICATION.md) - Session validation and auth flows
 - [Hooks Migration Guide](HOOKS_MIGRATION_GUIDE.md) - Class to functional components
+- [Modernization Strategy](MODERNIZATION.md) - Complete modernization guide including testing
 - [React 18 Migration](REACT_18_MIGRATION.md) - React 18 upgrade notes
 - [Vite Migration](VITE_MIGRATION.md) - Webpack to Vite migration
-- [Phase 3 Testing](PHASE3_TESTING.md) - Testing strategies
-- [Modernization Strategy](MODERNIZATION.md) - Ongoing improvements
 - [Elm Quick Start](ELM_QUICK_START.md) - Elm basics
 - [Elm Debugging](ELM_DEBUGGING.md) - Debugging Elm components
 

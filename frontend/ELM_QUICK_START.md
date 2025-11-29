@@ -100,4 +100,4 @@ src/components/
 
 - Full debugging guide: `ELM_DEBUGGING.md`
 - Vite migration notes: `VITE_MIGRATION.md`
-- Testing guide: `PHASE3_TESTING.md`
+- Testing and modernization guide: `MODERNIZATION.md`
