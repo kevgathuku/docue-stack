@@ -279,7 +279,7 @@ This plan outlines the step-by-step migration of 7 Elm components and 1 React co
   - Test API error shows error toast
   - _Requirements: 11.1, 11.2, 11.3_
 
-- [ ] 12. Migrate SignUp component (React → ReScript pattern)
+- [x] 12. Migrate SignUp component (React → ReScript pattern)
   - Create components/SignUp/SignUp.res
   - Implement form state with useReducer (firstname, lastname, email, password, passwordConfirm)
   - Implement input handlers for all fields

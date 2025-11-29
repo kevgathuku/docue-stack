@@ -5,7 +5,7 @@ import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { selectSession, getSession } from '../../features/auth/authSlice';
 
 import Login from '../Login/Login.res.js';
-import SignUp from '../SignUp/SignUp.jsx';
+import SignUp from '../SignUp/SignUp.res.js';
 
 class Authenticate extends React.PureComponent {
   static propTypes = {

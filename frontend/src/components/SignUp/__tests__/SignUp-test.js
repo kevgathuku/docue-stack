@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from '../../../features/auth/authSlice';
-import SignUp from '../SignUp.jsx';
+import SignUp from '../SignUp.res.js';
 
 describe('SignUp', function() {
   let mockStore;
