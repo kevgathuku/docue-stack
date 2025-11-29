@@ -3,8 +3,14 @@
  * These tests verify that the bindings compile correctly and test their functionality
  */
 
+import { jest } from '@jest/globals';
 import { existsSync } from 'fs';
-import { resolve } from 'path';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+// ESM equivalent of __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 describe('ReScript Bindings', () => {
   describe('Binding compilation', () => {
@@ -39,7 +45,7 @@ describe('ReScript Bindings', () => {
     });
   });
 
-  describe('LocalStorage binding - getItemOption', () => {
+  describe('LocalStorage binding', () => {
     beforeEach(() => {
       localStorage.clear();
     });
@@ -48,28 +54,11 @@ describe('ReScript Bindings', () => {
       localStorage.clear();
     });
 
-    it('should test getItemOption behavior through localStorage API', () => {
-      // The getItemOption function wraps localStorage.getItem and converts null to undefined
-      // We test the underlying behavior that the binding implements
+    it('should verify localStorage external bindings work', () => {
+      // Note: The external bindings (setItem, getItem, removeItem, clear) are type-only
+      // declarations in ReScript. They don't compile to JavaScript - they're direct
+      // calls to the browser API. We test that the browser API works correctly.
       
-      // Test 1: Existing key returns value
-      localStorage.setItem('test-key', 'test-value');
-      const existingValue = localStorage.getItem('test-key');
-      expect(existingValue).toBe('test-value');
-      
-      // Test 2: Non-existent key returns null (which getItemOption converts to undefined)
-      const nonExistentValue = localStorage.getItem('non-existent-key');
-      expect(nonExistentValue).toBeNull();
-      
-      // Test 3: The binding converts null to option type (None = undefined, Some(x) = x)
-      // This is the core functionality of getItemOption
-      const convertNullToOption = (value) => value === null ? undefined : value;
-      expect(convertNullToOption(existingValue)).toBe('test-value');
-      expect(convertNullToOption(nonExistentValue)).toBeUndefined();
-    });
-
-    it('should verify localStorage operations work correctly', () => {
-      // Verify the underlying APIs that the binding wraps
       localStorage.setItem('key1', 'value1');
       localStorage.setItem('key2', 'value2');
       
@@ -81,6 +70,19 @@ describe('ReScript Bindings', () => {
       
       localStorage.clear();
       expect(localStorage.getItem('key2')).toBeNull();
+    });
+
+    it('should document getItemOption implementation', () => {
+      // getItemOption is the ONLY function exported from LocalStorage.res.js
+      // It implements: Primitive_option.fromNullable(localStorage.getItem(key))
+      // This converts null -> undefined (ReScript None) and value -> value (ReScript Some)
+      
+      // See LocalStorage_getItemOption.test.js for direct tests of the compiled function
+      
+      const nullToUndefined = (value) => value === null ? undefined : value;
+      
+      expect(nullToUndefined(null)).toBeUndefined();
+      expect(nullToUndefined('value')).toBe('value');
     });
   });
 
@@ -257,18 +259,18 @@ describe('ReScript Bindings', () => {
   });
 
   describe('Redux and Router bindings', () => {
-    it('should have Redux hooks available from react-redux', () => {
+    it('should have Redux hooks available from react-redux', async () => {
       // Verifies the underlying APIs that Redux bindings wrap
-      const reactRedux = require('react-redux');
+      const reactRedux = await import('react-redux');
       expect(reactRedux.useDispatch).toBeDefined();
       expect(typeof reactRedux.useDispatch).toBe('function');
       expect(reactRedux.useSelector).toBeDefined();
       expect(typeof reactRedux.useSelector).toBe('function');
     });
 
-    it('should have Router hooks available from react-router-dom', () => {
+    it('should have Router hooks available from react-router-dom', async () => {
       // Verifies the underlying API that ReactRouter binding wraps
-      const reactRouter = require('react-router-dom');
+      const reactRouter = await import('react-router-dom');
       expect(reactRouter.useNavigate).toBeDefined();
       expect(typeof reactRouter.useNavigate).toBe('function');
     });

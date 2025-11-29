@@ -4,8 +4,8 @@ module.exports = {
       '@babel/preset-env',
       {
         targets: { node: 'current' },
-        // Transform ES6 modules to CommonJS for Jest
-        modules: 'commonjs',
+        // Keep ES6 modules for Jest ESM support
+        modules: false,
       },
     ],
     ['@babel/preset-react', { runtime: 'automatic' }],
@@ -17,8 +17,8 @@ module.exports = {
           '@babel/preset-env',
           {
             targets: { node: 'current' },
-            // Ensure ES6 modules are transformed to CommonJS in test environment
-            modules: 'commonjs',
+            // Keep ES6 modules for Jest ESM support
+            modules: false,
           },
         ],
         ['@babel/preset-react', { runtime: 'automatic' }],

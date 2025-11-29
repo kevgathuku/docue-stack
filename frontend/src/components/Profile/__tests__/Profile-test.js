@@ -1,5 +1,6 @@
 'use strict';
 
+import { jest } from '@jest/globals';
 import { render } from '@testing-library/react';
 
 // Mock Elm module BEFORE any imports
