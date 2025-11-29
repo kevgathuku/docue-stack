@@ -69,7 +69,7 @@ This plan outlines the step-by-step migration of 7 Elm components and 1 React co
   - Test CSS classes match original Elm version
   - _Requirements: 11.1, 12.1_
 
-- [ ] 6. Migrate Login component (moderate - form with Redux)
+- [x] 6. Migrate Login component (moderate - form with Redux)
   - Create components/Login/Login.res
   - Implement form state with useReducer
   - Implement email and password input handlers
@@ -103,7 +103,7 @@ This plan outlines the step-by-step migration of 7 Elm components and 1 React co
   - Verify localStorage is updated and navigation occurs
   - _Requirements: 11.3_
 
-- [ ] 6.4 Write unit tests for Login component
+- [x] 6.4 Write unit tests for Login component
   - Test component renders email and password inputs
   - Test form submission with empty fields
   - Test error toast display on login failure

@@ -33,9 +33,9 @@ describe('Auth', function() {
     it('displays the correct contents', function() {
       render(<Auth />, { wrapper: Wrapper });
       
-      // It should find the correct content
-      expect(screen.getByText(/Login/i)).toBeInTheDocument();
-      expect(screen.getByText(/Signup/i)).toBeInTheDocument();
+      // It should find the tabs
+      expect(screen.getAllByText(/Login/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/Signup/i).length).toBeGreaterThan(0);
     });
 
     it('renders the correct component structure', function() {

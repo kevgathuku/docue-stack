@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import Login from '../Login/Login.jsx';
+import Login from '../Login/Login.res.js';
 import SignUp from '../SignUp/SignUp.jsx';
 
 class Authenticate extends React.PureComponent {
