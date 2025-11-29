@@ -3,6 +3,7 @@ export default {
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
+    '\\.(jpg|jpeg|png|gif|svg)$': '<rootDir>/config/jest/fileTransform.js',
     '\\.elm$': '<rootDir>/src/__mocks__/elmMock.js',
   },
   transform: {

@@ -101,7 +101,7 @@
   - Remove Flux store listeners from all document components
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 5.2_
 
-- [ ] 7.1 Update tests for document components
+- [x] 7.1 Update tests for document components
   - Wrap components with Redux Provider in tests
   - Update test assertions for Redux state
   - Verify all document component tests pass

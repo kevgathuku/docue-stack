@@ -1,46 +1,31 @@
-import React from 'react';
-import DocActions from '../../actions/DocActions';
-import DocStore from '../../stores/DocStore';
+import React, { useEffect } from 'react';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import {
+  fetchDocuments,
+  selectDocuments,
+  selectDocumentsLoading,
+  selectDocumentsError,
+} from '../../features/documents/documentsSlice';
 import DocList from './DocList.jsx';
 
-class Dashboard extends React.Component {
-  constructor(props) {
-    super(props);
+const Dashboard = () => {
+  const dispatch = useAppDispatch();
+  const docs = useAppSelector(selectDocuments);
+  const loading = useAppSelector(selectDocumentsLoading);
+  const reduxError = useAppSelector(selectDocumentsError);
 
-    this.state = {
-      docs: null,
-      error: null
-    };
-  }
-
-  componentDidMount() {
+  useEffect(() => {
     // Get the token from localStorage
-    let token = localStorage.getItem('user');
+    const token = localStorage.getItem('user');
     
-    if (!token) {
-      this.setState({ error: 'No authentication token found' });
-      return;
+    if (token) {
+      dispatch(fetchDocuments(token));
     }
-    
-    DocActions.getDocs(token);
-    DocStore.addChangeListener(this.handleDocsResult, 'fetchDocs');
-  }
+  }, [dispatch]);
 
-  componentWillUnmount() {
-    DocStore.removeChangeListener(this.handleDocsResult, 'fetchDocs');
-  }
-
-  handleDocsResult = () => {
-    let docs = DocStore.getDocs();
-    if (docs && !docs.error) {
-      this.setState({
-        docs: docs
-      });
-    }
-  };
-
-  render() {
-    const { docs, error } = this.state;
+  const renderContent = () => {
+    const token = localStorage.getItem('user');
+    const error = !token ? 'No authentication token found' : reduxError;
     
     if (error) {
       return (
@@ -70,7 +55,7 @@ class Dashboard extends React.Component {
           <h2 className="header center-align">All Documents</h2>
         </div>
         <div className="row">
-          {docs ? <DocList docs={docs} /> : <p>Loading...</p>}
+          {loading ? <p>Loading...</p> : docs ? <DocList docs={docs} /> : <p>Loading...</p>}
         </div>
         <div className="fixed-action-btn" style={{bottom: 45, right: 24}}>
           <a
@@ -85,7 +70,9 @@ class Dashboard extends React.Component {
         </div>
       </div>
     );
-  }
-}
+  };
+
+  return renderContent();
+};
 
 export default Dashboard;

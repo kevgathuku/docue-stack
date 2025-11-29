@@ -1,159 +1,155 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import Select from 'react-select';
-import DocActions from '../../actions/DocActions';
-import DocStore from '../../stores/DocStore';
-import RoleActions from '../../actions/RoleActions';
-import RoleStore from '../../stores/RoleStore';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import {
+  createDocument,
+  selectDocCreateResult,
+  selectDocumentsError,
+} from '../../features/documents/documentsSlice';
+import { fetchRoles, selectRoles } from '../../features/roles/rolesSlice';
 import { handleFieldChange } from '../../utils/componentHelpers';
 import { withNavigate } from '../../utils/withNavigate';
 
-class CreateDocument extends React.Component {
-  static propTypes = {
-    navigate: PropTypes.func,
-  };
+const CreateDocument = ({ navigate }) => {
+  const dispatch = useAppDispatch();
+  const roles = useAppSelector(selectRoles);
+  const createResult = useAppSelector(selectDocCreateResult);
+  const error = useAppSelector(selectDocumentsError);
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      token: localStorage.getItem('user'),
-      title: '',
-      content: '',
-      role: null,
-      roles: [],
-    };
-  }
+  const [token] = useState(localStorage.getItem('user'));
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [role, setRole] = useState(null);
 
-  componentDidMount() {
-    RoleActions.getRoles(this.state.token);
-    DocStore.addChangeListener(this.handleDocumentCreateResult);
-    RoleStore.addChangeListener(this.handleRolesResult);
-  }
-
-  componentWillUnmount() {
-    DocStore.removeChangeListener(this.handleDocumentCreateResult);
-    RoleStore.removeChangeListener(this.handleRolesResult);
-  }
-
-  handleDocumentCreateResult = () => {
-    let data = DocStore.getDocCreateResult();
-    if (data) {
-      if (data.error) {
-        window.Materialize.toast(data.error, 2000, 'error-toast');
-      } else {
-        window.Materialize.toast(
-          'Document created successfully!',
-          2000,
-          'success-toast'
-        );
-        this.props.navigate('/dashboard');
-      }
+  useEffect(() => {
+    if (token) {
+      dispatch(fetchRoles(token));
     }
-  };
+  }, [dispatch, token]);
 
-  handleRolesResult = () => {
-    const roles = RoleStore.getRoles();
-    this.setState({ roles });
-  };
+  useEffect(() => {
+    if (createResult) {
+      window.Materialize.toast(
+        'Document created successfully!',
+        2000,
+        'success-toast'
+      );
+      navigate('/dashboard');
+    }
+  }, [createResult, navigate]);
 
-  handleSubmit = (event) => {
+  useEffect(() => {
+    if (error) {
+      window.Materialize.toast(error, 2000, 'error-toast');
+    }
+  }, [error]);
+
+  const handleSubmit = (event) => {
     event.preventDefault();
-    if (!this.state.role) {
+    if (!role) {
       window.Materialize.toast('Please Select a Role', 2000, 'error-toast');
       return;
     }
-    let documentPayload = {
-      title: this.state.title,
-      content: this.state.content,
-      role: this.state.role.title,
+    const documentPayload = {
+      title,
+      content,
+      role: role.title,
     };
-    DocActions.createDoc(documentPayload, this.state.token);
+    dispatch(createDocument({ body: documentPayload, token }));
   };
 
-  handleFieldChange = (event) => {
-    let stateObject = handleFieldChange(event);
-    this.setState(stateObject);
+  const handleFieldChangeLocal = (event) => {
+    const stateObject = handleFieldChange(event);
+    const key = Object.keys(stateObject)[0];
+    const value = stateObject[key];
+    
+    if (key === 'title') {
+      setTitle(value);
+    } else if (key === 'content') {
+      setContent(value);
+    }
   };
 
-  handleSelectChange = (val) => {
-    this.setState({
-      role: val,
-    });
+  const handleSelectChange = (val) => {
+    setRole(val);
   };
 
-  render() {
-    return (
-      <div className="container">
-        <div className="row">
-          <h2 className="header center-align">Create Document</h2>
-        </div>
-        <div className="row">
-          <form className="col s12" onSubmit={this.handleSubmit}>
-            <div className="input-field col s12 m6">
-              <input
-                className="validate"
-                id="title"
-                name="title"
-                value={this.state.title}
-                onChange={this.handleFieldChange}
-                type="text"
-              />
-              <label className="active" htmlFor="title">
-                Title
-              </label>
-            </div>
-            <div className="input-field col s12 m6">
-              <Select
-                getOptionLabel={(option) => {
-                  return option.title;
-                }}
-                getOptionValue={(option) => {
-                  return option._id;
-                }}
-                styles={{
-                  control: (base) => ({
-                    ...base,
-                    color: 'white',
-                    maxHeight: '50px',
-                  }),
-                }}
-                name="role"
-                options={this.state.roles}
-                onChange={this.handleSelectChange}
-                placeholder="Select Role"
-                value={this.state.role}
-                isSearchable={false}
-              />
-            </div>
-            <div className="input-field col s12">
-              <textarea
-                className="validate materialize-textarea"
-                id="content"
-                name="content"
-                value={this.state.content}
-                onChange={this.handleFieldChange}
-              />
-              <label className="active" htmlFor="content">
-                Content
-              </label>
-            </div>
-            <div className="col s12">
-              <div className="container center">
-                <button
-                  className="btn waves-effect header-btn blue"
-                  name="action"
-                  type="submit"
-                >
-                  {' '}
-                  submit
-                </button>
-              </div>
-            </div>
-          </form>
-        </div>
+  return (
+    <div className="container">
+      <div className="row">
+        <h2 className="header center-align">Create Document</h2>
       </div>
-    );
-  }
-}
+      <div className="row">
+        <form className="col s12" onSubmit={handleSubmit}>
+          <div className="input-field col s12 m6">
+            <input
+              className="validate"
+              id="title"
+              name="title"
+              value={title}
+              onChange={handleFieldChangeLocal}
+              type="text"
+            />
+            <label className="active" htmlFor="title">
+              Title
+            </label>
+          </div>
+          <div className="input-field col s12 m6">
+            <Select
+              getOptionLabel={(option) => {
+                return option.title;
+              }}
+              getOptionValue={(option) => {
+                return option._id;
+              }}
+              styles={{
+                control: (base) => ({
+                  ...base,
+                  color: 'white',
+                  maxHeight: '50px',
+                }),
+              }}
+              name="role"
+              options={roles || []}
+              onChange={handleSelectChange}
+              placeholder="Select Role"
+              value={role}
+              isSearchable={false}
+            />
+          </div>
+          <div className="input-field col s12">
+            <textarea
+              className="validate materialize-textarea"
+              id="content"
+              name="content"
+              value={content}
+              onChange={handleFieldChangeLocal}
+            />
+            <label className="active" htmlFor="content">
+              Content
+            </label>
+          </div>
+          <div className="col s12">
+            <div className="container center">
+              <button
+                className="btn waves-effect header-btn blue"
+                name="action"
+                type="submit"
+              >
+                {' '}
+                submit
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+CreateDocument.propTypes = {
+  navigate: PropTypes.func,
+};
 
 export default withNavigate(CreateDocument);
