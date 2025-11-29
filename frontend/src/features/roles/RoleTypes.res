@@ -54,18 +54,18 @@ let decodeRole: JSON.t => result<role, string> = json => {
 let decodeRoleList: JSON.t => result<roleList, string> = json => {
   switch JSON.Decode.array(json) {
   | Some(arr) => {
-      let results = arr->Belt.Array.map(decodeRole)
-      let errors = results->Belt.Array.keep(result => {
+      let results = arr->Array.map(decodeRole)
+      let errors = results->Array.filter(result => {
         switch result {
         | Error(_) => true
         | Ok(_) => false
         }
       })
 
-      if Belt.Array.length(errors) > 0 {
+      if Array.length(errors) > 0 {
         Error("Failed to decode some roles")
       } else {
-        let roles = results->Belt.Array.keepMap(result => {
+        let roles = results->Array.filterMap(result => {
           switch result {
           | Ok(role) => Some(role)
           | Error(_) => None

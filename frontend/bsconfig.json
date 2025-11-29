@@ -25,7 +25,8 @@
   },
   "suffix": ".res.js",
   "dependencies": [
-    "@rescript/react"
+    "@rescript/react",
+    "@rescript/core"
   ],
   "dev-dependencies": [
     "@rescript/tools"
@@ -37,5 +38,5 @@
   "warnings": {
     "error": "+101"
   },
-  "compiler-flags": []
+  "compiler-flags": ["-open RescriptCore"]
 }

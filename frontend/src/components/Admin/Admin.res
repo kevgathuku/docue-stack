@@ -74,7 +74,6 @@ let make = () => {
           }
         }
         let _ = loadStats()
-        ()
       }
     | None => setState(_ => Error("No authentication token found"))
     }

@@ -100,13 +100,13 @@ let make = () => {
       // Handle login success - MUST check session.loggedIn
       // This prevents infinite redirects when Redux state has stale data
       let loggedIn = session["loggedIn"]
-      
+
       switch (token, loggedIn) {
       | ("", _) => () // No token, do nothing
       | (_, false) => () // Token exists but session not validated, wait
       | (token, true) => {
           // Token exists AND session is validated - safe to redirect
-          
+
           // Store token in localStorage
           LocalStorage.setItem("user", token)
 
