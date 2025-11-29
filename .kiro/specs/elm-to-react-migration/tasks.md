@@ -82,7 +82,7 @@ This plan outlines the step-by-step migration of 7 Elm components and 1 React co
   - Manually test login flow end-to-end
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
 
-- [ ]* 6.1 Write property test for form state updates
+- [x] 6.1 Write property test for form state updates
   - **Property 1: Form state updates reflect input changes**
   - **Validates: Requirements 1.1**
   - Generate random email/password pairs
@@ -109,6 +109,14 @@ This plan outlines the step-by-step migration of 7 Elm components and 1 React co
   - Test error toast display on login failure
   - Test CSS classes match original Elm version
   - _Requirements: 11.1, 12.1_
+
+- [ ]* 6.5 Add integration tests for Login toast notifications
+  - Test error toast is displayed when login fails (mock Redux state with loginError)
+  - Test success toast is displayed when login succeeds (mock Redux state with token and session)
+  - Verify Materialize.showError is called with correct error message
+  - Verify Materialize.showSuccess is called on successful login
+  - **Note**: Current tests don't cover Requirements 1.4 (error toast display) - this gap was discovered during property test implementation
+  - _Requirements: 1.4, 11.3_
 
 - [ ] 7. Migrate CreateRole component (moderate - form with Redux)
   - Create components/CreateRole/CreateRole.res

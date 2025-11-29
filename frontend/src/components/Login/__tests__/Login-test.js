@@ -29,9 +29,10 @@ describe('Login Component (ReScript)', () => {
       },
     });
 
-    // Mock Materialize toast
-    global.M = {
-      toast: () => {},
+    // Mock Materialize toast - matches the signature from Materialize.res
+    // toast: (message: string, duration: int, className: string) => unit
+    global.window.Materialize = {
+      toast: (message, duration, className) => {},
     };
 
     // Mock localStorage
