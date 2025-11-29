@@ -1,10 +1,8 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router, Navigate, Routes, Route } from 'react-router-dom';
-import { thunk } from 'redux-thunk';
-import { applyMiddleware, createStore, compose } from 'redux';
 import { Provider } from 'react-redux';
-import reducer from './stores/reducer';
+import { store } from './store';
 import * as serviceWorker from './serviceWorker';
 
 import Auth from './components/Auth/Auth.jsx';
@@ -24,8 +22,8 @@ import PrivateRoute from './components/PrivateRoute.jsx';
 import 'normalize.css/normalize.css';
 import './styles/style.css';
 
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-const store = createStore(reducer, composeEnhancers(applyMiddleware(thunk)));
+// Redux store is configured with Redux Toolkit's configureStore
+// Redux DevTools Extension is enabled in development (see store/index.js)
 
 // React 18 root API
 const container = document.getElementById('content');

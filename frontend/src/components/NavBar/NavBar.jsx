@@ -1,8 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
 
-import { getSession, initiateLogout } from '../../actions/actionCreators';
+import { 
+  getSession, 
+  logout, 
+  selectToken, 
+  selectUser, 
+  selectLogoutResult, 
+  selectSession 
+} from '../../features/auth/authSlice';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import logoSrc from '../../images/favicon.png';
 import { withNavigate } from '../../utils/withNavigate';
 
@@ -15,6 +22,7 @@ class NavBar extends React.Component {
     logoutResult: PropTypes.string,
     session: PropTypes.shape({
       loggedIn: PropTypes.bool,
+      loading: PropTypes.bool,
     }),
     token: PropTypes.string,
     user: PropTypes.object,
@@ -22,8 +30,14 @@ class NavBar extends React.Component {
 
   componentDidMount() {
     const token = localStorage.getItem('user');
-    // Send a request to check if the user is logged in
-    this.props.dispatch(getSession(token));
+    const { session } = this.props;
+    
+    // Only check session if we have a token but don't know the session state yet
+    // If session.loggedIn is already true, we don't need to check again
+    // If there's no token, no need to check
+    if (token && !session.loggedIn && !session.loading) {
+      this.props.dispatch(getSession(token));
+    }
 
     window.$('.dropdown-button').dropdown();
     window.$('.button-collapse').sideNav();
@@ -58,15 +72,9 @@ class NavBar extends React.Component {
         localStorage.removeItem('user');
         localStorage.removeItem('userInfo');
         
-        // Clear Redux state by dispatching logout success
-        // This prevents Login component from seeing stale user data
-        this.props.dispatch({
-          type: 'LOGOUT_SUCCESS',
-          payload: { logoutResult: { message: 'Session expired' } }
-        });
-        
         // Note: PrivateRoute will handle redirect to /auth
-        // NavBar only clears state, doesn't navigate
+        // NavBar only clears localStorage, doesn't dispatch actions or navigate
+        // The Redux state will be cleared naturally when user logs in again
       }
     }
   }
@@ -74,7 +82,7 @@ class NavBar extends React.Component {
   handleLogoutSubmit = (event) => {
     event.preventDefault();
     const token = localStorage.getItem('user');
-    this.props.dispatch(initiateLogout(token));
+    this.props.dispatch(logout(token));
   };
 
   render() {
@@ -159,14 +167,26 @@ class NavBar extends React.Component {
   }
 }
 
-const mapStateToProps = (state) => {
-  return {
-    token: state.token,
-    user: state.user,
-    loggedIn: state.user._id && state.session.loggedIn,
-    logoutResult: state.logoutResult,
-    session: state.session,
-  };
-};
+// Wrapper component to use hooks with class component
+function NavBarWithRedux(props) {
+  const dispatch = useAppDispatch();
+  const token = useAppSelector(selectToken);
+  const user = useAppSelector(selectUser);
+  const logoutResult = useAppSelector(selectLogoutResult);
+  const session = useAppSelector(selectSession);
+  const loggedIn = user._id && session.loggedIn;
 
-export default withNavigate(connect(mapStateToProps)(NavBar));
+  return (
+    <NavBar
+      {...props}
+      dispatch={dispatch}
+      token={token}
+      user={user}
+      loggedIn={loggedIn}
+      logoutResult={logoutResult}
+      session={session}
+    />
+  );
+}
+
+export default withNavigate(NavBarWithRedux);

@@ -4,15 +4,13 @@ import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
+import authReducer from '../../../features/auth/authSlice';
 import Auth from '../Auth.jsx';
 
 // Mock store for testing
 const mockStore = configureStore({
   reducer: {
-    // Minimal reducer for testing
-    session: () => ({ loggedIn: false, loading: false }),
-    user: () => ({}),
-    token: () => '',
+    auth: authReducer,
   },
 });
 

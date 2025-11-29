@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
 
 import Elm from '../../utils/ReactElm';
 import * as ElmLogin from '../Login.elm';
-import { initiateLogin } from '../../actions/actionCreators';
+import { login, selectLoginError, selectToken, selectUser, selectSession } from '../../features/auth/authSlice';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { withNavigate } from '../../utils/withNavigate';
 
 class Login extends React.Component {
@@ -14,6 +14,7 @@ class Login extends React.Component {
     loginError: PropTypes.string,
     token: PropTypes.string,
     user: PropTypes.object,
+    session: PropTypes.object,
   };
 
   constructor(props) {
@@ -61,7 +62,7 @@ class Login extends React.Component {
         username: model.email,
         password: model.password,
       };
-      component.props.dispatch(initiateLogin(loginPayload));
+      component.props.dispatch(login(loginPayload));
     });
   }
 
@@ -70,13 +71,24 @@ class Login extends React.Component {
   }
 }
 
-const mapStateToProps = (state) => {
-  return {
-    loginError: state.loginError,
-    token: state.token,
-    user: state.user,
-    session: state.session,
-  };
-};
+// Wrapper component to use hooks with class component
+function LoginWithRedux(props) {
+  const dispatch = useAppDispatch();
+  const loginError = useAppSelector(selectLoginError);
+  const token = useAppSelector(selectToken);
+  const user = useAppSelector(selectUser);
+  const session = useAppSelector(selectSession);
 
-export default withNavigate(connect(mapStateToProps)(Login));
+  return (
+    <Login
+      {...props}
+      dispatch={dispatch}
+      loginError={loginError}
+      token={token}
+      user={user}
+      session={session}
+    />
+  );
+}
+
+export default withNavigate(LoginWithRedux);

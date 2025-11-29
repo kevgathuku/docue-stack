@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { selectSession } from '../features/auth/authSlice';
+import { useAppSelector } from '../store/hooks';
 
 /**
  * PrivateRoute - Protects routes that require authentication
@@ -9,7 +10,7 @@ import { useSelector } from 'react-redux';
  * If no token, redirects to /auth immediately
  */
 export default function PrivateRoute({ children }) {
-  const session = useSelector((state) => state.session);
+  const session = useAppSelector(selectSession);
   const location = useLocation();
   const token = localStorage.getItem('user');
 

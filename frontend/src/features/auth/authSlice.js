@@ -156,6 +156,10 @@ const authSlice = createSlice({
         state.token = token;
         state.user = user;
         state.signupError = null;
+        state.session = {
+          loggedIn: true,
+          loading: false,
+        };
       })
       .addCase(signup.rejected, (state, action) => {
         state.signupError = action.payload;
@@ -168,6 +172,10 @@ const authSlice = createSlice({
         state.loginError = '';
         state.token = token;
         state.user = user;
+        state.session = {
+          loggedIn: true,
+          loading: false,
+        };
       })
       .addCase(login.rejected, (state, action) => {
         state.loginError = action.payload;

@@ -1,18 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
 
 import { handleFieldChange } from '../../utils/componentHelpers';
-import { initiateSignup } from '../../actions/actionCreators';
+import { signup, selectSignupError, selectToken, selectUser, selectSession } from '../../features/auth/authSlice';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { withNavigate } from '../../utils/withNavigate';
 
 class SignupForm extends React.Component {
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
     navigate: PropTypes.func,
-    signupError: PropTypes.object,
+    signupError: PropTypes.any,
     token: PropTypes.string,
     user: PropTypes.object,
+    session: PropTypes.object,
   };
 
   constructor(props) {
@@ -32,7 +33,10 @@ class SignupForm extends React.Component {
   componentDidUpdate(prevProps) {
     let { signupError, user, token, session } = this.props;
     if (signupError && prevProps.signupError !== this.props.signupError) {
-      window.Materialize.toast(signupError.error, 2000, 'error-toast');
+      const errorMessage = typeof signupError === 'object' && signupError.error 
+        ? signupError.error 
+        : signupError;
+      window.Materialize.toast(errorMessage, 2000, 'error-toast');
       return;
     }
 
@@ -80,7 +84,7 @@ class SignupForm extends React.Component {
         email: this.state.email,
         password: this.state.password,
       };
-      this.props.dispatch(initiateSignup(userPayload));
+      this.props.dispatch(signup(userPayload));
     }
   };
 
@@ -169,13 +173,24 @@ class SignupForm extends React.Component {
   }
 }
 
-const mapStateToProps = (state) => {
-  return {
-    signupError: state.signupError,
-    token: state.token,
-    user: state.user,
-    session: state.session,
-  };
-};
+// Wrapper component to use hooks with class component
+function SignupFormWithRedux(props) {
+  const dispatch = useAppDispatch();
+  const signupError = useAppSelector(selectSignupError);
+  const token = useAppSelector(selectToken);
+  const user = useAppSelector(selectUser);
+  const session = useAppSelector(selectSession);
 
-export default withNavigate(connect(mapStateToProps)(SignupForm));
+  return (
+    <SignupForm
+      {...props}
+      dispatch={dispatch}
+      signupError={signupError}
+      token={token}
+      user={user}
+      session={session}
+    />
+  );
+}
+
+export default withNavigate(SignupFormWithRedux);
