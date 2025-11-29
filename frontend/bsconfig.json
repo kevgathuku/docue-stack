@@ -25,18 +25,15 @@
   },
   "suffix": ".res.js",
   "dependencies": [
-    "@rescript/react",
-    "@rescript/core"
+    "@rescript/react"
   ],
   "dev-dependencies": [
     "@rescript/tools"
   ],
   "jsx": {
-    "version": 4,
-    "mode": "automatic"
+    "version": 4
   },
   "warnings": {
     "error": "+101"
-  },
-  "compiler-flags": ["-open RescriptCore"]
+  }
 }

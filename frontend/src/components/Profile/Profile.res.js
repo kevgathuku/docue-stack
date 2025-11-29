@@ -2,8 +2,8 @@
 
 import * as Fetch from "../../bindings/Fetch.res.js";
 import * as React from "react";
-import * as Core__JSON from "@rescript/core/src/Core__JSON.res.js";
 import * as Materialize from "../../bindings/Materialize.res.js";
+import * as Stdlib_JSON from "@rescript/runtime/lib/es6/Stdlib_JSON.js";
 import * as LocalStorage from "../../bindings/LocalStorage.res.js";
 import * as Stdlib_JsExn from "@rescript/runtime/lib/es6/Stdlib_JsExn.js";
 import * as JsxRuntime from "react/jsx-runtime";
@@ -168,7 +168,7 @@ function getBaseUrl() {
 }
 
 function decodeProfileUser(json) {
-  let obj = Core__JSON.Decode.object(json);
+  let obj = Stdlib_JSON.Decode.object(json);
   if (obj === undefined) {
     return {
       TAG: "Error",
@@ -197,9 +197,9 @@ function decodeProfileUser(json) {
       _0: "Missing required user fields"
     };
   }
-  let match = Core__JSON.Decode.string(id);
-  let match$1 = Core__JSON.Decode.string(email);
-  let match$2 = Core__JSON.Decode.object(name);
+  let match = Stdlib_JSON.Decode.string(id);
+  let match$1 = Stdlib_JSON.Decode.string(email);
+  let match$2 = Stdlib_JSON.Decode.object(name);
   if (match === undefined) {
     return {
       TAG: "Error",
@@ -219,9 +219,9 @@ function decodeProfileUser(json) {
     };
   }
   let firstJson = match$2["first"];
-  let firstName = firstJson !== undefined ? Core__JSON.Decode.string(firstJson) : undefined;
+  let firstName = firstJson !== undefined ? Stdlib_JSON.Decode.string(firstJson) : undefined;
   let lastJson = match$2["last"];
-  let lastName = lastJson !== undefined ? Core__JSON.Decode.string(lastJson) : undefined;
+  let lastName = lastJson !== undefined ? Stdlib_JSON.Decode.string(lastJson) : undefined;
   if (firstName === undefined) {
     return {
       TAG: "Error",
@@ -236,10 +236,10 @@ function decodeProfileUser(json) {
   }
   let roleTitle;
   if (role !== undefined) {
-    let roleObj = Core__JSON.Decode.object(role);
+    let roleObj = Stdlib_JSON.Decode.object(role);
     if (roleObj !== undefined) {
       let titleJson = roleObj["title"];
-      roleTitle = titleJson !== undefined ? Core__JSON.Decode.string(titleJson) : undefined;
+      roleTitle = titleJson !== undefined ? Stdlib_JSON.Decode.string(titleJson) : undefined;
     } else {
       roleTitle = undefined;
     }
@@ -280,10 +280,10 @@ async function updateUserProfile(userId, token, email, firstName, lastName, pass
       TAG: "Error",
       _0: `Update failed with status ` + String(status)
     };
-  } catch (raw_obj) {
-    let obj = Primitive_exceptions.internalToException(raw_obj);
-    if (obj.RE_EXN_ID === "JsExn") {
-      let msg = Stdlib_JsExn.message(obj._1);
+  } catch (raw_e) {
+    let e = Primitive_exceptions.internalToException(raw_e);
+    if (e.RE_EXN_ID === "JsExn") {
+      let msg = Stdlib_JsExn.message(e._1);
       if (msg !== undefined) {
         return {
           TAG: "Error",
@@ -296,7 +296,7 @@ async function updateUserProfile(userId, token, email, firstName, lastName, pass
         };
       }
     }
-    throw obj;
+    throw e;
   }
 }
 

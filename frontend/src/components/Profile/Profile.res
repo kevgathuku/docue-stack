@@ -209,8 +209,8 @@ let updateUserProfile = async (
       Error(`Update failed with status ${Belt.Int.toString(status)}`)
     }
   } catch {
-  | JsExn(obj) =>
-    switch JsExn.message(obj) {
+  | JsExn(e) =>
+    switch JsExn.message(e) {
     | Some(msg) => Error(msg)
     | None => Error("Unknown error occurred")
     }
@@ -248,7 +248,7 @@ let make = () => {
     switch LocalStorage.getItemOption("userInfo") {
     | Some(userInfoStr) =>
       try {
-        let json = JSON.parseExn(userInfoStr)
+        let json = JSON.parseOrThrow(userInfoStr)
         switch decodeProfileUser(json) {
         | Ok(user) => Some(user)
         | Error(_) => None
