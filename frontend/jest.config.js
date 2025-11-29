@@ -20,6 +20,5 @@ export default {
   ],
   testPathIgnorePatterns: [
     '/node_modules/',
-    '/__tests__/.*-test\\.js$', // Ignore old Enzyme tests
   ],
 };
