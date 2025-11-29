@@ -1,21 +1,20 @@
 // Mock for Elm modules in Jest tests
 // This allows tests to run without actually compiling Elm code
 
-const createElmMock = (moduleName) => ({
-  [moduleName]: {
-    init: jest.fn(() => ({
-      ports: {},
-    })),
-  },
+const createElmMock = () => ({
+  init: jest.fn(() => ({
+    ports: {},
+  })),
 });
 
 // Export mocks for all Elm modules
+// Each module should have an init function directly
 module.exports = {
-  Login: createElmMock('Login').Login,
-  Admin: createElmMock('Admin').Admin,
-  Profile: createElmMock('Profile').Profile,
-  Landing: createElmMock('Landing').Landing,
-  NotFound: createElmMock('NotFound').NotFound,
-  CreateRole: createElmMock('CreateRole').CreateRole,
-  RolesAdmin: createElmMock('RolesAdmin').RolesAdmin,
+  Login: createElmMock(),
+  Admin: createElmMock(),
+  Profile: createElmMock(),
+  Landing: createElmMock(),
+  NotFound: createElmMock(),
+  CreateRole: createElmMock(),
+  RolesAdmin: createElmMock(),
 };

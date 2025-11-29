@@ -1,20 +1,30 @@
 'use strict';
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { createStore } from 'redux';
+import { configureStore } from '@reduxjs/toolkit';
 import Auth from '../Auth.jsx';
 
-// Mock reducer for testing
-const mockReducer = (state = {}) => state;
-const mockStore = createStore(mockReducer);
+// Mock store for testing
+const mockStore = configureStore({
+  reducer: {
+    // Minimal reducer for testing
+    session: () => ({ loggedIn: false, loading: false }),
+    user: () => ({}),
+    token: () => '',
+  },
+});
 
 // Wrapper component for Router and Redux
 const Wrapper = ({ children }) => (
   <Provider store={mockStore}>
-    <BrowserRouter>
+    <BrowserRouter
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
       {children}
     </BrowserRouter>
   </Provider>
