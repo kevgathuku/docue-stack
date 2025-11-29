@@ -176,7 +176,7 @@ This plan outlines the step-by-step migration of 7 Elm components and 1 React co
   - Verify API call is made with authentication token
   - _Requirements: 11.3_
 
-- [ ] 8.3 Write unit tests for Admin component
+- [x] 8.3 Write unit tests for Admin component
   - Test component renders stats cards
   - Test navigation links are present
   - Test error message display on API failure

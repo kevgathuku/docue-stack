@@ -6,7 +6,7 @@ import { store } from './store';
 import * as serviceWorker from './serviceWorker';
 
 import Auth from './components/Auth/Auth.jsx';
-import Admin from './components/Admin/Admin.jsx';
+import Admin from './components/Admin/Admin.res.js';
 import CreateDocument from './components/CreateDocument/index.jsx';
 import CreateRole from './components/CreateRole/CreateRole.res.js';
 import DocumentPage from './components/DocumentPage/index.jsx';
