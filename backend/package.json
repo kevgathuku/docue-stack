@@ -14,7 +14,9 @@
     "test:simple": "NODE_ENV='test' node spec/run.js",
     "test:parallel": "NODE_ENV='test' MONGO_TEST_URL=mongodb://localhost/docue-test-$$ node spec/run.js",
     "coverage": "nyc node spec/run.js && nyc report --reporter=text-lcov | coveralls",
-    "codecov": "nyc report --reporter=text-lcov > coverage.lcov && codecov"
+    "codecov": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
+    "update-role": "node scripts/update-user-role.js",
+    "list-users": "node scripts/list-users.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
