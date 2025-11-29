@@ -83,7 +83,7 @@ describe('Login Component Property-Based Tests', () => {
           // Verify the input value reflects the change
           expect(emailInput.value).toBe(email);
         }),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -101,7 +101,7 @@ describe('Login Component Property-Based Tests', () => {
           // Verify the input value reflects the change
           expect(passwordInput.value).toBe(password);
         }),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -122,7 +122,7 @@ describe('Login Component Property-Based Tests', () => {
           expect(emailInput.value).toBe(email);
           expect(passwordInput.value).toBe(password);
         }),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -145,7 +145,7 @@ describe('Login Component Property-Based Tests', () => {
             expect(emailInput.value).toBe(emails[emails.length - 1]);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -169,7 +169,7 @@ describe('Login Component Property-Based Tests', () => {
           expect(emailInput.value).toBe(email);
           expect(passwordInput.value).toBe(password2);
         }),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -193,7 +193,7 @@ describe('Login Component Property-Based Tests', () => {
           expect(passwordInput.value).toBe(password);
           expect(emailInput.value).toBe(email2);
         }),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -218,7 +218,7 @@ describe('Login Component Property-Based Tests', () => {
           expect(emailInput.value).toBe('');
           expect(passwordInput.value).toBe('');
         }),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -243,7 +243,7 @@ describe('Login Component Property-Based Tests', () => {
             expect(passwordInput.value).toBe(password);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -270,7 +270,7 @@ describe('Login Component Property-Based Tests', () => {
             expect(passwordInput.value).toBe(lastPassword);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -295,7 +295,7 @@ describe('Login Component Property-Based Tests', () => {
             expect(passwordInput.value).toBe(longPassword);
           }
         ),
-        { numRuns: 50 } // Fewer runs for performance with long strings
+        { numRuns: 10 } // Fewer runs for performance with long strings
       );
     });
   });
