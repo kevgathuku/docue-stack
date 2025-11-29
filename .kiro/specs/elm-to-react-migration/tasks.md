@@ -55,7 +55,7 @@ This plan outlines the step-by-step migration of 7 Elm components and 1 React co
   - Test CSS classes match original Elm version
   - _Requirements: 11.1, 12.1_
 
-- [ ] 5. Migrate NotFound component (simplest - static)
+- [x] 5. Migrate NotFound component (simplest - static)
   - Create components/NotFound/NotFound.res
   - Implement error message display
   - Export component for JavaScript interop
@@ -63,7 +63,7 @@ This plan outlines the step-by-step migration of 7 Elm components and 1 React co
   - Manually test rendering and styling
   - _Requirements: 7.1, 7.2, 7.3_
 
-- [ ]* 5.1 Write unit tests for NotFound component
+- [x] 5.1 Write unit tests for NotFound component
   - Test component renders "Not Found" message
   - Test explanatory text is displayed
   - Test CSS classes match original Elm version
@@ -103,7 +103,7 @@ This plan outlines the step-by-step migration of 7 Elm components and 1 React co
   - Verify localStorage is updated and navigation occurs
   - _Requirements: 11.3_
 
-- [ ]* 6.4 Write unit tests for Login component
+- [ ] 6.4 Write unit tests for Login component
   - Test component renders email and password inputs
   - Test form submission with empty fields
   - Test error toast display on login failure

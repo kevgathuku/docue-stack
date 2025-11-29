@@ -14,7 +14,7 @@ import Dashboard from './components/Dashboard/index.jsx';
 import Landing from './components/Landing/Landing.res.js';
 import Profile from './components/Profile/Profile.jsx';
 import { DefaultLayout } from './components/Landing/Main.jsx';
-import NotFound from './components/NotFound/NotFound.jsx';
+import NotFound from './components/NotFound/NotFound.res.js';
 import RolesAdmin from './components/RolesAdmin/RolesAdmin.jsx';
 import UsersAdmin from './components/UsersAdmin/UsersAdmin.jsx';
 import PrivateRoute from './components/PrivateRoute.jsx';
