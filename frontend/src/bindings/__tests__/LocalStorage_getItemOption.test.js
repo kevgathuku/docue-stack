@@ -86,10 +86,9 @@ describe('Verification: ReScript implementation matches our test', () => {
     expect(content).toContain('export {');
     expect(content).toContain('getItemOption');
     
-    // Verify it uses inline null/undefined check (no runtime dependencies)
+    // Verify it uses Nullable.toOption which compiles to Primitive_option.fromNullable
     expect(content).toContain('localStorage.getItem');
-    expect(content).toContain('null');
-    expect(content).toContain('undefined');
+    expect(content).toContain('Primitive_option.fromNullable');
   });
 
   test('implementation logic matches ReScript pattern', () => {
