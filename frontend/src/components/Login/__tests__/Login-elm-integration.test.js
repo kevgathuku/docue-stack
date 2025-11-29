@@ -3,20 +3,18 @@ import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
-import { createStore } from 'redux';
+import { configureStore } from '@reduxjs/toolkit';
+import authReducer from '../../../features/auth/authSlice';
 import Login from '../Login.jsx';
-
-// Simple reducer for testing
-const mockReducer = (state = {}) => state;
 
 describe('Login Component - Elm Integration', () => {
   let store;
 
   beforeEach(() => {
-    store = createStore(mockReducer, {
-      loginError: null,
-      token: null,
-      user: null,
+    store = configureStore({
+      reducer: {
+        auth: authReducer,
+      },
     });
   });
 

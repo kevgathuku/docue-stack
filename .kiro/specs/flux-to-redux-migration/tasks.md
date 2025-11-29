@@ -121,7 +121,7 @@
   - Verify all role/admin component tests pass
   - _Requirements: 6.1, 6.2_
 
-- [ ] 9. Checkpoint - Ensure all tests pass
+- [x] 9. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 10. Remove Flux infrastructure and dependencies

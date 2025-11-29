@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import {
   fetchDocuments,
@@ -39,9 +40,9 @@ const Dashboard = () => {
                 </span>
               </div>
               <p className="center-align">
-                <a href="/auth" className="btn blue">
+                <Link to="/auth" className="btn blue">
                   Go to Login
-                </a>
+                </Link>
               </p>
             </div>
           </div>
@@ -58,15 +59,15 @@ const Dashboard = () => {
           {loading ? <p>Loading...</p> : docs ? <DocList docs={docs} /> : <p>Loading...</p>}
         </div>
         <div className="fixed-action-btn" style={{bottom: 45, right: 24}}>
-          <a
+          <Link
             className="btn-floating btn-large tooltipped pink"
             data-delay="50"
             data-position="left"
             data-tooltip="Create Document"
-            href="/documents/create"
+            to="/documents/create"
           >
             <i className="material-icons">add</i>
-          </a>
+          </Link>
         </div>
       </div>
     );

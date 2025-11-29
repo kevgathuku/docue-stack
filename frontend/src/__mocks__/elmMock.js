@@ -8,8 +8,8 @@ const createElmMock = () => ({
 });
 
 // Export mocks for all Elm modules
-// Each module should have an init function directly
-module.exports = {
+// The structure matches what ReactElm expects: either direct .init or .Elm.ModuleName.init
+const mockModules = {
   Login: createElmMock(),
   Admin: createElmMock(),
   Profile: createElmMock(),
@@ -17,4 +17,11 @@ module.exports = {
   NotFound: createElmMock(),
   CreateRole: createElmMock(),
   RolesAdmin: createElmMock(),
+};
+
+// Export with both direct access and nested Elm structure for compatibility
+module.exports = {
+  ...mockModules,
+  default: mockModules,
+  Elm: mockModules,
 };

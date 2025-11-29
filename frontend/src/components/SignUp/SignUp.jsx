@@ -27,6 +27,7 @@ class SignupForm extends React.Component {
       password: null,
       passwordConfirm: null,
       result: null,
+      signupAttempted: false,
     };
   }
 
@@ -40,21 +41,24 @@ class SignupForm extends React.Component {
       return;
     }
 
-    if (token && prevProps.token !== this.props.token) {
+    // The signup was successful - token changed indicates a fresh signup
+    // Only handle if this component initiated the signup
+    if (this.state.signupAttempted && token && prevProps.token !== token) {
       localStorage.setItem('user', token);
-    }
-
-    // Only redirect if user changed AND session is valid
-    // This prevents redirect loops when session is invalid but user object still exists in Redux
-    if (user && prevProps.user !== this.props.user && session.loggedIn) {
-      // The signup was successful. Save user's info in localStorage
-      localStorage.setItem('userInfo', JSON.stringify(user));
-      window.Materialize.toast(
-        'Your Account has been created successfully!',
-        2000,
-        'success-toast'
-      );
-      this.props.navigate('/dashboard');
+      
+      // Only redirect and show toast if session is valid and we have user data
+      if (user && session.loggedIn) {
+        localStorage.setItem('userInfo', JSON.stringify(user));
+        window.Materialize.toast(
+          'Your Account has been created successfully!',
+          2000,
+          'success-toast'
+        );
+        this.props.navigate('/dashboard');
+      }
+      
+      // Reset the flag
+      this.setState({ signupAttempted: false });
     }
   }
 
@@ -84,6 +88,8 @@ class SignupForm extends React.Component {
         email: this.state.email,
         password: this.state.password,
       };
+      // Set flag before dispatching signup
+      this.setState({ signupAttempted: true });
       this.props.dispatch(signup(userPayload));
     }
   };

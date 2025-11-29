@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 
 import { 
   getSession, 
@@ -89,10 +90,10 @@ class NavBar extends React.Component {
     return this.props.pathname === '/' ? null : (
       <nav className="transparent black-text" role="navigation">
         <div className="nav-wrapper container">
-          <a className="brand-logo brand-logo-small" href="/">
+          <Link className="brand-logo brand-logo-small" to="/">
             <img alt="Docue Logo" id="header-logo" src={logoSrc} />
             {'      Docue'}
-          </a>
+          </Link>
           <a href="#" data-activates="mobile-demo" className="button-collapse">
             <i className="material-icons" style={{ color: 'grey' }}>
               menu
@@ -100,22 +101,22 @@ class NavBar extends React.Component {
           </a>
           <ul className="side-nav" id="mobile-demo">
             <li>
-              <a href="/">Home</a>
+              <Link to="/">Home</Link>
             </li>
             <li>
               {this.props.loggedIn ? (
-                <a href="/profile">Profile</a>
+                <Link to="/profile">Profile</Link>
               ) : (
-                <a href="/auth">Login</a>
+                <Link to="/auth">Login</Link>
               )}
             </li>
             <li>
               {this.props.loggedIn ? (
-                <a href="/#" onClick={this.handleLogoutSubmit}>
+                <a href="#" onClick={this.handleLogoutSubmit}>
                   Logout
                 </a>
               ) : (
-                <a href="/auth">Sign Up</a>
+                <Link to="/auth">Sign Up</Link>
               )}
             </li>
           </ul>
@@ -125,21 +126,21 @@ class NavBar extends React.Component {
                 <div>
                   <ul id="dropdown" className="dropdown-content">
                     <li>
-                      <a href="/profile">My Profile</a>
+                      <Link to="/profile">My Profile</Link>
                     </li>
                     <li>
-                      <a href="/dashboard">All Documents</a>
+                      <Link to="/dashboard">All Documents</Link>
                     </li>
                     {this.props.user.role &&
                     this.props.user.role.title === 'admin' ? (
                       <li>
-                        <a href="/admin">Settings</a>
+                        <Link to="/admin">Settings</Link>
                       </li>
                     ) : null}
                     <li className="divider" />
                     <li>
                       <a
-                        href="/#"
+                        href="#"
                         id="logout-btn"
                         onClick={this.handleLogoutSubmit}
                       >

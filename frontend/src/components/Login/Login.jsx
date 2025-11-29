@@ -20,6 +20,10 @@ class Login extends React.Component {
   constructor(props) {
     super(props);
 
+    this.state = {
+      loginAttempted: false,
+    };
+
     this.setupPorts = this.setupPorts.bind(this);
   }
 
@@ -30,22 +34,24 @@ class Login extends React.Component {
       this.showLoginError();
     }
 
-    // The login was successful. Store user data in localStorage
-    if (token && prevProps.token !== this.props.token) {
+    // The login was successful - token changed indicates a fresh login
+    // Only handle if this component initiated the login
+    if (this.state.loginAttempted && token && prevProps.token !== token) {
       localStorage.setItem('user', token);
-    }
-
-    // Only redirect if user changed AND session is valid
-    // This prevents redirect loops when session is invalid but user object still exists in Redux
-    if (user && prevProps.user !== this.props.user && session.loggedIn) {
-      // The login was successful. Save user's info in localStorage
-      localStorage.setItem('userInfo', JSON.stringify(user));
-      window.Materialize.toast(
-        'Logged in Successfully!',
-        2000,
-        'success-toast'
-      );
-      this.props.navigate('/dashboard');
+      
+      // Only redirect and show toast if session is valid and we have user data
+      if (user && session.loggedIn) {
+        localStorage.setItem('userInfo', JSON.stringify(user));
+        window.Materialize.toast(
+          'Logged in Successfully!',
+          2000,
+          'success-toast'
+        );
+        this.props.navigate('/dashboard');
+      }
+      
+      // Reset the flag
+      this.setState({ loginAttempted: false });
     }
   }
 
@@ -62,6 +68,8 @@ class Login extends React.Component {
         username: model.email,
         password: model.password,
       };
+      // Set flag before dispatching login
+      component.setState({ loginAttempted: true });
       component.props.dispatch(login(loginPayload));
     });
   }
