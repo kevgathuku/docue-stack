@@ -27,6 +27,9 @@
   "dependencies": [
     "@rescript/react"
   ],
+  "dev-dependencies": [
+    "@rescript/tools"
+  ],
   "jsx": {
     "version": 4,
     "mode": "automatic"

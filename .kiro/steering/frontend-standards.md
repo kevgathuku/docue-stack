@@ -9,6 +9,7 @@ fileMatchPattern: "frontend/**/*"
 
 - **React**: 18.3.1 (modernized from 16.6)
 - **Elm**: Hybrid architecture with Elm components
+- **ReScript**: Type-safe functional language compiling to JavaScript
 - **State Management**: Redux Toolkit with slices and async thunks
 - **Routing**: React Router 6.30.2
 - **Build Tool**: Vite 6.x with fast HMR
@@ -18,11 +19,13 @@ fileMatchPattern: "frontend/**/*"
 
 ## Hybrid Architecture
 
-This app uses both React and Elm:
+This app uses React, Elm, and ReScript:
 - React handles the main application shell and most UI
 - Elm components are embedded for specific features (Login, Admin, etc.)
+- ReScript is being introduced for new components with strong type safety
 - Vite plugin handles Elm compilation
-- Elm files are compiled as part of the Vite build
+- ReScript compiler handles .res file compilation
+- All compiled to JavaScript as part of the Vite build
 
 ## Code Style
 
@@ -114,6 +117,80 @@ pnpm --filter frontend build
 
 # Preview production build
 pnpm --filter frontend preview
+```
+
+## ReScript Development
+
+### ReScript Compilation
+
+ReScript files (`.res`) are compiled to JavaScript (`.res.js`) automatically:
+
+```bash
+# Compile ReScript files
+pnpm --filter frontend exec rescript build
+
+# Clean compiled files
+pnpm --filter frontend exec rescript clean
+
+# Watch mode (auto-compile on changes)
+pnpm --filter frontend exec rescript build -w
+```
+
+### ReScript Migration Tools
+
+The `@rescript/tools` package provides utilities for migrating deprecated APIs:
+
+```bash
+# Migrate a single file from deprecated APIs to modern ones
+pnpm --filter frontend exec rescript-tools migrate src/path/to/file.res
+
+# Migrate all files in the project
+pnpm --filter frontend exec rescript-tools migrate-all .
+```
+
+**Common migrations:**
+- `Js.Json.t` → `JSON.t`
+- `Js.Json.decodeObject` → `JSON.Decode.object`
+- `Js.Json.decodeString` → `JSON.Decode.string`
+- `Js.Dict.empty` → `Dict.make`
+- `Js.Dict.get` → `Dict.get`
+- `Js.Dict.set` → `Dict.set`
+
+**Configuration:**
+
+Add `@rescript/tools` to `bsconfig.json`:
+
+```json
+{
+  "dev-dependencies": [
+    "@rescript/tools"
+  ]
+}
+```
+
+Then install:
+
+```bash
+pnpm --filter frontend add -D @rescript/tools
+```
+
+### ReScript File Organization
+
+```
+frontend/src/
+├── bindings/           # JavaScript interop bindings
+│   ├── Redux.res      # Redux Toolkit bindings
+│   ├── ReactRouter.res # React Router bindings
+│   └── Materialize.res # Materialize CSS bindings
+├── features/          # Type definitions for Redux state
+│   ├── auth/
+│   │   └── AuthTypes.res
+│   ├── roles/
+│   │   └── RoleTypes.res
+│   └── documents/
+│       └── DocumentTypes.res
+└── components/        # ReScript React components
+    └── *.res
 ```
 
 ## Testing Standards
@@ -259,4 +336,6 @@ See `frontend/MODERNIZATION.md` for complete modernization details.
 6. **Use typed hooks** - useAppDispatch and useAppSelector
 7. **Keep slices focused** - One slice per feature domain
 8. **Export selectors** - Make state access reusable
+9. **Use modern ReScript APIs** - Run migration tools to update deprecated code
+10. **Type Redux state** - Create ReScript type definitions for all slices
 

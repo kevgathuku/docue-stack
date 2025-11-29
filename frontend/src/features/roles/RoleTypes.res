@@ -21,28 +21,26 @@ type rolesState = {
 // JSON Decoders
 
 // Decode role from JSON
-let decodeRole: Js.Json.t => result<role, string> = json => {
-  switch Js.Json.decodeObject(json) {
+let decodeRole: JSON.t => result<role, string> = json => {
+  switch JSON.Decode.object(json) {
   | Some(obj) => {
-      let id = Js.Dict.get(obj, "_id")
-      let title = Js.Dict.get(obj, "title")
-      let accessLevel = Js.Dict.get(obj, "accessLevel")
-      
+      let id = Dict.get(obj, "_id")
+      let title = Dict.get(obj, "title")
+      let accessLevel = Dict.get(obj, "accessLevel")
+
       switch (id, title, accessLevel) {
-      | (Some(idJson), Some(titleJson), Some(accessLevelJson)) => {
-          switch (
-            Js.Json.decodeString(idJson),
-            Js.Json.decodeString(titleJson),
-            Js.Json.decodeNumber(accessLevelJson)
-          ) {
-          | (Some(idStr), Some(titleStr), Some(accessLevelNum)) =>
-              Ok({
-                id: idStr,
-                title: titleStr,
-                accessLevel: accessLevelNum->Belt.Float.toInt,
-              })
-          | _ => Error("Invalid role field types")
-          }
+      | (Some(idJson), Some(titleJson), Some(accessLevelJson)) => switch (
+          JSON.Decode.string(idJson),
+          JSON.Decode.string(titleJson),
+          JSON.Decode.float(accessLevelJson),
+        ) {
+        | (Some(idStr), Some(titleStr), Some(accessLevelNum)) =>
+          Ok({
+            id: idStr,
+            title: titleStr,
+            accessLevel: accessLevelNum->Belt.Float.toInt,
+          })
+        | _ => Error("Invalid role field types")
         }
       | _ => Error("Missing role fields")
       }
@@ -52,8 +50,8 @@ let decodeRole: Js.Json.t => result<role, string> = json => {
 }
 
 // Decode role list from JSON
-let decodeRoleList: Js.Json.t => result<roleList, string> = json => {
-  switch Js.Json.decodeArray(json) {
+let decodeRoleList: JSON.t => result<roleList, string> = json => {
+  switch JSON.Decode.array(json) {
   | Some(arr) => {
       let results = arr->Belt.Array.map(decodeRole)
       let errors = results->Belt.Array.keep(result => {
@@ -62,7 +60,7 @@ let decodeRoleList: Js.Json.t => result<roleList, string> = json => {
         | Ok(_) => false
         }
       })
-      
+
       if Belt.Array.length(errors) > 0 {
         Error("Failed to decode some roles")
       } else {
@@ -80,19 +78,19 @@ let decodeRoleList: Js.Json.t => result<roleList, string> = json => {
 }
 
 // Encode role to JSON (for API requests)
-let encodeRole: role => Js.Json.t = role => {
-  let dict = Js.Dict.empty()
-  Js.Dict.set(dict, "_id", Js.Json.string(role.id))
-  Js.Dict.set(dict, "title", Js.Json.string(role.title))
-  Js.Dict.set(dict, "accessLevel", Js.Json.number(Belt.Int.toFloat(role.accessLevel)))
-  Js.Json.object_(dict)
+let encodeRole: role => JSON.t = role => {
+  let dict = Dict.make()
+  Dict.set(dict, "_id", JSON.Encode.string(role.id))
+  Dict.set(dict, "title", JSON.Encode.string(role.title))
+  Dict.set(dict, "accessLevel", JSON.Encode.float(Belt.Int.toFloat(role.accessLevel)))
+  JSON.Encode.object(dict)
 }
 
 // Encode role creation data to JSON (without _id)
-let encodeRoleCreateData: string => Js.Json.t = title => {
-  let dict = Js.Dict.empty()
-  Js.Dict.set(dict, "title", Js.Json.string(title))
-  Js.Json.object_(dict)
+let encodeRoleCreateData: string => JSON.t = title => {
+  let dict = Dict.make()
+  Dict.set(dict, "title", JSON.Encode.string(title))
+  JSON.Encode.object(dict)
 }
 
 // Access level constants matching backend
@@ -100,7 +98,7 @@ module AccessLevel = {
   let viewer = 0
   let staff = 1
   let admin = 2
-  
+
   let toString = (level: int): string => {
     switch level {
     | 0 => "viewer"
@@ -109,7 +107,7 @@ module AccessLevel = {
     | _ => "unknown"
     }
   }
-  
+
   let fromString = (str: string): option<int> => {
     switch str {
     | "viewer" => Some(0)

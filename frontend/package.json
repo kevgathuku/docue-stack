@@ -34,6 +34,7 @@
     "@babel/preset-react": "^7.25.9",
     "@rescript/core": "^1.6.1",
     "@rescript/react": "^0.14.0",
+    "@rescript/tools": "^0.6.6",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
