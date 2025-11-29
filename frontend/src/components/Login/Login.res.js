@@ -5,6 +5,11 @@ import * as Materialize from "../../bindings/Materialize.res.js";
 import * as ReactRedux from "react-redux";
 import * as ReactRouterDom from "react-router-dom";
 import * as JsxRuntime from "react/jsx-runtime";
+import * as AuthSlice from "../../features/auth/authSlice";
+
+function login(prim) {
+  return AuthSlice.login(prim);
+}
 
 function reducer(state, action) {
   if (typeof action === "object") {
@@ -63,11 +68,7 @@ function Login(props) {
       username: state.email,
       password: state.password
     };
-    let loginAction = (function(credentials) {
-        const { login } = require('../../features/auth/authSlice');
-        return login(credentials);
-      });
-    reduxDispatch(loginAction(credentials));
+    reduxDispatch(AuthSlice.login(credentials));
   };
   React.useEffect(() => {
     if (state.loginAttempted) {
@@ -169,6 +170,7 @@ let make = Login;
 let $$default = Login;
 
 export {
+  login,
   reducer,
   initialState,
   make,

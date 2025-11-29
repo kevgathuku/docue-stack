@@ -2,27 +2,15 @@
 
 
 function showSuccess(message) {
-  M.toast({
-    html: message,
-    displayLength: 2000,
-    classes: "green rounded"
-  });
+  window.Materialize.toast(message, 2000, "success-toast");
 }
 
 function showError(message) {
-  M.toast({
-    html: message,
-    displayLength: 3000,
-    classes: "red rounded"
-  });
+  window.Materialize.toast(message, 2000, "error-toast");
 }
 
 function showInfo(message) {
-  M.toast({
-    html: message,
-    displayLength: 2000,
-    classes: "blue rounded"
-  });
+  window.Materialize.toast(message, 2000, "info-toast");
 }
 
 export {

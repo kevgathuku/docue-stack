@@ -5,6 +5,10 @@ open Redux
 open ReactRouter
 open Materialize
 
+// External binding for login action from authSlice
+@module("../../features/auth/authSlice")
+external login: {..} => {..} = "login"
+
 // Component state for form inputs
 type state = {
   email: string,
@@ -76,15 +80,7 @@ let make = () => {
     }
     
     // Dispatch Redux login action
-    // The action creator is imported from authSlice
-    let loginAction = %raw(`
-      function(credentials) {
-        const { login } = require('../../features/auth/authSlice');
-        return login(credentials);
-      }
-    `)
-    
-    reduxDispatch(loginAction(credentials))
+    reduxDispatch(login(credentials))
   }
   
   // Effect to handle login success/error
