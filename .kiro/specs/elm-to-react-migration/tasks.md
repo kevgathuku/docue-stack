@@ -176,13 +176,13 @@ This plan outlines the step-by-step migration of 7 Elm components and 1 React co
   - Verify API call is made with authentication token
   - _Requirements: 11.3_
 
-- [ ]* 8.3 Write unit tests for Admin component
+- [ ] 8.3 Write unit tests for Admin component
   - Test component renders stats cards
   - Test navigation links are present
   - Test error message display on API failure
   - _Requirements: 11.1, 11.3_
 
-- [ ] 9. Migrate RolesAdmin component (moderate - API fetching with table)
+- [x] 9. Migrate RolesAdmin component (moderate - API fetching with table)
   - Create components/RolesAdmin/RolesAdmin.res
   - Implement roles state with useState
   - Implement API call on component mount with useEffect
@@ -202,7 +202,7 @@ This plan outlines the step-by-step migration of 7 Elm components and 1 React co
   - Verify each role is displayed with title and access level
   - _Requirements: 11.1_
 
-- [ ]* 9.2 Write unit tests for RolesAdmin component
+- [x] 9.2 Write unit tests for RolesAdmin component
   - Test component renders table structure
   - Test floating action button is present
   - Test Materialize tooltip initialization
