@@ -22,7 +22,5 @@ export default {
     '<rootDir>/src/**/__tests__/**/*.{js,jsx}',
     '<rootDir>/src/**/?(*.)(spec|test).{js,jsx}',
   ],
-  testPathIgnorePatterns: [
-    '/node_modules/',
-  ],
+  testPathIgnorePatterns: ['/node_modules/'],
 };

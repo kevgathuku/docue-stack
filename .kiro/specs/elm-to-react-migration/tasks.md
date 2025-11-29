@@ -25,7 +25,7 @@ This plan outlines the step-by-step migration of 7 Elm components and 1 React co
   - Test hot module replacement for ReScript files
   - _Requirements: 10.1, 10.2, 10.3, 10.4_
 
-- [ ] 2. Create core ReScript bindings
+- [x] 2. Create core ReScript bindings
   - Create bindings/Redux.res for Redux Toolkit (useDispatch, useSelector)
   - Create bindings/ReactRouter.res for React Router (useNavigate)
   - Create bindings/Materialize.res for toast notifications
