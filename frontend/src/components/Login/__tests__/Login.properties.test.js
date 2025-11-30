@@ -135,9 +135,9 @@ describe('Login Component Property-Based Tests', () => {
           const emailInput = screen.getByLabelText(/email address/i);
 
           // Simulate user typing and changing their mind multiple times
-          emails.forEach((email) => {
+          for (const email of emails) {
             fireEvent.change(emailInput, { target: { value: email } });
-          });
+          }
 
           // Verify the input value reflects the last change
           expect(emailInput.value).toBe(emails[emails.length - 1]);
@@ -256,10 +256,10 @@ describe('Login Component Property-Based Tests', () => {
             const passwordInput = screen.getByLabelText(/password/i);
 
             // Simulate rapid typing
-            inputPairs.forEach(([email, password]) => {
+            for (const [email, password] of inputPairs) {
               fireEvent.change(emailInput, { target: { value: email } });
               fireEvent.change(passwordInput, { target: { value: password } });
-            });
+            }
 
             // Final values should match the last input pair
             const [lastEmail, lastPassword] = inputPairs[inputPairs.length - 1];

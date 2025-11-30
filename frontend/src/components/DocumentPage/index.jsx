@@ -101,15 +101,16 @@ const DocumentPage = ({ navigate, match }) => {
       </div>
       {docEdit}
       <div className="fixed-action-btn" style={{ bottom: 45, right: 24 }}>
-        <a className="btn-floating btn-large pink">
+        <button type="button" className="btn-floating btn-large pink">
           <i className="material-icons">toc</i>
-        </a>
+        </button>
         <ul>
           {
             /* If this user is the owner, display the delete button */
             owner ? (
               <li>
                 <button
+                  type="button"
                   className="btn-floating tooltipped red"
                   data-position="left"
                   data-delay="50"

@@ -144,7 +144,7 @@ describe('Admin ReScript Component', () => {
         json: async () => mockStats,
       });
 
-      const { container } = render(<Admin />);
+      render(<Admin />);
 
       await waitFor(() => {
         expect(screen.getByText('Admin Panel')).toBeInTheDocument();
@@ -193,12 +193,12 @@ describe('Admin ReScript Component', () => {
         const links = screen.getAllByRole('link');
         const manageLinks = links.filter((link) => link.textContent.includes('Manage'));
 
-        manageLinks.forEach((link) => {
+        for (const link of manageLinks) {
           expect(link).toHaveClass('waves-effect');
           expect(link).toHaveClass('waves-light');
           expect(link).toHaveClass('btn');
           expect(link).toHaveClass('blue');
-        });
+        }
       });
     });
 

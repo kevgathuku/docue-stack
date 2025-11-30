@@ -1,7 +1,6 @@
 const _ = require('underscore');
 const jwt = require('jsonwebtoken');
 const extractUserFromToken = require('./utils').extractUserFromToken;
-const Error = require('./utils').Error;
 const Documents = require('../models/documents');
 const Users = require('../models/users');
 const Roles = require('../models/roles');

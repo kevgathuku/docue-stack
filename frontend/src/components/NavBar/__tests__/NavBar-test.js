@@ -155,7 +155,7 @@ describe('NavBar', () => {
         },
       });
 
-      const { container } = render(
+      render(
         <Provider store={adminStore}>
           <BrowserRouter
             future={{

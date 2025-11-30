@@ -23,10 +23,10 @@ describe('ReScript Bindings', () => {
         'Fetch.res.js',
       ];
 
-      bindings.forEach((binding) => {
+      for (const binding of bindings) {
         const bindingPath = resolve(__dirname, `../${binding}`);
         expect(existsSync(bindingPath)).toBe(true);
-      });
+      }
     });
 
     it('should have corresponding source files', () => {
@@ -38,10 +38,10 @@ describe('ReScript Bindings', () => {
         'Fetch.res',
       ];
 
-      sources.forEach((source) => {
+      for (const source of sources) {
         const sourcePath = resolve(__dirname, `../${source}`);
         expect(existsSync(sourcePath)).toBe(true);
-      });
+      }
     });
   });
 

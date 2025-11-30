@@ -304,10 +304,10 @@ describe('Cross-Component Error Toast Property Tests', () => {
               // All error toasts should have:
               // - duration of 2000ms
               // - className of 'error-toast'
-              errorToasts.forEach((toast) => {
+              for (const toast of errorToasts) {
                 expect(toast.duration).toBe(2000);
                 expect(toast.className).toBe('error-toast');
-              });
+              }
             });
           } finally {
             unmount();

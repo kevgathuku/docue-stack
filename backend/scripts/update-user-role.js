@@ -70,7 +70,12 @@ async function updateUserRole() {
       console.error(`❌ Role not found: ${roleName}`);
       console.log('\nAvailable roles in database:');
       const allRoles = await Role.find({});
-      allRoles.forEach((r) => console.log(`  - ${r.title} (accessLevel: ${r.accessLevel})`));
+      console.table(
+        allRoles.map((r) => ({
+          title: r.title,
+          accessLevel: r.accessLevel,
+        }))
+      );
       process.exit(1);
     }
 

@@ -111,12 +111,16 @@ const DocEdit = ({ doc, roles, updateDoc }) => {
       <div className="modal-footer">
         <div className="container">
           <button
+            type="button"
             className="btn modal-action modal-close waves-effect blue right"
             onClick={handleSubmit}
           >
             update
           </button>
-          <button className="btn modal-action modal-close waves-effect red accent-2 left">
+          <button
+            type="button"
+            className="btn modal-action modal-close waves-effect red accent-2 left"
+          >
             cancel
           </button>
         </div>
