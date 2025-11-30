@@ -1,17 +1,15 @@
-'use strict';
-
 import { jest } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import DocList from '../DocList.jsx';
 
-describe('DocList', function() {
+describe('DocList', () => {
   let mockDocs;
 
-  beforeEach(function() {
+  beforeEach(() => {
     // Mock jQuery tooltip functions
     const tooltipMock = jest.fn();
-    window.$ = jest.fn((selector) => ({
+    window.$ = jest.fn((_selector) => ({
       tooltip: tooltipMock,
     }));
     window.$.tooltipMock = tooltipMock;
@@ -26,9 +24,9 @@ describe('DocList', function() {
           _id: 3,
           name: {
             first: 'Kevin',
-            last: 'Gathuku'
-          }
-        }
+            last: 'Gathuku',
+          },
+        },
       },
       {
         _id: 3,
@@ -39,10 +37,10 @@ describe('DocList', function() {
           _id: 4,
           name: {
             first: 'Jane',
-            last: 'Doe'
-          }
-        }
-      }
+            last: 'Doe',
+          },
+        },
+      },
     ];
   });
 
@@ -59,70 +57,70 @@ describe('DocList', function() {
     );
   };
 
-  describe('Component Rendering', function() {
-    it('displays the correct contents', function() {
+  describe('Component Rendering', () => {
+    it('displays the correct contents', () => {
       renderWithRouter(<DocList docs={mockDocs} />);
-      
+
       // It should find the owner's first name
       expect(screen.getByText(/Kevin/i)).toBeInTheDocument();
       expect(screen.getByText(/Jane/i)).toBeInTheDocument();
     });
 
-    it('should activate the materialize tooltips', function() {
+    it('should activate the materialize tooltips', () => {
       renderWithRouter(<DocList docs={mockDocs} />);
-      
+
       // The tooltips should be activated once after the component is mounted
       expect(window.$).toHaveBeenCalledWith('.tooltipped');
       expect(window.$.tooltipMock).toHaveBeenCalled();
     });
 
-    it('renders the correct component structure', function() {
+    it('renders the correct component structure', () => {
       const { container } = renderWithRouter(<DocList docs={mockDocs} />);
-      
+
       // Should render one card per document
       const cards = container.querySelectorAll('.card-image');
       expect(cards.length).toEqual(mockDocs.length);
-      
+
       // Should render one button per document
       const buttons = container.querySelectorAll('.btn-floating');
       expect(buttons.length).toEqual(mockDocs.length);
     });
 
-    it('renders document titles', function() {
+    it('renders document titles', () => {
       renderWithRouter(<DocList docs={mockDocs} />);
-      
+
       expect(screen.getByText('Test Document')).toBeInTheDocument();
       expect(screen.getByText('Another Document')).toBeInTheDocument();
     });
 
-    it('renders owner information for each document', function() {
+    it('renders owner information for each document', () => {
       renderWithRouter(<DocList docs={mockDocs} />);
-      
+
       // Check first document owner
       expect(screen.getByText(/By:\s+Kevin Gathuku/i)).toBeInTheDocument();
-      
+
       // Check second document owner
       expect(screen.getByText(/By:\s+Jane Doe/i)).toBeInTheDocument();
     });
 
-    it('renders view links for each document', function() {
+    it('renders view links for each document', () => {
       const { container } = renderWithRouter(<DocList docs={mockDocs} />);
-      
+
       // Should have links to view each document
       const links = container.querySelectorAll('a[href^="/documents/"]');
       expect(links.length).toEqual(mockDocs.length);
-      
+
       // Check that links point to correct document IDs
       expect(links[0].getAttribute('href')).toBe('/documents/2');
       expect(links[1].getAttribute('href')).toBe('/documents/3');
     });
 
-    it('renders with empty docs array', function() {
+    it('renders with empty docs array', () => {
       const { container } = renderWithRouter(<DocList docs={[]} />);
-      
+
       // Should render without errors
       expect(container.firstChild).toBeInTheDocument();
-      
+
       // Should not render any cards
       const cards = container.querySelectorAll('.card');
       expect(cards.length).toEqual(0);

@@ -1,9 +1,9 @@
-const express = require('express'),
-  router = express.Router(),
-  Documents = require('../models/documents'),
-  Roles = require('../models/roles'),
-  UsersController = require('../controllers/users'),
-  Users = require('../models/users');
+const express = require('express');
+const router = express.Router();
+const Documents = require('../models/documents');
+const Roles = require('../models/roles');
+const UsersController = require('../controllers/users');
+const Users = require('../models/users');
 
 router.use('/api', require('./roles'));
 router.use('/api', require('./users'));
@@ -13,23 +13,23 @@ const stats = (req, res) => {
   // This action is available to admin roles only
   if (req.decoded.role.title !== 'admin') {
     res.status(403).json({
-      error: 'Unauthorized Access'
+      error: 'Unauthorized Access',
     });
   } else {
     Promise.all([
       Documents.countDocuments().exec(),
       Users.countDocuments().exec(),
-      Roles.countDocuments().exec()
+      Roles.countDocuments().exec(),
     ])
-      .then(function(counts) {
+      .then((counts) => {
         const [docsCount, usersCount, rolesCount] = counts;
         res.json({
           documents: docsCount,
           roles: rolesCount,
-          users: usersCount
+          users: usersCount,
         });
       })
-      .catch(err => {
+      .catch((err) => {
         res.next(err);
       });
   }

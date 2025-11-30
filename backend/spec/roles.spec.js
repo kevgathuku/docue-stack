@@ -1,6 +1,4 @@
 describe('Roles Spec', () => {
-  'use strict';
-
   const request = require('supertest');
   const helper = require('./helper');
   const app = require('../index');
@@ -16,11 +14,11 @@ describe('Roles Spec', () => {
       const res = await request(app)
         .post('/api/roles')
         .send({
-          title: 'admin'
+          title: 'admin',
         })
         .set('Accept', 'application/json')
         .set('x-access-token', token);
-      
+
       expect(res.statusCode).toBe(201);
       expect(res.body.title).toBe('admin');
       // Should assign the accessLevel correctly
@@ -32,11 +30,11 @@ describe('Roles Spec', () => {
       const res = await request(app)
         .post('/api/roles')
         .send({
-          title: ''
+          title: '',
         })
         .set('Accept', 'application/json')
         .set('x-access-token', token);
-      
+
       expect(res.statusCode).toBe(400);
       expect(res.body.error).toBe('The role title is required');
     });
@@ -46,11 +44,11 @@ describe('Roles Spec', () => {
       const res = await request(app)
         .post('/api/roles')
         .send({
-          title: 'viewer'
+          title: 'viewer',
         })
         .set('Accept', 'application/json')
         .set('x-access-token', token);
-      
+
       expect(res.statusCode).toBe(400);
       expect(res.body.title).toBeUndefined();
       expect(res.body.error).toBe('Role already exists');
@@ -61,10 +59,10 @@ describe('Roles Spec', () => {
       const res = await request(app)
         .post('/api/roles')
         .send({
-          title: 'viewer'
+          title: 'viewer',
         })
         .set('Accept', 'application/json');
-      
+
       expect(res.statusCode).toBe(403);
       expect(res.body.error).toBe('No token provided.');
     });
@@ -74,15 +72,14 @@ describe('Roles Spec', () => {
       const res = await request(app)
         .post('/api/roles')
         .send({
-          title: invalidTitle
+          title: invalidTitle,
         })
         .set('Accept', 'application/json')
         .set('x-access-token', token);
-      
-      expect(res.statusCode).toBe(400);
-      expect(res.body.error).toBe(invalidTitle + ' is not a valid role title');
-    });
 
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toBe(`${invalidTitle} is not a valid role title`);
+    });
   });
 
   describe('Get All Roles', () => {
@@ -92,22 +89,18 @@ describe('Roles Spec', () => {
         .get('/api/roles')
         .set('x-access-token', token)
         .set('Accept', 'application/json');
-      
+
       expect(res.statusCode).toBe(200);
       expect(res.body.length).toBe(2);
     });
 
     it('getAllRoles should return the correct roles', async () => {
-      const res = await request(app)
-        .get('/api/roles')
-        .set('x-access-token', token);
-      
-      const allRoles = res.body.map(role => role.title);
+      const res = await request(app).get('/api/roles').set('x-access-token', token);
+
+      const allRoles = res.body.map((role) => role.title);
       expect(res.body.length).toBe(2);
       expect(allRoles).toContain('viewer');
       expect(allRoles).toContain('staff');
     });
-
   });
-
 });

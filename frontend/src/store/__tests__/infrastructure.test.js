@@ -1,9 +1,9 @@
+import { useAppDispatch, useAppSelector } from '../hooks';
 /**
  * Test to verify Redux infrastructure is properly set up
  * Requirements: 1.1, 1.4, 1.5
  */
-import { store, RootState, AppDispatch } from '../index';
-import { useAppDispatch, useAppSelector } from '../hooks';
+import { AppDispatch, RootState, store } from '../index';
 
 describe('Redux Infrastructure Setup', () => {
   describe('Dependencies', () => {
@@ -22,7 +22,7 @@ describe('Redux Infrastructure Setup', () => {
 
     test('fast-check should be available for property-based testing', () => {
       // Verify fast-check can be imported
-      return import('fast-check').then(fc => {
+      return import('fast-check').then((fc) => {
         expect(fc).toBeDefined();
         expect(fc.assert).toBeDefined();
         expect(fc.property).toBeDefined();

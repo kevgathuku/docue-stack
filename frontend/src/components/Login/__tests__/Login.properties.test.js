@@ -1,15 +1,15 @@
 /**
  * Property-Based Tests for Login ReScript Component
- * 
+ *
  * These tests verify that the Login component maintains correct form state
  * management behavior across all possible input combinations.
  */
 
-import * as fc from 'fast-check';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
-import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
+import { fireEvent, render, screen } from '@testing-library/react';
+import * as fc from 'fast-check';
+import { Provider } from 'react-redux';
+import { BrowserRouter } from 'react-router-dom';
 import authReducer from '../../../features/auth/authSlice';
 import Login from '../Login.res.js';
 
@@ -43,7 +43,7 @@ describe('Login Component Property-Based Tests', () => {
     // Mock Materialize toast - matches the signature from Materialize.res
     // toast: (message: string, duration: int, className: string) => unit
     global.window.Materialize = {
-      toast: (message, duration, className) => {},
+      toast: (_message, _duration, _className) => {},
     };
 
     // Mock localStorage
@@ -58,7 +58,7 @@ describe('Login Component Property-Based Tests', () => {
   /**
    * **Feature: elm-to-react-migration, Property 1: Form state updates reflect input changes**
    * **Validates: Requirements 1.1**
-   * 
+   *
    * For any login form and any valid email/password input, updating the input field
    * should result in the form state containing that exact value.
    */
@@ -76,7 +76,7 @@ describe('Login Component Property-Based Tests', () => {
           renderWithProviders(<Login />, store);
 
           const emailInput = screen.getByLabelText(/email address/i);
-          
+
           // Simulate user typing email
           fireEvent.change(emailInput, { target: { value: email } });
 
@@ -94,7 +94,7 @@ describe('Login Component Property-Based Tests', () => {
           renderWithProviders(<Login />, store);
 
           const passwordInput = screen.getByLabelText(/password/i);
-          
+
           // Simulate user typing password
           fireEvent.change(passwordInput, { target: { value: password } });
 
@@ -113,7 +113,7 @@ describe('Login Component Property-Based Tests', () => {
 
           const emailInput = screen.getByLabelText(/email address/i);
           const passwordInput = screen.getByLabelText(/password/i);
-          
+
           // Simulate user typing both fields
           fireEvent.change(emailInput, { target: { value: email } });
           fireEvent.change(passwordInput, { target: { value: password } });
@@ -128,23 +128,20 @@ describe('Login Component Property-Based Tests', () => {
 
     it('should handle multiple updates to the same field', () => {
       fc.assert(
-        fc.property(
-          fc.array(emailArb, { minLength: 1, maxLength: 5 }),
-          (emails) => {
-            const store = createMockStore();
-            renderWithProviders(<Login />, store);
+        fc.property(fc.array(emailArb, { minLength: 1, maxLength: 5 }), (emails) => {
+          const store = createMockStore();
+          renderWithProviders(<Login />, store);
 
-            const emailInput = screen.getByLabelText(/email address/i);
-            
-            // Simulate user typing and changing their mind multiple times
-            emails.forEach((email) => {
-              fireEvent.change(emailInput, { target: { value: email } });
-            });
+          const emailInput = screen.getByLabelText(/email address/i);
 
-            // Verify the input value reflects the last change
-            expect(emailInput.value).toBe(emails[emails.length - 1]);
+          // Simulate user typing and changing their mind multiple times
+          for (const email of emails) {
+            fireEvent.change(emailInput, { target: { value: email } });
           }
-        ),
+
+          // Verify the input value reflects the last change
+          expect(emailInput.value).toBe(emails[emails.length - 1]);
+        }),
         { numRuns: 20 }
       );
     });
@@ -157,10 +154,10 @@ describe('Login Component Property-Based Tests', () => {
 
           const emailInput = screen.getByLabelText(/email address/i);
           const passwordInput = screen.getByLabelText(/password/i);
-          
+
           // Set email first
           fireEvent.change(emailInput, { target: { value: email } });
-          
+
           // Update password multiple times
           fireEvent.change(passwordInput, { target: { value: password1 } });
           fireEvent.change(passwordInput, { target: { value: password2 } });
@@ -181,10 +178,10 @@ describe('Login Component Property-Based Tests', () => {
 
           const emailInput = screen.getByLabelText(/email address/i);
           const passwordInput = screen.getByLabelText(/password/i);
-          
+
           // Set password first
           fireEvent.change(passwordInput, { target: { value: password } });
-          
+
           // Update email multiple times
           fireEvent.change(emailInput, { target: { value: email1 } });
           fireEvent.change(emailInput, { target: { value: email2 } });
@@ -205,7 +202,7 @@ describe('Login Component Property-Based Tests', () => {
 
           const emailInput = screen.getByLabelText(/email address/i);
           const passwordInput = screen.getByLabelText(/password/i);
-          
+
           // Set values
           fireEvent.change(emailInput, { target: { value: email } });
           fireEvent.change(passwordInput, { target: { value: password } });
@@ -233,7 +230,7 @@ describe('Login Component Property-Based Tests', () => {
 
             const emailInput = screen.getByLabelText(/email address/i);
             const passwordInput = screen.getByLabelText(/password/i);
-            
+
             // Use the string as-is for password (can contain special chars)
             fireEvent.change(emailInput, { target: { value: emailPart } });
             fireEvent.change(passwordInput, { target: { value: password } });
@@ -257,12 +254,12 @@ describe('Login Component Property-Based Tests', () => {
 
             const emailInput = screen.getByLabelText(/email address/i);
             const passwordInput = screen.getByLabelText(/password/i);
-            
+
             // Simulate rapid typing
-            inputPairs.forEach(([email, password]) => {
+            for (const [email, password] of inputPairs) {
               fireEvent.change(emailInput, { target: { value: email } });
               fireEvent.change(passwordInput, { target: { value: password } });
-            });
+            }
 
             // Final values should match the last input pair
             const [lastEmail, lastPassword] = inputPairs[inputPairs.length - 1];
@@ -285,7 +282,7 @@ describe('Login Component Property-Based Tests', () => {
 
             const emailInput = screen.getByLabelText(/email address/i);
             const passwordInput = screen.getByLabelText(/password/i);
-            
+
             // Set very long values
             fireEvent.change(emailInput, { target: { value: longEmail } });
             fireEvent.change(passwordInput, { target: { value: longPassword } });

@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import request from 'superagent';
 import { BASE_URL } from '../../config/api.js';
 
@@ -19,9 +19,7 @@ export const fetchRoles = createAsyncThunk(
   'roles/fetchRoles',
   async (token, { rejectWithValue }) => {
     try {
-      const result = await request
-        .get(`${BASE_URL}/api/roles`)
-        .set('x-access-token', token);
+      const result = await request.get(`${BASE_URL}/api/roles`).set('x-access-token', token);
       return result.body;
     } catch (err) {
       return rejectWithValue(err.response?.body?.error || err.message);
@@ -89,8 +87,8 @@ const rolesSlice = createSlice({
   },
 });
 
-// Export actions (currently none, but structure is ready)
-export const {} = rolesSlice.actions;
+// Export actions if needed in the future
+// export const {} = rolesSlice.actions;
 
 // Selectors
 export const selectRoles = (state) => state.roles.roles;

@@ -1,6 +1,4 @@
-'use strict';
-
-var env = process.env.NODE_ENV || 'development';
+const env = process.env.NODE_ENV || 'development';
 
 // load .env only in dev mode
 if (env === 'development') {
@@ -10,27 +8,27 @@ if (env === 'development') {
 const Roles = require('../server/models/roles');
 const titles = Object.keys(Roles.ACCESS_LEVEL);
 
-exports.up = function(next) {
-
-  let tasks = titles.map((title) => {
-    let update = {
+exports.up = (next) => {
+  const tasks = titles.map((title) => {
+    const update = {
       title: title,
-      accessLevel: Roles.ACCESS_LEVEL[title]
+      accessLevel: Roles.ACCESS_LEVEL[title],
     };
-    return Roles.findOneAndUpdate({title: title}, update, {upsert: true});
+    return Roles.findOneAndUpdate({ title: title }, update, { upsert: true });
   });
 
   Promise.all(tasks)
-    .then(()=> { next(); })
+    .then(() => {
+      next();
+    })
     .catch((error) => {
       console.error(error);
       next();
     });
 };
 
-exports.down = function(next) {
-
-  Roles.remove({ title: { $in: titles}})
+exports.down = (next) => {
+  Roles.remove({ title: { $in: titles } })
     .then(() => next())
     .catch((error) => {
       console.error(error);

@@ -1,15 +1,15 @@
 import { jest } from '@jest/globals';
-import { render, screen } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
-import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
+import { render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { BrowserRouter } from 'react-router-dom';
 import authReducer from '../../../features/auth/authSlice';
 import SignUp from '../SignUp.res.js';
 
-describe('SignUp', function() {
+describe('SignUp', () => {
   let mockStore;
 
-  beforeEach(function() {
+  beforeEach(() => {
     // Create a mock store with auth slice
     mockStore = configureStore({
       reducer: {
@@ -38,18 +38,18 @@ describe('SignUp', function() {
     );
   };
 
-  describe('Component Rendering', function() {
-    it('displays the correct contents', function() {
+  describe('Component Rendering', () => {
+    it('displays the correct contents', () => {
       renderWithProviders(<SignUp />);
-      
+
       // It should find the correct content
       expect(screen.getByLabelText(/First Name/i)).toBeInTheDocument();
       expect(screen.getByText(/Sign up/i)).toBeInTheDocument();
     });
 
-    it('renders the correct form fields', function() {
+    it('renders the correct form fields', () => {
       renderWithProviders(<SignUp />);
-      
+
       expect(screen.getByLabelText(/First Name/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/Last Name/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
@@ -58,10 +58,10 @@ describe('SignUp', function() {
     });
   });
 
-  describe('Redux Integration', function() {
-    it('should access auth state from Redux store', function() {
+  describe('Redux Integration', () => {
+    it('should access auth state from Redux store', () => {
       renderWithProviders(<SignUp />);
-      
+
       const state = mockStore.getState();
       expect(state.auth).toBeDefined();
       expect(state.auth.signupError).toBeNull();
@@ -69,9 +69,9 @@ describe('SignUp', function() {
       expect(state.auth.user).toEqual({});
     });
 
-    it('should use Redux session state', function() {
+    it('should use Redux session state', () => {
       renderWithProviders(<SignUp />);
-      
+
       const state = mockStore.getState();
       expect(state.auth.session).toBeDefined();
       expect(state.auth.session.loggedIn).toBe(false);

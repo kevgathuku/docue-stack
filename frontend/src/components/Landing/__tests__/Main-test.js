@@ -1,17 +1,15 @@
-'use strict';
-
 import { jest } from '@jest/globals';
-import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
+import { render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { MemoryRouter } from 'react-router-dom';
 import authReducer from '../../../features/auth/authSlice';
 import { DefaultLayout } from '../Main.jsx';
 
-describe('DefaultLayout component', function() {
+describe('DefaultLayout component', () => {
   let mockStore;
 
-  beforeEach(function() {
+  beforeEach(() => {
     // Create a mock store with auth slice
     mockStore = configureStore({
       reducer: {
@@ -20,7 +18,7 @@ describe('DefaultLayout component', function() {
     });
 
     // Mock jQuery functions for NavBar
-    window.$ = jest.fn((selector) => ({
+    window.$ = jest.fn((_selector) => ({
       dropdown: jest.fn(),
       sideNav: jest.fn(),
     }));
@@ -43,39 +41,39 @@ describe('DefaultLayout component', function() {
     );
   };
 
-  it('renders the component passed as prop', function() {
+  it('renders the component passed as prop', () => {
     renderWithProviders('/dashboard');
-    
+
     // Should render the test component
     expect(screen.getByTestId('test-component')).toBeInTheDocument();
     expect(screen.getByText('Test Content')).toBeInTheDocument();
   });
 
-  it('renders the NavBar component on non-home pages', function() {
+  it('renders the NavBar component on non-home pages', () => {
     const { container } = renderWithProviders('/dashboard');
-    
+
     // NavBar should be rendered on non-home pages
     const nav = container.querySelector('nav');
     expect(nav).toBeInTheDocument();
-    
+
     // Component should also be rendered
     expect(screen.getByTestId('test-component')).toBeInTheDocument();
   });
 
-  it('does not render NavBar on home page', function() {
+  it('does not render NavBar on home page', () => {
     const { container } = renderWithProviders('/');
-    
+
     // NavBar should NOT be rendered on home page
     const nav = container.querySelector('nav');
     expect(nav).not.toBeInTheDocument();
-    
+
     // But component should still be rendered
     expect(screen.getByTestId('test-component')).toBeInTheDocument();
   });
 
-  it('wraps content with Provider', function() {
+  it('wraps content with Provider', () => {
     renderWithProviders('/dashboard');
-    
+
     // Component should render successfully (Provider is working)
     expect(screen.getByTestId('test-component')).toBeInTheDocument();
   });

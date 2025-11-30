@@ -1,6 +1,6 @@
 /**
  * Tests for Profile ReScript component
- * 
+ *
  * Requirements tested:
  * - 2.1: Profile view displays user data
  * - 2.2: Edit button toggles to edit form
@@ -16,7 +16,7 @@
  */
 
 import { jest } from '@jest/globals';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import Profile from '../Profile.res.js';
 
 describe('Profile Component (ReScript)', () => {
@@ -88,31 +88,31 @@ describe('Profile Component (ReScript)', () => {
 
     it('displays user profile information', () => {
       render(<Profile />);
-      
+
       // Check that the profile view is rendered
       expect(screen.getByText('My Profile')).toBeInTheDocument();
-      
+
       // Check that user name is displayed
       expect(screen.getByText('Khaled Another One')).toBeInTheDocument();
-      
+
       // Check that email is displayed
       expect(screen.getByText(/Email: khaled@anotherone.com/)).toBeInTheDocument();
-      
+
       // Check that role is displayed
       expect(screen.getByText(/Role: viewer/)).toBeInTheDocument();
     });
 
     it('shows loading state when no user info', () => {
       localStorageMock.getItem = jest.fn(() => null);
-      
+
       render(<Profile />);
-      
+
       expect(screen.getByText('Loading profile...')).toBeInTheDocument();
     });
 
     it('displays edit button in profile view', () => {
       const { container } = render(<Profile />);
-      
+
       const editButton = container.querySelector('.btn-floating');
       expect(editButton).toBeInTheDocument();
       expect(editButton).toHaveClass('btn-floating');
@@ -122,15 +122,15 @@ describe('Profile Component (ReScript)', () => {
   describe('View/Edit Toggle', () => {
     it('toggles to edit form when edit button is clicked', () => {
       const { container } = render(<Profile />);
-      
+
       // Initially in profile view
       expect(screen.getByText('My Profile')).toBeInTheDocument();
       expect(screen.queryByText('Edit Profile')).not.toBeInTheDocument();
-      
+
       // Click edit button (find by class since it's an <a> without href)
       const editButton = container.querySelector('.btn-floating');
       fireEvent.click(editButton);
-      
+
       // Now in edit view
       expect(screen.getByText('Edit Profile')).toBeInTheDocument();
       expect(screen.queryByText('My Profile')).not.toBeInTheDocument();
@@ -138,16 +138,16 @@ describe('Profile Component (ReScript)', () => {
 
     it('returns to profile view when cancel button is clicked', () => {
       const { container } = render(<Profile />);
-      
+
       // Toggle to edit view
       const editButton = container.querySelector('.btn-floating');
       fireEvent.click(editButton);
       expect(screen.getByText('Edit Profile')).toBeInTheDocument();
-      
+
       // Click cancel button
       const cancelButton = screen.getByRole('button', { name: /cancel/i });
       fireEvent.click(cancelButton);
-      
+
       // Back to profile view
       expect(screen.getByText('My Profile')).toBeInTheDocument();
       expect(screen.queryByText('Edit Profile')).not.toBeInTheDocument();
@@ -157,71 +157,71 @@ describe('Profile Component (ReScript)', () => {
   describe('Form Input Updates', () => {
     it('updates email state when typing', () => {
       const { container } = render(<Profile />);
-      
+
       // Toggle to edit view
       const editButton = container.querySelector('.btn-floating');
       fireEvent.click(editButton);
-      
+
       // Find and update email input
       const emailInput = screen.getByLabelText(/email/i);
       fireEvent.change(emailInput, { target: { value: 'newemail@example.com' } });
-      
+
       expect(emailInput.value).toBe('newemail@example.com');
     });
 
     it('updates first name state when typing', () => {
       const { container } = render(<Profile />);
-      
+
       // Toggle to edit view
       const editButton = container.querySelector('.btn-floating');
       fireEvent.click(editButton);
-      
+
       // Find and update first name input
       const firstNameInput = screen.getByLabelText(/first name/i);
       fireEvent.change(firstNameInput, { target: { value: 'NewFirst' } });
-      
+
       expect(firstNameInput.value).toBe('NewFirst');
     });
 
     it('updates last name state when typing', () => {
       const { container } = render(<Profile />);
-      
+
       // Toggle to edit view
       const editButton = container.querySelector('.btn-floating');
       fireEvent.click(editButton);
-      
+
       // Find and update last name input
       const lastNameInput = screen.getByLabelText(/last name/i);
       fireEvent.change(lastNameInput, { target: { value: 'NewLast' } });
-      
+
       expect(lastNameInput.value).toBe('NewLast');
     });
 
     it('updates password state when typing', () => {
       const { container } = render(<Profile />);
-      
+
       // Toggle to edit view
       const editButton = container.querySelector('.btn-floating');
       fireEvent.click(editButton);
-      
+
       // Find and update password input
       const passwordInput = screen.getByLabelText(/new password/i);
       fireEvent.change(passwordInput, { target: { value: 'newpassword123' } });
-      
+
       expect(passwordInput.value).toBe('newpassword123');
     });
 
     it('updates password confirmation state when typing', () => {
       const { container } = render(<Profile />);
-      
+
       // Toggle to edit view
       const editButton = container.querySelector('.btn-floating');
       fireEvent.click(editButton);
-      
+
       // Find and update password confirmation input
       const confirmInput = screen.getByLabelText(/confirm password/i);
       fireEvent.change(confirmInput, { target: { value: 'newpassword123' } });
-      
+
       expect(confirmInput.value).toBe('newpassword123');
     });
   });
@@ -229,21 +229,21 @@ describe('Profile Component (ReScript)', () => {
   describe('Password Validation', () => {
     it('shows error toast when passwords do not match', () => {
       const { container } = render(<Profile />);
-      
+
       // Toggle to edit view
       const editButton = container.querySelector('.btn-floating');
       fireEvent.click(editButton);
-      
+
       // Enter mismatched passwords
       const passwordInput = screen.getByLabelText(/new password/i);
       const confirmInput = screen.getByLabelText(/confirm password/i);
       fireEvent.change(passwordInput, { target: { value: 'password123' } });
       fireEvent.change(confirmInput, { target: { value: 'different123' } });
-      
+
       // Submit form
       const updateButton = screen.getByRole('button', { name: /update/i });
       fireEvent.click(updateButton);
-      
+
       // Check that error toast was called
       expect(materializeToastMock).toHaveBeenCalledWith(
         "Passwords don't match",
@@ -254,21 +254,21 @@ describe('Profile Component (ReScript)', () => {
 
     it('shows error toast when password is too short', () => {
       const { container } = render(<Profile />);
-      
+
       // Toggle to edit view
       const editButton = container.querySelector('.btn-floating');
       fireEvent.click(editButton);
-      
+
       // Enter short password
       const passwordInput = screen.getByLabelText(/new password/i);
       const confirmInput = screen.getByLabelText(/confirm password/i);
       fireEvent.change(passwordInput, { target: { value: 'short' } });
       fireEvent.change(confirmInput, { target: { value: 'short' } });
-      
+
       // Submit form
       const updateButton = screen.getByRole('button', { name: /update/i });
       fireEvent.click(updateButton);
-      
+
       // Check that error toast was called
       expect(materializeToastMock).toHaveBeenCalledWith(
         'Passwords should be > 6 characters',
@@ -300,19 +300,19 @@ describe('Profile Component (ReScript)', () => {
       });
 
       const { container } = render(<Profile />);
-      
+
       // Toggle to edit view
       const editButton = container.querySelector('.btn-floating');
       fireEvent.click(editButton);
-      
+
       // Update fields (without password)
       const emailInput = screen.getByLabelText(/email/i);
       fireEvent.change(emailInput, { target: { value: 'updated@example.com' } });
-      
+
       // Submit form
       const updateButton = screen.getByRole('button', { name: /update/i });
       fireEvent.click(updateButton);
-      
+
       // Wait for async operations
       await waitFor(() => {
         expect(materializeToastMock).toHaveBeenCalledWith(
@@ -323,10 +323,7 @@ describe('Profile Component (ReScript)', () => {
       });
 
       // Check that localStorage was updated
-      expect(localStorageMock.setItem).toHaveBeenCalledWith(
-        'userInfo',
-        expect.any(String)
-      );
+      expect(localStorageMock.setItem).toHaveBeenCalledWith('userInfo', expect.any(String));
     });
   });
 
@@ -339,19 +336,19 @@ describe('Profile Component (ReScript)', () => {
       });
 
       const { container } = render(<Profile />);
-      
+
       // Toggle to edit view
       const editButton = container.querySelector('.btn-floating');
       fireEvent.click(editButton);
-      
+
       // Update fields
       const emailInput = screen.getByLabelText(/email/i);
       fireEvent.change(emailInput, { target: { value: 'updated@example.com' } });
-      
+
       // Submit form
       const updateButton = screen.getByRole('button', { name: /update/i });
       fireEvent.click(updateButton);
-      
+
       // Wait for async operations
       await waitFor(() => {
         expect(materializeToastMock).toHaveBeenCalledWith(

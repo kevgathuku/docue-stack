@@ -3,7 +3,7 @@ import { store } from '../index';
 describe('Redux Store Configuration', () => {
   test('store should be created with correct structure', () => {
     const state = store.getState();
-    
+
     expect(state).toHaveProperty('auth');
     expect(state).toHaveProperty('documents');
     expect(state).toHaveProperty('roles');
@@ -11,7 +11,7 @@ describe('Redux Store Configuration', () => {
 
   test('auth state should have correct initial structure', () => {
     const state = store.getState();
-    
+
     // Verify auth state matches existing reducer structure
     expect(state.auth).toHaveProperty('users');
     expect(state.auth).toHaveProperty('session');

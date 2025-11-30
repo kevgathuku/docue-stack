@@ -1,23 +1,23 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter as Router, Navigate, Routes, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { store } from './store';
+import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import * as serviceWorker from './serviceWorker';
+import { store } from './store';
 
-import Auth from './components/Auth/Auth.jsx';
 import Admin from './components/Admin/Admin.res.js';
+import Auth from './components/Auth/Auth.jsx';
 import CreateDocument from './components/CreateDocument/index.jsx';
 import CreateRole from './components/CreateRole/CreateRole.res.js';
-import DocumentPage from './components/DocumentPage/index.jsx';
 import Dashboard from './components/Dashboard/index.jsx';
+import DocumentPage from './components/DocumentPage/index.jsx';
 import Landing from './components/Landing/Landing.res.js';
-import Profile from './components/Profile/Profile.res.js';
 import { DefaultLayout } from './components/Landing/Main.jsx';
 import NotFound from './components/NotFound/NotFound.res.js';
+import PrivateRoute from './components/PrivateRoute.jsx';
+import Profile from './components/Profile/Profile.res.js';
 import RolesAdmin from './components/RolesAdmin/RolesAdmin.res.js';
 import UsersAdmin from './components/UsersAdmin/UsersAdmin.jsx';
-import PrivateRoute from './components/PrivateRoute.jsx';
 
 import 'normalize.css/normalize.css';
 import './styles/style.css';
@@ -37,7 +37,7 @@ root.render(
         <Route path="/" element={<DefaultLayout component={Landing} />} />
         <Route path="/auth" element={<DefaultLayout component={Auth} />} />
         <Route path="/404" element={<DefaultLayout component={NotFound} />} />
-        
+
         {/* Protected routes - require authentication */}
         <Route
           path="/dashboard"
@@ -103,7 +103,7 @@ root.render(
             </PrivateRoute>
           }
         />
-        
+
         {/* Catch all - redirect to 404 */}
         <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>

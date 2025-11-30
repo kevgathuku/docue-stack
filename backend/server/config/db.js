@@ -1,8 +1,3 @@
-/**
- * eslint no-console: 0
- */
-'use strict';
-
 const mongoose = require('mongoose');
 // load .env only in dev mode
 if (process.env.NODE_ENV === 'development') {

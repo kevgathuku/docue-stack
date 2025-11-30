@@ -12,7 +12,7 @@ export const createDropdownButton = (userName, onClick) => {
       'data-activates': 'dropdown',
       'data-beloworigin': 'true',
       'data-constrainwidth': 'false',
-      onClick: onClick
+      onClick: onClick,
     },
     userName,
     React.createElement('i', { className: 'material-icons right' }, 'arrow_drop_down')
@@ -26,7 +26,7 @@ export const createMobileMenuButton = (onClick) => {
       href: '#',
       'data-activates': 'mobile-demo',
       className: 'button-collapse',
-      onClick: onClick
+      onClick: onClick,
     },
     React.createElement('i', { className: 'material-icons', style: { color: 'grey' } }, 'menu')
   );

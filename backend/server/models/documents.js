@@ -1,5 +1,3 @@
-'use strict';
-
 const mongoose = require('../config/db');
 
 const DocumentSchema = mongoose.Schema(
@@ -7,25 +5,25 @@ const DocumentSchema = mongoose.Schema(
     title: {
       type: String,
       unique: true,
-      required: true
+      required: true,
     },
     content: {
-      type: String
+      type: String,
     },
     ownerId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'User',
     },
     role: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Role'
-    }
+      ref: 'Role',
+    },
   },
   {
     timestamps: {
       createdAt: 'dateCreated',
-      updatedAt: 'lastModified'
-    }
+      updatedAt: 'lastModified',
+    },
   }
 );
 

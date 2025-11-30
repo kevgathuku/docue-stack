@@ -5,7 +5,12 @@
 
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchRoles, selectRoles, selectRolesLoading, selectRolesError } from '../../features/roles/rolesSlice.js';
+import {
+  fetchRoles,
+  selectRoles,
+  selectRolesError,
+  selectRolesLoading,
+} from '../../features/roles/rolesSlice.js';
 import RolesAdmin from './RolesAdmin.res.js';
 
 export default function RolesAdminContainer() {
@@ -21,11 +26,5 @@ export default function RolesAdminContainer() {
     }
   }, [dispatch]);
 
-  return (
-    <RolesAdmin
-      roles={roles}
-      loading={loading}
-      error={error}
-    />
-  );
+  return <RolesAdmin roles={roles} loading={loading} error={error} />;
 }

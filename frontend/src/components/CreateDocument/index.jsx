@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
-import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import {
   createDocument,
   selectDocCreateResult,
   selectDocumentsError,
 } from '../../features/documents/documentsSlice';
 import { fetchRoles, selectRoles } from '../../features/roles/rolesSlice';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { handleFieldChange } from '../../utils/componentHelpers';
 import { withNavigate } from '../../utils/withNavigate';
 
@@ -30,11 +30,7 @@ const CreateDocument = ({ navigate }) => {
 
   useEffect(() => {
     if (createResult) {
-      window.Materialize.toast(
-        'Document created successfully!',
-        2000,
-        'success-toast'
-      );
+      window.Materialize.toast('Document created successfully!', 2000, 'success-toast');
       navigate('/dashboard');
     }
   }, [createResult, navigate]);
@@ -63,7 +59,7 @@ const CreateDocument = ({ navigate }) => {
     const stateObject = handleFieldChange(event);
     const key = Object.keys(stateObject)[0];
     const value = stateObject[key];
-    
+
     if (key === 'title') {
       setTitle(value);
     } else if (key === 'content') {
@@ -132,11 +128,7 @@ const CreateDocument = ({ navigate }) => {
           </div>
           <div className="col s12">
             <div className="container center">
-              <button
-                className="btn waves-effect header-btn blue"
-                name="action"
-                type="submit"
-              >
+              <button className="btn waves-effect header-btn blue" name="action" type="submit">
                 {' '}
                 submit
               </button>

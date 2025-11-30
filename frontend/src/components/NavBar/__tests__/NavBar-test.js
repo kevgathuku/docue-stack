@@ -1,17 +1,15 @@
-'use strict';
-
 import { jest } from '@jest/globals';
-import { render, screen } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
-import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
+import { render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { BrowserRouter } from 'react-router-dom';
 import authReducer from '../../../features/auth/authSlice';
 import NavBar from '../NavBar.res.js';
 
-describe('NavBar', function() {
+describe('NavBar', () => {
   let mockStore;
 
-  beforeEach(function() {
+  beforeEach(() => {
     // Create a mock store with auth slice
     mockStore = configureStore({
       reducer: {
@@ -31,7 +29,7 @@ describe('NavBar', function() {
     Storage.prototype.removeItem = jest.fn();
   });
 
-  const renderWithProviders = (component, pathname = '/dashboard') => {
+  const renderWithProviders = (component, _pathname = '/dashboard') => {
     return render(
       <Provider store={mockStore}>
         <BrowserRouter
@@ -46,35 +44,35 @@ describe('NavBar', function() {
     );
   };
 
-  describe('Component Rendering', function() {
-    it('renders the correct mobile links', function() {
+  describe('Component Rendering', () => {
+    it('renders the correct mobile links', () => {
       renderWithProviders(<NavBar pathname="/auth" />);
-      
+
       // It should find the correct title
       expect(screen.getByText(/Docue/i)).toBeInTheDocument();
       // It should render the correct menu items
       expect(screen.getByText(/Home/i)).toBeInTheDocument();
     });
 
-    it('renders the site logo', function() {
+    it('renders the site logo', () => {
       const { container } = renderWithProviders(<NavBar pathname="/dashboard" />);
-      
+
       // It should render the site logo
       const logo = container.querySelector('#header-logo');
       expect(logo).toBeInTheDocument();
       expect(logo.tagName).toBe('IMG');
     });
 
-    it('logo links to root when user is not logged in', function() {
+    it('logo links to root when user is not logged in', () => {
       const { container } = renderWithProviders(<NavBar pathname="/auth" />);
-      
+
       // Find the logo link
       const logoLink = container.querySelector('.brand-logo');
       expect(logoLink).toBeInTheDocument();
       expect(logoLink.getAttribute('href')).toBe('/');
     });
 
-    it('logo links to dashboard when user is logged in', function() {
+    it('logo links to dashboard when user is logged in', () => {
       // Create a store with logged-in user
       const loggedInStore = configureStore({
         reducer: {
@@ -101,25 +99,25 @@ describe('NavBar', function() {
           </BrowserRouter>
         </Provider>
       );
-      
+
       // Find the logo link
       const logoLink = container.querySelector('.brand-logo');
       expect(logoLink).toBeInTheDocument();
       expect(logoLink.getAttribute('href')).toBe('/dashboard');
     });
 
-    it('does not render when pathname is /', function() {
+    it('does not render when pathname is /', () => {
       const { container } = renderWithProviders(<NavBar pathname="/" />);
-      
+
       // Should not render the nav when on home page
       expect(container.querySelector('nav')).not.toBeInTheDocument();
     });
   });
 
-  describe('Redux Integration', function() {
-    it('should access auth state from Redux store', function() {
+  describe('Redux Integration', () => {
+    it('should access auth state from Redux store', () => {
       renderWithProviders(<NavBar pathname="/dashboard" />);
-      
+
       const state = mockStore.getState();
       expect(state.auth).toBeDefined();
       expect(state.auth.token).toBe('');
@@ -127,17 +125,17 @@ describe('NavBar', function() {
       expect(state.auth.session.loggedIn).toBe(false);
     });
 
-    it('should render login links when not logged in', function() {
+    it('should render login links when not logged in', () => {
       renderWithProviders(<NavBar pathname="/dashboard" />);
-      
+
       // Should show login/signup links when not logged in
       const loginLinks = screen.getAllByText(/Login/i);
       expect(loginLinks.length).toBeGreaterThan(0);
     });
   });
 
-  describe('Admin User Features', function() {
-    it('should show admin settings link for admin users', function() {
+  describe('Admin User Features', () => {
+    it('should show admin settings link for admin users', () => {
       // Create a store with logged-in admin user
       const adminStore = configureStore({
         reducer: {
@@ -157,7 +155,7 @@ describe('NavBar', function() {
         },
       });
 
-      const { container } = render(
+      render(
         <Provider store={adminStore}>
           <BrowserRouter
             future={{
@@ -174,7 +172,7 @@ describe('NavBar', function() {
       expect(screen.getByText('Settings')).toBeInTheDocument();
     });
 
-    it('should not show admin settings link for regular users', function() {
+    it('should not show admin settings link for regular users', () => {
       // Create a store with logged-in regular user
       const userStore = configureStore({
         reducer: {
@@ -212,8 +210,8 @@ describe('NavBar', function() {
     });
   });
 
-  describe('Logout Functionality', function() {
-    it('should handle logout click when token exists', function() {
+  describe('Logout Functionality', () => {
+    it('should handle logout click when token exists', () => {
       // Mock localStorage.getItem to return a token
       Storage.prototype.getItem = jest.fn(() => 'test-token');
 
@@ -250,14 +248,14 @@ describe('NavBar', function() {
       // Find logout button by id (more reliable than text with spaces)
       const logoutButton = container.querySelector('#logout-btn');
       expect(logoutButton).toBeInTheDocument();
-      
+
       logoutButton.click();
 
       // Verify localStorage.getItem was called
       expect(Storage.prototype.getItem).toHaveBeenCalledWith('user');
     });
 
-    it('should redirect to home after logout completes', function() {
+    it('should redirect to home after logout completes', () => {
       const loggedInStore = configureStore({
         reducer: {
           auth: authReducer,

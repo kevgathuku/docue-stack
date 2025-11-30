@@ -3,14 +3,14 @@ import rolesReducer from './rolesSlice';
 
 /**
  * Property-Based Tests for Roles Slice
- * 
+ *
  * **Feature: flux-to-redux-migration, Property 1: State management equivalence (roles)**
  * **Feature: flux-to-redux-migration, Property 6: Role operations preservation**
  * **Validates: Requirements 2.2, 5.3**
- * 
+ *
  * These tests verify that the Redux Toolkit roles slice maintains
  * correct state management behavior for all role operations.
- * 
+ *
  * Note: Unlike auth, roles don't have a Flux reducer to compare against,
  * only a RoleStore. These tests verify internal consistency and correct
  * state transitions for all role operations.
