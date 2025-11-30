@@ -6,16 +6,16 @@ import { store } from './store';
 import * as serviceWorker from './serviceWorker';
 
 import Auth from './components/Auth/Auth.jsx';
-import Admin from './components/Admin/Admin.jsx';
+import Admin from './components/Admin/Admin.res.js';
 import CreateDocument from './components/CreateDocument/index.jsx';
-import CreateRole from './components/CreateRole/CreateRole.jsx';
+import CreateRole from './components/CreateRole/CreateRole.res.js';
 import DocumentPage from './components/DocumentPage/index.jsx';
 import Dashboard from './components/Dashboard/index.jsx';
-import Landing from './components/Landing/Landing.jsx';
-import Profile from './components/Profile/Profile.jsx';
+import Landing from './components/Landing/Landing.res.js';
+import Profile from './components/Profile/Profile.res.js';
 import { DefaultLayout } from './components/Landing/Main.jsx';
-import NotFound from './components/NotFound/NotFound.jsx';
-import RolesAdmin from './components/RolesAdmin/RolesAdmin.jsx';
+import NotFound from './components/NotFound/NotFound.res.js';
+import RolesAdmin from './components/RolesAdmin/RolesAdmin.res.js';
 import UsersAdmin from './components/UsersAdmin/UsersAdmin.jsx';
 import PrivateRoute from './components/PrivateRoute.jsx';
 

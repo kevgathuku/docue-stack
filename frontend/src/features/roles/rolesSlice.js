@@ -1,11 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import request from 'superagent';
-
-// Base URL configuration
-const BASE_URL =
-  process.env.NODE_ENV === 'development'
-    ? 'http://localhost:8000'
-    : 'https://docue.herokuapp.com';
+import { BASE_URL } from '../../config/api.js';
 
 // Initial state matching the RoleStore structure
 const initialState = {

@@ -1,20 +1,43 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import request from 'superagent';
+import { BASE_URL } from '../../config/api.js';
 
-// Base URL configuration
-const BASE_URL =
-  process.env.NODE_ENV === 'development'
-    ? 'http://localhost:8000'
-    : 'https://docue.herokuapp.com';
+// Helper to safely load initial state from localStorage
+const loadInitialState = () => {
+  try {
+    const token = localStorage.getItem('user');
+    const userInfo = localStorage.getItem('userInfo');
+    
+    if (token && userInfo) {
+      const user = JSON.parse(userInfo);
+      return {
+        token,
+        user,
+        session: {
+          loggedIn: false, // Will be validated by getSession
+          loading: false,
+        },
+      };
+    }
+  } catch (error) {
+    console.error('Error loading initial auth state from localStorage:', error);
+  }
+  
+  return {
+    token: '',
+    user: {},
+    session: {
+      loggedIn: false,
+      loading: false,
+    },
+  };
+};
 
 // Initial state matching the existing reducer structure exactly
 const initialState = {
   users: null,
   usersError: null,
-  session: {
-    loggedIn: false,
-    loading: false,
-  },
+  ...loadInitialState(),
   sessionError: '',
   loginError: '',
   logoutResult: '',
@@ -22,8 +45,6 @@ const initialState = {
   signupError: null,
   profileUpdateResult: null,
   profileUpdateError: '',
-  token: '',
-  user: {},
   loggedIn: {},
 };
 

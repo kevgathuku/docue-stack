@@ -1,5 +1,6 @@
 'use strict';
 
+import { jest } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
@@ -47,7 +48,7 @@ describe('NavBar', function() {
 
   describe('Component Rendering', function() {
     it('renders the correct mobile links', function() {
-      renderWithProviders(<NavBar pathname="/dashboard" />);
+      renderWithProviders(<NavBar pathname="/auth" />);
       
       // It should find the correct title
       expect(screen.getByText(/Docue/i)).toBeInTheDocument();
@@ -62,6 +63,49 @@ describe('NavBar', function() {
       const logo = container.querySelector('#header-logo');
       expect(logo).toBeInTheDocument();
       expect(logo.tagName).toBe('IMG');
+    });
+
+    it('logo links to root when user is not logged in', function() {
+      const { container } = renderWithProviders(<NavBar pathname="/auth" />);
+      
+      // Find the logo link
+      const logoLink = container.querySelector('.brand-logo');
+      expect(logoLink).toBeInTheDocument();
+      expect(logoLink.getAttribute('href')).toBe('/');
+    });
+
+    it('logo links to dashboard when user is logged in', function() {
+      // Create a store with logged-in user
+      const loggedInStore = configureStore({
+        reducer: {
+          auth: authReducer,
+        },
+        preloadedState: {
+          auth: {
+            user: { _id: '123', email: 'test@example.com', name: { first: 'Test', last: 'User' } },
+            token: 'test-token',
+            session: { loggedIn: true },
+          },
+        },
+      });
+
+      const { container } = render(
+        <Provider store={loggedInStore}>
+          <BrowserRouter
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true,
+            }}
+          >
+            <NavBar pathname="/profile" />
+          </BrowserRouter>
+        </Provider>
+      );
+      
+      // Find the logo link
+      const logoLink = container.querySelector('.brand-logo');
+      expect(logoLink).toBeInTheDocument();
+      expect(logoLink.getAttribute('href')).toBe('/dashboard');
     });
 
     it('does not render when pathname is /', function() {

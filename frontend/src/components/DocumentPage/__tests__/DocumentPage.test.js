@@ -1,16 +1,21 @@
 'use strict';
 
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { Provider } from 'react-redux';
-import { BrowserRouter } from 'react-router-dom';
-import { configureStore } from '@reduxjs/toolkit';
-import DocumentPage from '../index.jsx';
-import documentsReducer from '../../../features/documents/documentsSlice';
-import rolesReducer from '../../../features/roles/rolesSlice';
+import { jest } from '@jest/globals';
 
-jest.mock('sweetalert');
-import swal from 'sweetalert';
+// Mock sweetalert using unstable_mockModule
+await jest.unstable_mockModule('sweetalert', () => ({
+  default: jest.fn(),
+}));
+
+// Import after mocking
+const React = (await import('react')).default;
+const { render, screen } = await import('@testing-library/react');
+const { Provider } = await import('react-redux');
+const { BrowserRouter } = await import('react-router-dom');
+const { configureStore } = await import('@reduxjs/toolkit');
+const DocumentPage = (await import('../index.jsx')).default;
+const documentsReducer = (await import('../../../features/documents/documentsSlice')).default;
+const rolesReducer = (await import('../../../features/roles/rolesSlice')).default;
 
 describe('DocumentPage', function() {
   let store;

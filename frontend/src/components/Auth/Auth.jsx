@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { Navigate } from 'react-router-dom';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { selectSession, getSession } from '../../features/auth/authSlice';
 
-import Login from '../Login/Login.jsx';
-import SignUp from '../SignUp/SignUp.jsx';
+import Login from '../Login/Login.res.js';
+import SignUp from '../SignUp/SignUp.res.js';
 
 class Authenticate extends React.PureComponent {
   static propTypes = {
@@ -55,4 +58,41 @@ class Authenticate extends React.PureComponent {
   }
 }
 
-export default Authenticate;
+// Wrapper component that redirects logged-in users to dashboard
+function AuthWithRedirect(props) {
+  const dispatch = useAppDispatch();
+  const session = useAppSelector(selectSession);
+  const token = localStorage.getItem('user');
+  
+  // Trigger session validation when component mounts with a token
+  // This is the inverse of PrivateRoute - we check if user is logged in
+  useEffect(() => {
+    if (token && !session.loading && !session.loggedIn) {
+      console.log('[Auth] Checking if user is already logged in');
+      dispatch(getSession(token));
+    }
+  }, [token, session.loading, session.loggedIn, dispatch]);
+  
+  // If session check is in progress, show loading
+  if (token && session.loading) {
+    return (
+      <div className="container">
+        <div className="progress">
+          <div className="indeterminate"></div>
+        </div>
+        <p className="center-align">Checking authentication...</p>
+      </div>
+    );
+  }
+  
+  // If user is already logged in (session validated), redirect to dashboard
+  if (token && session.loggedIn) {
+    console.log('[Auth] User already logged in, redirecting to dashboard');
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  // Otherwise, show the auth page
+  return <Authenticate {...props} />;
+}
+
+export default AuthWithRedirect;
