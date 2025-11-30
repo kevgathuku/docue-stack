@@ -1,5 +1,3 @@
-'use strict';
-
 import { jest } from '@jest/globals';
 
 // Mock sweetalert using unstable_mockModule
@@ -17,7 +15,7 @@ const DocumentPage = (await import('../index.jsx')).default;
 const documentsReducer = (await import('../../../features/documents/documentsSlice')).default;
 const rolesReducer = (await import('../../../features/roles/rolesSlice')).default;
 
-describe('DocumentPage', function() {
+describe('DocumentPage', () => {
   let store;
 
   beforeEach(() => {
@@ -27,21 +25,24 @@ describe('DocumentPage', function() {
         roles: rolesReducer,
       },
     });
-    
+
     // Set up localStorage
     localStorage.setItem('user', 'test-token');
-    localStorage.setItem('userInfo', JSON.stringify({
-      _id: '123',
-      name: { first: 'Test', last: 'User' }
-    }));
+    localStorage.setItem(
+      'userInfo',
+      JSON.stringify({
+        _id: '123',
+        name: { first: 'Test', last: 'User' },
+      })
+    );
   });
 
   afterEach(() => {
     localStorage.clear();
   });
 
-  describe('Component Rendering', function() {
-    it('renders the correct component', function() {
+  describe('Component Rendering', () => {
+    it('renders the correct component', () => {
       const { container } = render(
         <BrowserRouter>
           <Provider store={store}>
@@ -65,7 +66,7 @@ describe('DocumentPage', function() {
     });
   });
 
-  describe('Component with document data', function() {
+  describe('Component with document data', () => {
     beforeEach(() => {
       const doc = {
         _id: '4',
@@ -76,9 +77,9 @@ describe('DocumentPage', function() {
           _id: '123',
           name: {
             first: 'Kevin',
-            last: 'Test'
-          }
-        }
+            last: 'Test',
+          },
+        },
       };
 
       store = configureStore({
@@ -99,17 +100,17 @@ describe('DocumentPage', function() {
           roles: {
             roles: [
               { _id: '1', title: 'viewer', accessLevel: 0 },
-              { _id: '2', title: 'admin', accessLevel: 2 }
+              { _id: '2', title: 'admin', accessLevel: 2 },
             ],
             createdRole: null,
             loading: false,
             error: null,
-          }
-        }
+          },
+        },
       });
     });
 
-    it('should correctly display document content', function() {
+    it('should correctly display document content', () => {
       const { container } = render(
         <BrowserRouter>
           <Provider store={store}>
@@ -117,7 +118,7 @@ describe('DocumentPage', function() {
           </Provider>
         </BrowserRouter>
       );
-      
+
       expect(screen.getByText(/Test Document/i)).toBeInTheDocument();
       // Check that the content is in the document
       const contentDiv = container.querySelector('div.col.s10.offset-s1');

@@ -1,14 +1,14 @@
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
 import RolesAdmin from '../RolesAdmin.res.js';
 
-describe('RolesAdmin', function() {
+describe('RolesAdmin', () => {
   let tooltipCalls;
 
   beforeEach(() => {
     // Reset mock values
     tooltipCalls = [];
-    
+
     // Mock jQuery tooltip initialization
     global.$ = (selector) => {
       tooltipCalls.push(selector);
@@ -18,13 +18,13 @@ describe('RolesAdmin', function() {
     };
   });
 
-  describe('Component Rendering', function() {
-    it('renders without crashing', function() {
+  describe('Component Rendering', () => {
+    it('renders without crashing', () => {
       const { container } = render(<RolesAdmin roles={null} loading={false} error={null} />);
       expect(container).toBeTruthy();
     });
 
-    it('renders table structure when roles are loaded', async function() {
+    it('renders table structure when roles are loaded', async () => {
       const mockRoles = [
         { id: '1', title: 'Admin', accessLevel: 2 },
         { id: '2', title: 'Staff', accessLevel: 1 },
@@ -52,10 +52,8 @@ describe('RolesAdmin', function() {
       });
     });
 
-    it('renders floating action button', async function() {
-      const mockRoles = [
-        { id: '1', title: 'Admin', accessLevel: 2 },
-      ];
+    it('renders floating action button', async () => {
+      const mockRoles = [{ id: '1', title: 'Admin', accessLevel: 2 }];
 
       const { container } = render(<RolesAdmin roles={mockRoles} loading={false} error={null} />);
 
@@ -70,7 +68,7 @@ describe('RolesAdmin', function() {
       });
     });
 
-    it('initializes Materialize tooltips', async function() {
+    it('initializes Materialize tooltips', async () => {
       const mockRoles = [];
 
       render(<RolesAdmin roles={mockRoles} loading={false} error={null} />);
@@ -86,7 +84,7 @@ describe('RolesAdmin', function() {
       });
     });
 
-    it('displays error message on API failure', async function() {
+    it('displays error message on API failure', async () => {
       render(<RolesAdmin roles={null} loading={false} error="Failed to fetch roles: HTTP 500" />);
 
       await waitFor(() => {
@@ -98,7 +96,7 @@ describe('RolesAdmin', function() {
       });
     });
 
-    it('displays no roles message when roles array is empty', async function() {
+    it('displays no roles message when roles array is empty', async () => {
       render(<RolesAdmin roles={null} loading={false} error={null} />);
 
       await waitFor(() => {

@@ -1,12 +1,11 @@
-import React from 'react';
 import PropTypes from 'prop-types';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import cardImage from '../../images/abstract.jpeg';
 
 class DocList extends React.Component {
-
   static propTypes = {
-    docs: PropTypes.arrayOf(PropTypes.object)
+    docs: PropTypes.arrayOf(PropTypes.object),
   };
 
   constructor(props) {
@@ -15,7 +14,7 @@ class DocList extends React.Component {
     this.state = {
       docs: this.props.docs,
       deletedDoc: null,
-      token: localStorage.getItem('user')
+      token: localStorage.getItem('user'),
     };
   }
 
@@ -35,34 +34,30 @@ class DocList extends React.Component {
   }
 
   render() {
-    let renderDoc = function(doc) {
-      return (
-        <div className="col s12 m6 l4" key={doc._id}>
-          <div className="card">
-            <div className="card-image">
-              <img src={cardImage} alt="Document Logo"/>
-            </div>
-            <div className="card-content">
-              <h5 style={{fontSize: '1.44rem'}}>{doc.title}</h5>
-              <p>{`By:  ${doc.ownerId.name.first} ${doc.ownerId.name.last}`}</p>
-              <Link 
-                  className="btn-floating tooltipped blue lighten-1 right"
-                  data-position="top"
-                  data-delay="50"
-                  data-tooltip="View"
-                  style={{position: 'relative', top: '-22px'}}
-                  to={`/documents/${doc._id}`}
-              >
-                <i className="material-icons">play_arrow</i>
-              </Link>
-            </div>
+    const renderDoc = (doc) => (
+      <div className="col s12 m6 l4" key={doc._id}>
+        <div className="card">
+          <div className="card-image">
+            <img src={cardImage} alt="Document Logo" />
+          </div>
+          <div className="card-content">
+            <h5 style={{ fontSize: '1.44rem' }}>{doc.title}</h5>
+            <p>{`By:  ${doc.ownerId.name.first} ${doc.ownerId.name.last}`}</p>
+            <Link
+              className="btn-floating tooltipped blue lighten-1 right"
+              data-position="top"
+              data-delay="50"
+              data-tooltip="View"
+              style={{ position: 'relative', top: '-22px' }}
+              to={`/documents/${doc._id}`}
+            >
+              <i className="material-icons">play_arrow</i>
+            </Link>
           </div>
         </div>
-      );
-    };
-    return (
-      <div>{this.state.docs.map(renderDoc, this)}</div>
+      </div>
     );
+    return <div>{this.state.docs.map(renderDoc, this)}</div>;
   }
 }
 

@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import {
   fetchDocuments,
   selectDocuments,
-  selectDocumentsLoading,
   selectDocumentsError,
+  selectDocumentsLoading,
 } from '../../features/documents/documentsSlice';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import DocList from './DocList.jsx';
 
 const Dashboard = () => {
@@ -18,7 +18,7 @@ const Dashboard = () => {
   useEffect(() => {
     // Get the token from localStorage
     const token = localStorage.getItem('user');
-    
+
     if (token) {
       dispatch(fetchDocuments(token));
     }
@@ -27,7 +27,7 @@ const Dashboard = () => {
   const renderContent = () => {
     const token = localStorage.getItem('user');
     const error = !token ? 'No authentication token found' : reduxError;
-    
+
     if (error) {
       return (
         <div className="container">
@@ -49,7 +49,7 @@ const Dashboard = () => {
         </div>
       );
     }
-    
+
     return (
       <div className="container">
         <div className="row">
@@ -58,7 +58,7 @@ const Dashboard = () => {
         <div className="row">
           {loading ? <p>Loading...</p> : docs ? <DocList docs={docs} /> : <p>Loading...</p>}
         </div>
-        <div className="fixed-action-btn" style={{bottom: 45, right: 24}}>
+        <div className="fixed-action-btn" style={{ bottom: 45, right: 24 }}>
           <Link
             className="btn-floating btn-large tooltipped pink"
             data-delay="50"

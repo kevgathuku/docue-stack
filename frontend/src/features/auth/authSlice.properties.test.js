@@ -3,7 +3,7 @@ import authReducer from './authSlice';
 
 /**
  * Property-Based Tests for Auth Slice
- * 
+ *
  * These tests verify that the Redux Toolkit auth slice maintains
  * correct state management behavior for all authentication operations.
  */
@@ -13,7 +13,7 @@ describe('Auth Slice Property-Based Tests', () => {
    * **Feature: flux-to-redux-migration, Property 1: State management equivalence (auth)**
    * **Feature: flux-to-redux-migration, Property 4: Authentication functionality preservation**
    * **Validates: Requirements 2.3, 5.1, 5.4**
-   * 
+   *
    * For any action dispatched to the Redux auth slice, the resulting state
    * should maintain correct authentication state and data integrity.
    */
@@ -29,10 +29,7 @@ describe('Auth Slice Property-Based Tests', () => {
 
     const tokenArb = fc.string({ minLength: 10, maxLength: 50 });
 
-    const errorArb = fc.oneof(
-      fc.string({ minLength: 1 }),
-      fc.constant(null)
-    );
+    const errorArb = fc.oneof(fc.string({ minLength: 1 }), fc.constant(null));
 
     it('should correctly handle fetchUsers fulfilled actions', () => {
       fc.assert(
@@ -270,7 +267,7 @@ describe('Auth Slice Property-Based Tests', () => {
           expect(state.profileUpdateError).toBe('');
           expect(state.users).toContainEqual(updatedUser);
           // Verify the user was updated in the array
-          const updatedInArray = state.users.find(u => u._id === updatedUser._id);
+          const updatedInArray = state.users.find((u) => u._id === updatedUser._id);
           expect(updatedInArray).toEqual(updatedUser);
         }),
         { numRuns: 100 }
@@ -295,33 +292,28 @@ describe('Auth Slice Property-Based Tests', () => {
 
     it('should maintain correct state across action sequences', () => {
       fc.assert(
-        fc.property(
-          tokenArb,
-          userArb,
-          fc.string({ minLength: 1 }),
-          (token, user, message) => {
-            // Simulate a login -> logout sequence
-            const loginAction = {
-              type: 'auth/login/fulfilled',
-              payload: { token, user },
-            };
+        fc.property(tokenArb, userArb, fc.string({ minLength: 1 }), (token, user, message) => {
+          // Simulate a login -> logout sequence
+          const loginAction = {
+            type: 'auth/login/fulfilled',
+            payload: { token, user },
+          };
 
-            const logoutAction = {
-              type: 'auth/logout/fulfilled',
-              payload: { message },
-            };
+          const logoutAction = {
+            type: 'auth/logout/fulfilled',
+            payload: { message },
+          };
 
-            // Execute sequence
-            let state = authReducer(undefined, loginAction);
-            expect(state.token).toBe(token);
-            expect(state.user).toEqual(user);
+          // Execute sequence
+          let state = authReducer(undefined, loginAction);
+          expect(state.token).toBe(token);
+          expect(state.user).toEqual(user);
 
-            state = authReducer(state, logoutAction);
-            expect(state.token).toBe('');
-            expect(state.user).toEqual({});
-            expect(state.logoutResult).toBe(message);
-          }
-        ),
+          state = authReducer(state, logoutAction);
+          expect(state.token).toBe('');
+          expect(state.user).toEqual({});
+          expect(state.logoutResult).toBe(message);
+        }),
         { numRuns: 100 }
       );
     });
@@ -330,7 +322,7 @@ describe('Auth Slice Property-Based Tests', () => {
   /**
    * **Feature: flux-to-redux-migration, Property 2: Async thunk state transitions**
    * **Validates: Requirements 3.4**
-   * 
+   *
    * For any async thunk execution, the state should transition through pending status,
    * then to either fulfilled or rejected status with appropriate data or error.
    */
@@ -451,26 +443,23 @@ describe('Auth Slice Property-Based Tests', () => {
 
     it('should handle fetchUsers pending -> fulfilled transition', () => {
       fc.assert(
-        fc.property(
-          fc.array(userArb, { minLength: 0, maxLength: 10 }),
-          (users) => {
-            let state = authReducer(undefined, {});
+        fc.property(fc.array(userArb, { minLength: 0, maxLength: 10 }), (users) => {
+          let state = authReducer(undefined, {});
 
-            // Pending state (no specific pending handler, but should not break)
-            state = authReducer(state, {
-              type: 'auth/fetchUsers/pending',
-            });
+          // Pending state (no specific pending handler, but should not break)
+          state = authReducer(state, {
+            type: 'auth/fetchUsers/pending',
+          });
 
-            // Fulfilled state
-            state = authReducer(state, {
-              type: 'auth/fetchUsers/fulfilled',
-              payload: users,
-            });
+          // Fulfilled state
+          state = authReducer(state, {
+            type: 'auth/fetchUsers/fulfilled',
+            payload: users,
+          });
 
-            expect(state.users).toEqual(users);
-            expect(state.usersError).toBeNull();
-          }
-        ),
+          expect(state.users).toEqual(users);
+          expect(state.usersError).toBeNull();
+        }),
         { numRuns: 100 }
       );
     });
@@ -523,35 +512,30 @@ describe('Auth Slice Property-Based Tests', () => {
 
     it('should handle logout pending -> fulfilled transition', () => {
       fc.assert(
-        fc.property(
-          tokenArb,
-          userArb,
-          fc.string({ minLength: 1 }),
-          (token, user, message) => {
-            // Start with logged in state
-            let state = authReducer(undefined, {});
-            state = authReducer(state, {
-              type: 'auth/login/fulfilled',
-              payload: { token, user },
-            });
+        fc.property(tokenArb, userArb, fc.string({ minLength: 1 }), (token, user, message) => {
+          // Start with logged in state
+          let state = authReducer(undefined, {});
+          state = authReducer(state, {
+            type: 'auth/login/fulfilled',
+            payload: { token, user },
+          });
 
-            // Pending state
-            state = authReducer(state, {
-              type: 'auth/logout/pending',
-            });
+          // Pending state
+          state = authReducer(state, {
+            type: 'auth/logout/pending',
+          });
 
-            // Fulfilled state
-            state = authReducer(state, {
-              type: 'auth/logout/fulfilled',
-              payload: { message },
-            });
+          // Fulfilled state
+          state = authReducer(state, {
+            type: 'auth/logout/fulfilled',
+            payload: { message },
+          });
 
-            expect(state.token).toBe('');
-            expect(state.user).toEqual({});
-            expect(state.logoutResult).toBe(message);
-            expect(state.logoutError).toBe('');
-          }
-        ),
+          expect(state.token).toBe('');
+          expect(state.user).toEqual({});
+          expect(state.logoutResult).toBe(message);
+          expect(state.logoutError).toBe('');
+        }),
         { numRuns: 100 }
       );
     });
@@ -627,12 +611,10 @@ describe('Auth Slice Property-Based Tests', () => {
     });
   });
 
-
-
   /**
    * **Feature: flux-to-redux-migration, Property 3: Error handling preservation**
    * **Validates: Requirements 3.5**
-   * 
+   *
    * For any API call that fails, the error should be captured in the Redux state
    * in the correct format.
    */

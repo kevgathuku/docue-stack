@@ -1,14 +1,12 @@
-'use strict';
-
-import React from 'react';
+import { configureStore } from '@reduxjs/toolkit';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
-import { configureStore } from '@reduxjs/toolkit';
-import Dashboard from '../index.jsx';
 import documentsReducer from '../../../features/documents/documentsSlice';
+import Dashboard from '../index.jsx';
 
-describe('Dashboard', function() {
+describe('Dashboard', () => {
   let store;
 
   beforeEach(() => {
@@ -17,7 +15,7 @@ describe('Dashboard', function() {
         documents: documentsReducer,
       },
     });
-    
+
     // Set up localStorage with a token by default
     localStorage.setItem('user', 'test-token');
   });
@@ -26,8 +24,8 @@ describe('Dashboard', function() {
     localStorage.clear();
   });
 
-  describe('Component Rendering', function() {
-    it('displays the correct contents', function() {
+  describe('Component Rendering', () => {
+    it('displays the correct contents', () => {
       render(
         <BrowserRouter>
           <Provider store={store}>
@@ -38,7 +36,7 @@ describe('Dashboard', function() {
       expect(screen.getByText(/All Documents/i)).toBeInTheDocument();
     });
 
-    it('renders the correct component', function() {
+    it('renders the correct component', () => {
       const { container } = render(
         <BrowserRouter>
           <Provider store={store}>
@@ -64,7 +62,7 @@ describe('Dashboard', function() {
     it('shows error when no token is present', () => {
       // Clear localStorage
       localStorage.removeItem('user');
-      
+
       render(
         <BrowserRouter>
           <Provider store={store}>
@@ -72,7 +70,7 @@ describe('Dashboard', function() {
           </Provider>
         </BrowserRouter>
       );
-      
+
       expect(screen.getByText(/No authentication token found/i)).toBeInTheDocument();
     });
   });

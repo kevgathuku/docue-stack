@@ -1,6 +1,6 @@
 /**
  * Tests for CreateRole ReScript component
- * 
+ *
  * Requirements tested:
  * - 5.1: Role title input updates state
  * - 5.2: Form submission dispatches Redux action
@@ -11,12 +11,12 @@
  * - 11.3: Tests for success and error scenarios
  */
 
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { configureStore } from '@reduxjs/toolkit';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
-import { configureStore } from '@reduxjs/toolkit';
-import CreateRole from '../CreateRole.res.js';
 import rolesReducer from '../../../features/roles/rolesSlice';
+import CreateRole from '../CreateRole.res.js';
 
 describe('CreateRole Component (ReScript)', () => {
   let mockStore;
@@ -68,7 +68,7 @@ describe('CreateRole Component (ReScript)', () => {
   describe('Component Rendering', () => {
     it('renders title input field', () => {
       renderWithProviders(<CreateRole />);
-      
+
       // Check for title input
       const titleInput = screen.getByLabelText(/title/i);
       expect(titleInput).toBeInTheDocument();
@@ -80,7 +80,7 @@ describe('CreateRole Component (ReScript)', () => {
 
     it('renders submit button', () => {
       renderWithProviders(<CreateRole />);
-      
+
       const submitButton = screen.getByRole('button', { name: /submit/i });
       expect(submitButton).toBeInTheDocument();
       expect(submitButton).toHaveAttribute('type', 'submit');
@@ -92,7 +92,7 @@ describe('CreateRole Component (ReScript)', () => {
 
     it('renders Create Role heading', () => {
       renderWithProviders(<CreateRole />);
-      
+
       const heading = screen.getByRole('heading', { name: /create role/i });
       expect(heading).toBeInTheDocument();
       expect(heading).toHaveClass('header');
@@ -101,17 +101,17 @@ describe('CreateRole Component (ReScript)', () => {
 
     it('preserves CSS classes from original version', () => {
       const { container } = renderWithProviders(<CreateRole />);
-      
+
       // Check container class
       expect(container.querySelector('.container')).toBeInTheDocument();
-      
+
       // Check row classes
       const rows = container.querySelectorAll('.row');
       expect(rows.length).toBeGreaterThan(0);
-      
+
       // Check form class
       expect(container.querySelector('form.col.s12')).toBeInTheDocument();
-      
+
       // Check input-field classes
       expect(container.querySelector('.input-field.col.s4.offset-s2')).toBeInTheDocument();
     });
@@ -120,25 +120,25 @@ describe('CreateRole Component (ReScript)', () => {
   describe('Form Interaction', () => {
     it('updates title state when typing', () => {
       renderWithProviders(<CreateRole />);
-      
+
       const titleInput = screen.getByLabelText(/title/i);
       fireEvent.change(titleInput, { target: { value: 'Admin Role' } });
-      
+
       expect(titleInput.value).toBe('Admin Role');
     });
 
     it('handles form submission with valid title', () => {
       renderWithProviders(<CreateRole />);
-      
+
       const titleInput = screen.getByLabelText(/title/i);
       const submitButton = screen.getByRole('button', { name: /submit/i });
-      
+
       // Enter a title
       fireEvent.change(titleInput, { target: { value: 'Manager' } });
-      
+
       // Submit the form
       fireEvent.click(submitButton);
-      
+
       // Verify the form was submitted (Redux action dispatched)
       const state = mockStore.getState();
       expect(state.roles).toBeDefined();
@@ -147,12 +147,12 @@ describe('CreateRole Component (ReScript)', () => {
 
     it('shows error toast when submitting empty title', () => {
       renderWithProviders(<CreateRole />);
-      
+
       const submitButton = screen.getByRole('button', { name: /submit/i });
-      
+
       // Submit the form without entering a title
       fireEvent.click(submitButton);
-      
+
       // Verify error toast was shown
       expect(toastCalls).toHaveLength(1);
       expect(toastCalls[0]).toEqual({
@@ -166,16 +166,16 @@ describe('CreateRole Component (ReScript)', () => {
   describe('Navigation on Success', () => {
     it('shows success toast after successful creation', async () => {
       renderWithProviders(<CreateRole />);
-      
+
       const titleInput = screen.getByLabelText(/title/i);
       const submitButton = screen.getByRole('button', { name: /submit/i });
-      
+
       // Enter a title
       fireEvent.change(titleInput, { target: { value: 'Editor' } });
-      
+
       // Submit the form
       fireEvent.click(submitButton);
-      
+
       // Manually update the store to simulate successful creation
       await act(async () => {
         mockStore.dispatch({
@@ -183,11 +183,11 @@ describe('CreateRole Component (ReScript)', () => {
           payload: { _id: '123', title: 'Editor', accessLevel: 2 },
         });
       });
-      
+
       // Wait for success toast to be shown
       await waitFor(() => {
         expect(toastCalls.length).toBeGreaterThan(0);
-        const successToast = toastCalls.find(call => call.className === 'success-toast');
+        const successToast = toastCalls.find((call) => call.className === 'success-toast');
         expect(successToast).toEqual({
           message: 'Role created successfully!',
           duration: 2000,
@@ -200,16 +200,16 @@ describe('CreateRole Component (ReScript)', () => {
   describe('Error Handling', () => {
     it('shows error toast on creation failure', async () => {
       renderWithProviders(<CreateRole />);
-      
+
       const titleInput = screen.getByLabelText(/title/i);
       const submitButton = screen.getByRole('button', { name: /submit/i });
-      
+
       // Enter a title
       fireEvent.change(titleInput, { target: { value: 'Duplicate Role' } });
-      
+
       // Submit the form
       fireEvent.click(submitButton);
-      
+
       // Manually update the store to simulate creation failure
       await act(async () => {
         mockStore.dispatch({
@@ -217,11 +217,11 @@ describe('CreateRole Component (ReScript)', () => {
           payload: 'Role already exists',
         });
       });
-      
+
       // Wait for error toast to be shown
       await waitFor(() => {
         expect(toastCalls.length).toBeGreaterThan(0);
-        const errorToast = toastCalls.find(call => call.className === 'error-toast');
+        const errorToast = toastCalls.find((call) => call.className === 'error-toast');
         expect(errorToast).toEqual({
           message: 'Role already exists',
           duration: 2000,
@@ -234,7 +234,7 @@ describe('CreateRole Component (ReScript)', () => {
   describe('Redux Integration', () => {
     it('accesses roles state from Redux store', () => {
       renderWithProviders(<CreateRole />);
-      
+
       const state = mockStore.getState();
       expect(state.roles).toBeDefined();
       expect(state.roles.createdRole).toBeNull();
@@ -245,9 +245,9 @@ describe('CreateRole Component (ReScript)', () => {
     it('retrieves token from localStorage', () => {
       // Set up a token in localStorage
       global.localStorage.getItem = () => 'test-token-123';
-      
+
       renderWithProviders(<CreateRole />);
-      
+
       // Component should render successfully with token from localStorage
       const state = mockStore.getState();
       expect(state.roles).toBeDefined();

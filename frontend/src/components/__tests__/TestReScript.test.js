@@ -3,7 +3,7 @@
  * Verifies ReScript compilation and React integration
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import TestReScript from '../TestReScript.res.js';
 
 describe('TestReScript Component', () => {
@@ -20,10 +20,10 @@ describe('TestReScript Component', () => {
   it('increments count on button click', () => {
     render(<TestReScript />);
     const button = screen.getByText('Increment');
-    
+
     fireEvent.click(button);
     expect(screen.getByText('Count: 1')).toBeInTheDocument();
-    
+
     fireEvent.click(button);
     expect(screen.getByText('Count: 2')).toBeInTheDocument();
   });

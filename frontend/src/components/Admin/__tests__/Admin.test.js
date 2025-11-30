@@ -1,6 +1,6 @@
 /**
  * Tests for Admin ReScript component
- * 
+ *
  * Requirements tested:
  * - 3.1: Admin dashboard fetches statistics from API with authentication token
  * - 3.2: Statistics display counts for users, documents, and roles
@@ -11,8 +11,8 @@
  * - 11.3: Tests for API integration success and error scenarios
  */
 
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
 import Admin from '../Admin.res.js';
 
 describe('Admin ReScript Component', () => {
@@ -22,7 +22,7 @@ describe('Admin ReScript Component', () => {
   beforeEach(() => {
     // Reset mock values
     mockGetItem = null;
-    
+
     // Mock localStorage
     Object.defineProperty(global, 'localStorage', {
       value: {
@@ -191,11 +191,9 @@ describe('Admin ReScript Component', () => {
 
       await waitFor(() => {
         const links = screen.getAllByRole('link');
-        const manageLinks = links.filter(link => 
-          link.textContent.includes('Manage')
-        );
+        const manageLinks = links.filter((link) => link.textContent.includes('Manage'));
 
-        manageLinks.forEach(link => {
+        manageLinks.forEach((link) => {
           expect(link).toHaveClass('waves-effect');
           expect(link).toHaveClass('waves-light');
           expect(link).toHaveClass('btn');
@@ -229,8 +227,8 @@ describe('Admin ReScript Component', () => {
       await waitFor(() => {
         const icons = container.querySelectorAll('.material-icons.left');
         expect(icons.length).toBe(3);
-        
-        const iconTexts = Array.from(icons).map(icon => icon.textContent);
+
+        const iconTexts = Array.from(icons).map((icon) => icon.textContent);
         expect(iconTexts).toContain('face');
         expect(iconTexts).toContain('drafts');
         expect(iconTexts).toContain('settings');

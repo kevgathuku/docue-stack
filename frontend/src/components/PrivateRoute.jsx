@@ -1,11 +1,11 @@
-import { Navigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
-import { selectSession, getSession } from '../features/auth/authSlice';
-import { useAppSelector, useAppDispatch } from '../store/hooks';
+import { Navigate, useLocation } from 'react-router-dom';
+import { getSession, selectSession } from '../features/auth/authSlice';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
 
 /**
  * PrivateRoute - Protects routes that require authentication
- * 
+ *
  * Uses the /api/users/session endpoint as the definitive source of truth
  * Triggers session validation and waits for response before making redirect decisions
  */
@@ -25,7 +25,14 @@ export default function PrivateRoute({ children }) {
 
   // Debug logging
   if (process.env.NODE_ENV === 'development') {
-    console.log('[PrivateRoute] Session state:', JSON.stringify(session), 'Token:', !!token, 'Location:', location.pathname);
+    console.log(
+      '[PrivateRoute] Session state:',
+      JSON.stringify(session),
+      'Token:',
+      !!token,
+      'Location:',
+      location.pathname
+    );
   }
 
   // If no token in localStorage, redirect immediately
