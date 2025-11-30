@@ -1,4 +1,4 @@
-// CreateRole component migrated from Elm to ReScript
+// CreateRole component
 // Implements role creation form with Redux integration
 
 open Redux

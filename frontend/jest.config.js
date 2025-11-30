@@ -8,7 +8,6 @@ export default {
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '\\.(jpg|jpeg|png|gif|svg)$': '<rootDir>/config/jest/fileTransform.js',
-    '\\.elm$': '<rootDir>/src/__mocks__/elmMock.js',
     '^@rescript/core/(.*)$': '<rootDir>/src/__mocks__/rescriptCoreMock.js',
   },
   

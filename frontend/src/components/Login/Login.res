@@ -1,4 +1,4 @@
-// Login component migrated from Elm to ReScript
+// Login component
 // Implements form state management with Redux integration
 
 open Redux

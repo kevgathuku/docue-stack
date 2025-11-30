@@ -1,5 +1,4 @@
 // Admin component - displays system statistics
-// Migrated from Elm to ReScript
 
 open Fetch
 open LocalStorage

@@ -6,7 +6,7 @@
  * - 6.2: "Get Started" button links to authentication page
  * - 6.3: Component renders without external data fetching
  * - 11.1: Unit tests for rendering
- * - 12.1: CSS classes match original Elm version
+ * - 12.1: CSS classes match original version
  */
 
 import { render, screen } from '@testing-library/react';
@@ -57,7 +57,7 @@ describe('Landing ReScript Component', () => {
     expect(getStartedButton).toHaveAttribute('href', '/auth');
   });
 
-  it('has correct CSS classes matching original Elm version', () => {
+  it('has correct CSS classes matching original version', () => {
     const { container } = render(<Landing />);
     
     // Check hero section classes

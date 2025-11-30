@@ -6,7 +6,7 @@
  * - 7.2: Error page shows user-friendly explanatory text
  * - 7.3: Component uses consistent styling with the application
  * - 11.1: Unit tests for rendering
- * - 12.1: CSS classes match original Elm version
+ * - 12.1: CSS classes match original version
  */
 
 import { render, screen } from '@testing-library/react';
@@ -31,7 +31,7 @@ describe('NotFound ReScript Component', () => {
     expect(explanatoryText.tagName).toBe('P');
   });
 
-  it('has correct CSS classes matching original Elm version', () => {
+  it('has correct CSS classes matching original version', () => {
     const { container } = render(<NotFound />);
     
     // Check container class

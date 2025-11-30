@@ -9,7 +9,6 @@
     "preview": "vite preview",
     "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
     "test:ci": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage --ci",
-    "test:elm": "elm-test",
     "res:build": "rescript build",
     "res:watch": "rescript watch",
     "res:clean": "rescript clean"
@@ -42,7 +41,6 @@
     "babel-jest": "^29.7.0",
     "coveralls": "^2.11.14",
     "dotenv": "17.2.3",
-    "elm-test": "^0.19.0-rev6",
     "fast-check": "^4.3.0",
     "firebase-tools": "^6.3.0",
     "identity-obj-proxy": "^3.0.0",
@@ -53,8 +51,7 @@
     "rescript": "^12.0.0",
     "sessionstorage": "^0.0.1",
     "sinon": "^1.17.3",
-    "vite": "^6.4.1",
-    "vite-plugin-elm": "^3.0.1"
+    "vite": "^6.4.1"
   },
   "browserslist": [
     ">0.2%",

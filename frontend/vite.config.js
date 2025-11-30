@@ -1,15 +1,10 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { plugin as elm } from 'vite-plugin-elm';
 
 export default defineConfig({
   plugins: [
     react({
       include: /\.(jsx|js)$/,
-    }),
-    elm({
-      debug: process.env.NODE_ENV !== 'production',
-      optimize: process.env.NODE_ENV === 'production',
     }),
   ],
   server: {
@@ -31,7 +26,7 @@ export default defineConfig({
     },
   },
   resolve: {
-    extensions: ['.js', '.jsx', '.elm', '.res.js'],
+    extensions: ['.js', '.jsx', '.res.js'],
   },
   esbuild: {
     loader: 'jsx',

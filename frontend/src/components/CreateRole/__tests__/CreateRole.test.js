@@ -99,7 +99,7 @@ describe('CreateRole Component (ReScript)', () => {
       expect(heading).toHaveClass('center-align');
     });
 
-    it('preserves CSS classes from Elm version', () => {
+    it('preserves CSS classes from original version', () => {
       const { container } = renderWithProviders(<CreateRole />);
       
       // Check container class

@@ -8,7 +8,7 @@
  * - 1.4: Login failure displays error toast
  * - 1.5: Component renders with proper labels and styling
  * - 11.1: Unit tests for rendering and interactions
- * - 12.1: CSS classes match original Elm version
+ * - 12.1: CSS classes match original version
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -89,7 +89,7 @@ describe('Login Component (ReScript)', () => {
       expect(loginButton).toHaveClass('blue');
     });
 
-    it('preserves CSS classes from Elm version', () => {
+    it('preserves CSS classes from original version', () => {
       const { container } = renderWithProviders(<Login />);
       
       // Check row class

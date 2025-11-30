@@ -1,5 +1,4 @@
 // RolesAdmin component - displays roles table with management options
-// Migrated from Elm to ReScript
 // Receives Redux state as props from RolesAdminContainer.jsx
 
 open RoleTypes

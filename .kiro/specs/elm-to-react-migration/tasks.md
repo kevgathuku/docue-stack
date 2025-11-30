@@ -411,7 +411,7 @@ This plan outlines the step-by-step migration of 7 Elm components and 1 React co
   - Verify no console errors
   - Ensure all tests pass, ask the user if questions arise
 
-- [ ] 16. Clean up Elm artifacts
+- [x] 16. Clean up Elm artifacts
   - Remove all .elm files from src/components/
   - Remove elm.json configuration file
   - Remove Elm npm packages (elm, elm-webpack-loader, etc.)
@@ -424,7 +424,7 @@ This plan outlines the step-by-step migration of 7 Elm components and 1 React co
 - [ ] 17. Update documentation
   - Update frontend/README.md to reflect ReScript usage
   - Update frontend/MODERNIZATION.md with ReScript migration details
-  - Create frontend/RESCRIPT_GUIDE.md with ReScript patterns and best practices
+  - Update frontend/RESCRIPT_GUIDE.md with ReScript patterns and best practices
   - Document ReScript bindings usage
   - Document build and development workflow
   - Update component documentation
