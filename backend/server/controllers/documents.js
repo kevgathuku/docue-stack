@@ -1,4 +1,4 @@
-'use strict';
+
 
 const jwt = require('jsonwebtoken'),
   extractUserFromToken = require('./utils').extractUserFromToken,
@@ -25,7 +25,7 @@ module.exports = {
       
       if (document) {
         // If the document already exists send a validation error
-        let docErr = new Error('Document already exists');
+        const docErr = new Error('Document already exists');
         docErr.status = 400;
         return next(docErr);
       }
@@ -35,7 +35,7 @@ module.exports = {
       const user = await Users.findById(decodedUser.payload._id);
       
       if (!user) {
-        let err = new Error('User does not exist');
+        const err = new Error('User does not exist');
         err.status = 400;
         return next(err);
       }
@@ -192,7 +192,7 @@ module.exports = {
       const token = req.body.token || req.headers['x-access-token'];
       const user = extractUserFromToken(token);
       // Set a default limit of 10 if one is not set
-      const limit = parseInt(req.query.limit) || 10;
+      const limit = Number.parseInt(req.query.limit) || 10;
       
       const docs = await Documents.find({})
         .limit(limit)
@@ -203,12 +203,10 @@ module.exports = {
       
       // Return docs with accessLevel lower or equal to user's access level
       res.json(
-        docs.filter(function(doc) {
-          return (
+        docs.filter((doc) => (
             doc.role.accessLevel <= user.role.accessLevel ||
             doc.ownerId._id == user._id
-          );
-        })
+          ))
       );
     } catch (err) {
       next(err);
@@ -221,7 +219,7 @@ module.exports = {
       const token = req.body.token || req.headers['x-access-token'];
       const user = extractUserFromToken(token);
 
-      const limit = parseInt(req.query.limit) || 10;
+      const limit = Number.parseInt(req.query.limit) || 10;
       const role = await Roles.findOne({ title: req.params.role }).exec();
       
       if (!role) {
@@ -235,9 +233,7 @@ module.exports = {
         .exec();
       
       res.json(
-        docs.filter(function(doc) {
-          return doc.role.accessLevel <= user.role.accessLevel;
-        })
+        docs.filter((doc) => doc.role.accessLevel <= user.role.accessLevel)
       );
     } catch (err) {
       next(err);
@@ -250,7 +246,7 @@ module.exports = {
       const token = req.body.token || req.headers['x-access-token'];
       const user = extractUserFromToken(token);
 
-      const limit = parseInt(req.query.limit) || 10;
+      const limit = Number.parseInt(req.query.limit) || 10;
       // Ensure the date format is in the format expected
       const dateRegex = /\d{4}-\d{1,2}-\d{1,2}$/;
       // If the regex does not match, throw an error
@@ -278,9 +274,7 @@ module.exports = {
         .exec();
       
       res.json(
-        docs.filter(function(doc) {
-          return doc.role.accessLevel <= user.role.accessLevel;
-        })
+        docs.filter((doc) => doc.role.accessLevel <= user.role.accessLevel)
       );
     } catch (err) {
       next(err);

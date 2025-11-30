@@ -1,4 +1,4 @@
-'use strict';
+
 
 const express = require('express'),
   Roles = require('../controllers/roles'),

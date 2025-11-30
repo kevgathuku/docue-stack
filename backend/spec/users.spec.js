@@ -1,5 +1,4 @@
 describe('User Spec', () => {
-  'use strict';
 
   const helper = require('./helper');
   const request = require('supertest');

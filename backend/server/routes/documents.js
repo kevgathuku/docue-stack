@@ -1,4 +1,4 @@
-'use strict';
+
 
 const express = require('express'),
   Documents = require('../controllers/documents'),

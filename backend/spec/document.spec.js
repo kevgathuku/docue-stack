@@ -1,5 +1,4 @@
 describe('Documents Spec', () => {
-  'use strict';
 
   const request = require('supertest');
   const helper = require('./helper');
@@ -307,7 +306,7 @@ describe('Documents Spec', () => {
 
   describe('Get Documents by Role', () => {
     // The viewer role (default) is the test role
-    let testRole = defaultRole;
+    const testRole = defaultRole;
 
     it('should return documents accessible by the given role', async () => {
       // Get the documents accessible by the test role
@@ -322,10 +321,10 @@ describe('Documents Spec', () => {
   });
 
   describe('Get Documents by Date', () => {
-    let today = new Date();
+    const today = new Date();
     // Build the date format to be sent from the current date
     // Formt should be YYYY-MM-DD
-    let testDate = `${today.getFullYear()}-${today.getMonth() +
+    const testDate = `${today.getFullYear()}-${today.getMonth() +
       1}-${today.getDate()}`;
     it('should return documents created on the date provided', async () => {
       const res = await request(app)

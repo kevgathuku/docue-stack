@@ -1,10 +1,6 @@
-/**
-* eslint no-console: 0
-*/
 
-'use strict';
 
-let express = require('express'),
+const express = require('express'),
   compression = require('compression'),
   cors = require('cors'),
   morgan = require('morgan'),
@@ -46,7 +42,7 @@ app.use(
   })
 );
 
-let port = process.env.PORT || 8000; // set our port
+const port = process.env.PORT || 8000; // set our port
 
 app.use(require('./server/routes'));
 
@@ -61,7 +57,7 @@ app.use((err, req, res, next) => {
 
 // catch 404 errors
 app.use((req, res) => {
-  let err = new Error('Not Found');
+  const err = new Error('Not Found');
   res.status(404).json({
     error: err.message
   });

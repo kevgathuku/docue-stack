@@ -1,11 +1,11 @@
-'use strict';
 
-let Role = require('../models/roles');
+
+const Role = require('../models/roles');
 
 module.exports = {
   create: async (req, res, next) => {
     try {
-      let validRoles = Role.schema.paths.title.enumValues;
+      const validRoles = Role.schema.paths.title.enumValues;
 
       // Explicitly return so that the rest of the code is not executed
       // in case of an error
@@ -20,7 +20,7 @@ module.exports = {
         });
       }
 
-      let newRole = {
+      const newRole = {
         title: req.body.title,
         accessLevel: null
       };
@@ -44,7 +44,7 @@ module.exports = {
     } catch (err) {
       if (err.code === 11000) {
         // Duplicate key error
-        let duplicateErr = new Error('Role already exists');
+        const duplicateErr = new Error('Role already exists');
         duplicateErr.status = 400;
         next(duplicateErr);
       } else {

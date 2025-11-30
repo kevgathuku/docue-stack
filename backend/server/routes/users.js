@@ -1,4 +1,4 @@
-'use strict';
+
 
 const Users = require('../controllers/users');
 

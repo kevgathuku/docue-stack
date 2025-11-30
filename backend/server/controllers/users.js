@@ -1,6 +1,6 @@
-'use strict';
 
-let _ = require('underscore'),
+
+const _ = require('underscore'),
   jwt = require('jsonwebtoken'),
   extractUserFromToken = require('./utils').extractUserFromToken,
   Error = require('./utils').Error,
@@ -10,11 +10,11 @@ let _ = require('underscore'),
 
 module.exports = {
   create: (req, res, next) => {
-    let required = ['username', 'firstname', 'lastname', 'email', 'password'];
+    const required = ['username', 'firstname', 'lastname', 'email', 'password'];
     // If all the required fields are not present, raise an error
     // Returns true only if all the required fields are found in req.body
     if (!required.every(field => field in req.body)) {
-      let err = new Error(
+      const err = new Error(
         'Please provide the username, firstname, ' +
           'lastname, email, and password values'
       );
@@ -46,9 +46,9 @@ module.exports = {
       })
       .then(user => {
         // Successful signup
-        let tokenUser = _.pick(user, '_id', 'role', 'loggedIn');
+        const tokenUser = _.pick(user, '_id', 'role', 'loggedIn');
         // Sign the user object with the app secret
-        let token = jwt.sign(tokenUser, req.app.get('superSecret'), {
+        const token = jwt.sign(tokenUser, req.app.get('superSecret'), {
           expiresIn: 86400 // expires in 24 hours
         });
         // Return the newly created user with the token included
@@ -60,7 +60,7 @@ module.exports = {
       .catch(err => {
         if (err.code === 11000) {
           // The user already exists
-          let error = new Error('The User already exists');
+          const error = new Error('The User already exists');
           error.status = 400;
           next(error);
         } else {
@@ -218,14 +218,14 @@ module.exports = {
           throw err;
         } else {
           user.password = null;
-          let tokenUser = {
+          const tokenUser = {
             _id: user._id,
             role: user.role,
             loggedIn: user.loggedIn
           };
           // User is found and password is correct
           // Sign the user object with the app secret
-          let token = jwt.sign(tokenUser, req.app.get('superSecret'), {
+          const token = jwt.sign(tokenUser, req.app.get('superSecret'), {
             expiresIn: 86400 // expires in 24 hours
           });
           res.json({
@@ -241,8 +241,8 @@ module.exports = {
 
   logout: (req, res, next) => {
     // Set the loggedIn flag for the user to false
-    let token = req.body.token || req.headers['x-access-token'];
-    let user = extractUserFromToken(token);
+    const token = req.body.token || req.headers['x-access-token'];
+    const user = extractUserFromToken(token);
     Users.findByIdAndUpdate(user._id, {
       loggedIn: false
     })
@@ -260,12 +260,12 @@ module.exports = {
   // route middleware to verify a token
   authenticate: (req, res, next) => {
     // check header or post parameters for token
-    let token = req.body.token || req.headers['x-access-token'];
+    const token = req.body.token || req.headers['x-access-token'];
 
     // decode token
     if (token) {
       // Check if the user is logged in
-      let user = extractUserFromToken(token);
+      const user = extractUserFromToken(token);
       if (!user.loggedIn) {
         return res.status(401).json({
           error: 'Unauthorized Access. Please login first'
@@ -294,7 +294,7 @@ module.exports = {
 
   getSession: async (req, res) => {
     // check header or post parameters for token
-    let token = req.body.token || req.headers['x-access-token'];
+    const token = req.body.token || req.headers['x-access-token'];
 
     // decode token
     if (token) {

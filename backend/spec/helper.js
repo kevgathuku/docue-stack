@@ -1,4 +1,4 @@
-'use strict';
+
 
 const Documents = require('../server/models/documents');
 const Roles = require('../server/models/roles');

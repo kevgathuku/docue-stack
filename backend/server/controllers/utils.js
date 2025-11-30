@@ -1,6 +1,6 @@
-'use strict';
 
-let jwt = require('jsonwebtoken');
+
+const jwt = require('jsonwebtoken');
 
 class ExtendedError extends Error {
   constructor(message) {
@@ -14,7 +14,7 @@ class ExtendedError extends Error {
 // Takes a JWT token object and extracts the user info from the token
 module.exports = {
   extractUserFromToken: (token) => {
-    let decodedUser = jwt.decode(token, {
+    const decodedUser = jwt.decode(token, {
       complete: true
     });
     // Returns the user object stored in the token

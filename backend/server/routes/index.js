@@ -21,7 +21,7 @@ const stats = (req, res) => {
       Users.countDocuments().exec(),
       Roles.countDocuments().exec()
     ])
-      .then(function(counts) {
+      .then((counts) => {
         const [docsCount, usersCount, rolesCount] = counts;
         res.json({
           documents: docsCount,
