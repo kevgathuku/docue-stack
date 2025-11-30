@@ -41,14 +41,16 @@ This document management system has been successfully modernized from its 2016-2
 ### 📋 Optional Enhancements
 
 **Frontend (Optional):**
-- TypeScript migration (PropTypes working fine)
+- Continue ReScript migration (8 components migrated, more can be converted for type safety)
 - Remove Flow types (deprecated but not blocking)
 - Update API client (Superagent working well)
 
 **Backend (Optional):**
-- Add TypeScript
+- Add TypeScript for type safety
 - Improve error handling
 - Add request validation
+
+**Note:** For frontend type safety, we use ReScript instead of TypeScript. ReScript provides compile-time type safety with a sound type system and compiles to optimized JavaScript.
 
 ## Completed: Frontend Modernization
 
@@ -268,10 +270,11 @@ pnpm --filter frontend start
 4. Update security headers
 
 ### Long Term (Optional)
-1. Add TypeScript to backend
-2. Improve logging
-3. Add API documentation (OpenAPI/Swagger)
-4. Consider microservices architecture
+1. Continue migrating React components to ReScript (frontend type safety)
+2. Add TypeScript to backend (backend type safety)
+3. Improve logging
+4. Add API documentation (OpenAPI/Swagger)
+5. Consider microservices architecture
 
 ## Conclusion
 

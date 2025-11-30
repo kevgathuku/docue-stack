@@ -57,7 +57,7 @@ fileMatchPattern: "backend/**/*"
 1. Update Mongoose to latest 8.x (currently on 4.7.9)
 2. Migrate from old callback patterns to async/await
 3. Update test framework if needed (Jasmine → Jest/Vitest)
-4. Add TypeScript types gradually if beneficial
+4. Add TypeScript types gradually if beneficial (Note: Frontend uses ReScript for type safety)
 
 ## Password Hashing
 
