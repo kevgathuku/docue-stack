@@ -6,7 +6,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from '../../../features/auth/authSlice';
-import NavBar from '../NavBar.jsx';
+import NavBar from '../NavBar.res.js';
 
 describe('NavBar', function() {
   let mockStore;
