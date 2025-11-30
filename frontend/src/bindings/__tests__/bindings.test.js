@@ -3,10 +3,10 @@
  * These tests verify that the bindings compile correctly and test their functionality
  */
 
+import { existsSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { jest } from '@jest/globals';
-import { existsSync } from 'fs';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
 
 // ESM equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -23,10 +23,10 @@ describe('ReScript Bindings', () => {
         'Fetch.res.js',
       ];
 
-      bindings.forEach((binding) => {
+      for (const binding of bindings) {
         const bindingPath = resolve(__dirname, `../${binding}`);
         expect(existsSync(bindingPath)).toBe(true);
-      });
+      }
     });
 
     it('should have corresponding source files', () => {
@@ -38,10 +38,10 @@ describe('ReScript Bindings', () => {
         'Fetch.res',
       ];
 
-      sources.forEach((source) => {
+      for (const source of sources) {
         const sourcePath = resolve(__dirname, `../${source}`);
         expect(existsSync(sourcePath)).toBe(true);
-      });
+      }
     });
   });
 
@@ -58,16 +58,16 @@ describe('ReScript Bindings', () => {
       // Note: The external bindings (setItem, getItem, removeItem, clear) are type-only
       // declarations in ReScript. They don't compile to JavaScript - they're direct
       // calls to the browser API. We test that the browser API works correctly.
-      
+
       localStorage.setItem('key1', 'value1');
       localStorage.setItem('key2', 'value2');
-      
+
       expect(localStorage.getItem('key1')).toBe('value1');
       expect(localStorage.getItem('key2')).toBe('value2');
-      
+
       localStorage.removeItem('key1');
       expect(localStorage.getItem('key1')).toBeNull();
-      
+
       localStorage.clear();
       expect(localStorage.getItem('key2')).toBeNull();
     });
@@ -76,11 +76,11 @@ describe('ReScript Bindings', () => {
       // getItemOption is the ONLY function exported from LocalStorage.res.js
       // It implements: Primitive_option.fromNullable(localStorage.getItem(key))
       // This converts null -> undefined (ReScript None) and value -> value (ReScript Some)
-      
+
       // See LocalStorage_getItemOption.test.js for direct tests of the compiled function
-      
-      const nullToUndefined = (value) => value === null ? undefined : value;
-      
+
+      const nullToUndefined = (value) => (value === null ? undefined : value);
+
       expect(nullToUndefined(null)).toBeUndefined();
       expect(nullToUndefined('value')).toBe('value');
     });
@@ -97,7 +97,7 @@ describe('ReScript Bindings', () => {
     });
 
     afterEach(() => {
-      delete global.M;
+      global.M = undefined;
     });
 
     it('should call toast with success options (showSuccess pattern)', () => {
@@ -152,7 +152,7 @@ describe('ReScript Bindings', () => {
     });
 
     afterEach(() => {
-      delete global.fetch;
+      global.fetch = undefined;
     });
 
     it('should test HTTP method conversion pattern', () => {

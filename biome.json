@@ -7,11 +7,18 @@
     "enabled": true,
     "rules": {
       "recommended": true,
+      "correctness": {
+        "noUnusedVariables": "warn",
+        "noUnknownProperty": "warn"
+      },
       "suspicious": {
         "noExplicitAny": "off"
       },
       "style": {
         "noNonNullAssertion": "off"
+      },
+      "a11y": {
+        "useGenericFontNames": "warn"
       }
     }
   },
@@ -41,7 +48,8 @@
       "tmp",
       ".nyc_output",
       "*.res.js",
-      "*.bs.js"
+      "*.bs.js",
+      "**/styles/style.css"
     ]
   }
 }

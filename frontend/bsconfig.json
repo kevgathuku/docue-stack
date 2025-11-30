@@ -28,12 +28,8 @@
     "in-source": true
   },
   "suffix": ".res.js",
-  "dependencies": [
-    "@rescript/react"
-  ],
-  "dev-dependencies": [
-    "@rescript/tools"
-  ],
+  "dependencies": ["@rescript/react"],
+  "dev-dependencies": ["@rescript/tools"],
   "jsx": {
     "version": 4
   },

@@ -35,11 +35,11 @@ module.exports = [
     },
     rules: {
       // Code style rules
-      'indent': ['warn', 2],
-      'quotes': ['error', 'single'],
+      indent: ['warn', 2],
+      quotes: ['error', 'single'],
       'linebreak-style': ['error', 'unix'],
-      'semi': ['error', 'always'],
-      
+      semi: ['error', 'always'],
+
       // Disabled rules from original config
       'no-console': 'off',
       'no-case-declarations': 'off',

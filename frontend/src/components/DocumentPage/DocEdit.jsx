@@ -1,11 +1,8 @@
-import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
-import { useAppSelector, useAppDispatch } from '../../store/hooks';
-import {
-  editDocument,
-  selectDocEditResult,
-} from '../../features/documents/documentsSlice';
+import { editDocument, selectDocEditResult } from '../../features/documents/documentsSlice';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { handleFieldChange } from '../../utils/componentHelpers';
 
 const DocEdit = ({ doc, roles, updateDoc }) => {
@@ -32,7 +29,7 @@ const DocEdit = ({ doc, roles, updateDoc }) => {
     const stateObject = handleFieldChange(event);
     const key = Object.keys(stateObject)[0];
     const value = stateObject[key];
-    
+
     if (key === 'title') {
       setTitle(value);
     } else if (key === 'content') {
@@ -114,12 +111,16 @@ const DocEdit = ({ doc, roles, updateDoc }) => {
       <div className="modal-footer">
         <div className="container">
           <button
+            type="button"
             className="btn modal-action modal-close waves-effect blue right"
             onClick={handleSubmit}
           >
             update
           </button>
-          <button className="btn modal-action modal-close waves-effect red accent-2 left">
+          <button
+            type="button"
+            className="btn modal-action modal-close waves-effect red accent-2 left"
+          >
             cancel
           </button>
         </div>

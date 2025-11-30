@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import request from 'superagent';
 import { BASE_URL } from '../../config/api.js';
 
@@ -22,9 +22,7 @@ export const fetchDocuments = createAsyncThunk(
   'documents/fetchDocuments',
   async (token, { rejectWithValue }) => {
     try {
-      const result = await request
-        .get(`${BASE_URL}/api/documents`)
-        .set('x-access-token', token);
+      const result = await request.get(`${BASE_URL}/api/documents`).set('x-access-token', token);
       return result.body;
     } catch (err) {
       return rejectWithValue(err.response?.body?.error || err.message);
@@ -198,8 +196,8 @@ const documentsSlice = createSlice({
   },
 });
 
-// Export actions (currently none, but structure is ready)
-export const {} = documentsSlice.actions;
+// Export actions if needed in the future
+// export const { someAction } = documentsSlice.actions;
 
 // Selectors
 export const selectDocuments = (state) => state.documents.docs;

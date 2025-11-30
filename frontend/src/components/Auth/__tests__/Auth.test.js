@@ -1,9 +1,7 @@
-'use strict';
-
-import { render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
-import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
+import { render, screen, waitFor } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import authReducer from '../../../features/auth/authSlice';
 import Auth from '../Auth.jsx';
 
@@ -55,33 +53,33 @@ const createWrapper = (initialState = {}, initialRoute = '/auth') => {
   );
 };
 
-describe('Auth', function() {
+describe('Auth', () => {
   beforeEach(() => {
     // Clear localStorage before each test
     mockLocalStorage.clear();
   });
 
-  describe('Component Rendering', function() {
-    it('displays the correct contents when not logged in', function() {
+  describe('Component Rendering', () => {
+    it('displays the correct contents when not logged in', () => {
       const Wrapper = createWrapper();
       render(<Auth />, { wrapper: Wrapper });
-      
+
       // It should find the tabs
       expect(screen.getAllByText(/Login/i).length).toBeGreaterThan(0);
       expect(screen.getAllByText(/Signup/i).length).toBeGreaterThan(0);
     });
 
-    it('renders the correct component structure', function() {
+    it('renders the correct component structure', () => {
       const Wrapper = createWrapper();
       const { container } = render(<Auth />, { wrapper: Wrapper });
-      
+
       expect(container.querySelector('.container')).toBeInTheDocument();
       expect(container.querySelector('.card-panel')).toBeInTheDocument();
     });
   });
 
-  describe('Redirect Behavior', function() {
-    it('shows loading state when checking session with token', async function() {
+  describe('Redirect Behavior', () => {
+    it('shows loading state when checking session with token', async () => {
       // Set up token in localStorage
       mockLocalStorage.setItem('user', 'test-token');
 
@@ -105,7 +103,7 @@ describe('Auth', function() {
       });
     });
 
-    it('redirects to dashboard when user is logged in', async function() {
+    it('redirects to dashboard when user is logged in', async () => {
       // Set up token in localStorage
       mockLocalStorage.setItem('user', 'test-token');
 
@@ -132,7 +130,7 @@ describe('Auth', function() {
       expect(screen.queryByText(/Login/i)).not.toBeInTheDocument();
     });
 
-    it('shows auth page when no token exists', function() {
+    it('shows auth page when no token exists', () => {
       // No token in localStorage - ensure it's cleared
       mockLocalStorage.clear();
 
@@ -152,12 +150,12 @@ describe('Auth', function() {
 
       // Component should render without crashing
       expect(container).toBeInTheDocument();
-      
+
       // Should NOT redirect to dashboard when no token
       expect(screen.queryByText('Dashboard Page')).not.toBeInTheDocument();
     });
 
-    it('triggers session validation when token exists but session not validated', function() {
+    it('triggers session validation when token exists but session not validated', () => {
       // Token exists but session not yet validated
       // This simulates the initial state when page loads with a token
       mockLocalStorage.setItem('user', 'test-token');

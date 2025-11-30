@@ -1,15 +1,9 @@
-/**
-* eslint no-console: 0
-*/
-
-'use strict';
-
-let express = require('express'),
-  compression = require('compression'),
-  cors = require('cors'),
-  morgan = require('morgan'),
-  app = express(),
-  isProduction = process.env.NODE_ENV === 'production';
+const express = require('express');
+const compression = require('compression');
+const cors = require('cors');
+const morgan = require('morgan');
+const app = express();
+const isProduction = process.env.NODE_ENV === 'production';
 
 // Load the env variables only in DEV mode
 if (!isProduction) {
@@ -31,7 +25,7 @@ app.use(compression());
 // this will let us get the data from a POST
 app.use(
   express.urlencoded({
-    extended: true
+    extended: true,
   })
 );
 app.use(express.json());
@@ -41,29 +35,29 @@ app.use(
   cors({
     allowedHeaders: [
       'Access-Control-Allow-Headers',
-      'Origin, X-Requested-With, Content-Type, Accept, x-access-token'
-    ]
+      'Origin, X-Requested-With, Content-Type, Accept, x-access-token',
+    ],
   })
 );
 
-let port = process.env.PORT || 8000; // set our port
+const port = process.env.PORT || 8000; // set our port
 
 app.use(require('./server/routes'));
 
-app.use((err, req, res, next) => {
+app.use((err, _req, res, next) => {
   if (res.headersSent) {
     return next(err);
   }
   res.status(err.status || 500).json({
-    error: err.message
+    error: err.message,
   });
 });
 
 // catch 404 errors
-app.use((req, res) => {
-  let err = new Error('Not Found');
+app.use((_req, res) => {
+  const err = new Error('Not Found');
   res.status(404).json({
-    error: err.message
+    error: err.message,
   });
 });
 

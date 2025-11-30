@@ -1,17 +1,17 @@
-import * as fc from 'fast-check';
 import { configureStore } from '@reduxjs/toolkit';
+import * as fc from 'fast-check';
 import documentsReducer from './documentsSlice';
 
 /**
  * Property-Based Tests for Documents Slice
- * 
+ *
  * **Feature: flux-to-redux-migration, Property 1: State management equivalence (documents)**
  * **Feature: flux-to-redux-migration, Property 5: Document operations preservation**
  * **Validates: Requirements 2.1, 5.2**
- * 
+ *
  * These tests verify that the Redux Toolkit documents slice maintains
  * correct state management behavior for all document operations.
- * 
+ *
  * Note: Unlike auth, documents don't have a Flux reducer to compare against,
  * only a DocStore. These tests verify internal consistency and correct
  * state transitions for all document operations.
@@ -289,64 +289,55 @@ describe('Documents Slice Property-Based Tests', () => {
 
     it('should maintain state consistency across multiple operations', () => {
       fc.assert(
-        fc.property(
-          documentsArrayArb,
-          documentArb,
-          documentArb,
-          (docs, newDoc, updatedDoc) => {
-            let state = documentsReducer(undefined, {});
+        fc.property(documentsArrayArb, documentArb, documentArb, (docs, newDoc, updatedDoc) => {
+          let state = documentsReducer(undefined, {});
 
-            // Fetch documents
-            state = documentsReducer(state, {
-              type: 'documents/fetchDocuments/fulfilled',
-              payload: docs,
-            });
-            expect(state.docs).toEqual(docs);
+          // Fetch documents
+          state = documentsReducer(state, {
+            type: 'documents/fetchDocuments/fulfilled',
+            payload: docs,
+          });
+          expect(state.docs).toEqual(docs);
 
-            // Create a document
-            state = documentsReducer(state, {
-              type: 'documents/createDocument/fulfilled',
-              payload: newDoc,
-            });
-            expect(state.docCreateResult).toEqual(newDoc);
-            expect(state.docs).toEqual(docs); // Original docs unchanged
+          // Create a document
+          state = documentsReducer(state, {
+            type: 'documents/createDocument/fulfilled',
+            payload: newDoc,
+          });
+          expect(state.docCreateResult).toEqual(newDoc);
+          expect(state.docs).toEqual(docs); // Original docs unchanged
 
-            // Edit a document
-            state = documentsReducer(state, {
-              type: 'documents/editDocument/fulfilled',
-              payload: { data: updatedDoc, statusCode: 200 },
-            });
-            expect(state.docEditResult.data).toEqual(updatedDoc);
-            expect(state.docs).toEqual(docs); // Original docs still unchanged
-          }
-        ),
+          // Edit a document
+          state = documentsReducer(state, {
+            type: 'documents/editDocument/fulfilled',
+            payload: { data: updatedDoc, statusCode: 200 },
+          });
+          expect(state.docEditResult.data).toEqual(updatedDoc);
+          expect(state.docs).toEqual(docs); // Original docs still unchanged
+        }),
         { numRuns: 100 }
       );
     });
 
     it('should clear errors on successful operations', () => {
       fc.assert(
-        fc.property(
-          fc.string({ minLength: 1 }),
-          documentsArrayArb,
-          (error, docs) => {
-            let state = documentsReducer(undefined, {});
+        fc.property(fc.string({ minLength: 1 }), documentsArrayArb, (error, docs) => {
+          let state = documentsReducer(undefined, {});
 
-            // Set an error
-            state = documentsReducer(state, {
-              type: 'documents/fetchDocuments/rejected',
-              payload: error,
-            });
-            expect(state.error).toBe(error);
+          // Set an error
+          state = documentsReducer(state, {
+            type: 'documents/fetchDocuments/rejected',
+            payload: error,
+          });
+          expect(state.error).toBe(error);
 
-            // Successful operation should clear the error
-            state = documentsReducer(state, {
-              type: 'documents/fetchDocuments/fulfilled',
-              payload: docs,
-            });
-            expect(state.error).toBeNull();
-          }
-        ),
+          // Successful operation should clear the error
+          state = documentsReducer(state, {
+            type: 'documents/fetchDocuments/fulfilled',
+            payload: docs,
+          });
+          expect(state.error).toBeNull();
+        }),
         { numRuns: 100 }
       );
     });
@@ -391,38 +382,33 @@ describe('Documents Slice Property-Based Tests', () => {
 
     it('should preserve independent result fields across operations', () => {
       fc.assert(
-        fc.property(
-          documentArb,
-          documentArb,
-          documentArb,
-          (doc1, doc2, doc3) => {
-            let state = documentsReducer(undefined, {});
+        fc.property(documentArb, documentArb, documentArb, (doc1, doc2, doc3) => {
+          let state = documentsReducer(undefined, {});
 
-            // Set doc (single document)
-            state = documentsReducer(state, {
-              type: 'documents/fetchDocument/fulfilled',
-              payload: doc1,
-            });
-            expect(state.doc).toEqual(doc1);
+          // Set doc (single document)
+          state = documentsReducer(state, {
+            type: 'documents/fetchDocument/fulfilled',
+            payload: doc1,
+          });
+          expect(state.doc).toEqual(doc1);
 
-            // Set docCreateResult
-            state = documentsReducer(state, {
-              type: 'documents/createDocument/fulfilled',
-              payload: doc2,
-            });
-            expect(state.docCreateResult).toEqual(doc2);
-            expect(state.doc).toEqual(doc1); // doc should be unchanged
+          // Set docCreateResult
+          state = documentsReducer(state, {
+            type: 'documents/createDocument/fulfilled',
+            payload: doc2,
+          });
+          expect(state.docCreateResult).toEqual(doc2);
+          expect(state.doc).toEqual(doc1); // doc should be unchanged
 
-            // Set docEditResult
-            state = documentsReducer(state, {
-              type: 'documents/editDocument/fulfilled',
-              payload: { data: doc3, statusCode: 200 },
-            });
-            expect(state.docEditResult.data).toEqual(doc3);
-            expect(state.doc).toEqual(doc1); // doc should still be unchanged
-            expect(state.docCreateResult).toEqual(doc2); // docCreateResult should still be unchanged
-          }
-        ),
+          // Set docEditResult
+          state = documentsReducer(state, {
+            type: 'documents/editDocument/fulfilled',
+            payload: { data: doc3, statusCode: 200 },
+          });
+          expect(state.docEditResult.data).toEqual(doc3);
+          expect(state.doc).toEqual(doc1); // doc should still be unchanged
+          expect(state.docCreateResult).toEqual(doc2); // docCreateResult should still be unchanged
+        }),
         { numRuns: 100 }
       );
     });
@@ -526,68 +512,62 @@ describe('Documents Slice Property-Based Tests', () => {
   describe('Async thunk state transitions', () => {
     it('should always transition from pending to either fulfilled or rejected', () => {
       fc.assert(
-        fc.property(
-          fc.oneof(documentArb, fc.string({ minLength: 1 })),
-          (payloadOrError) => {
-            let state = documentsReducer(undefined, {});
+        fc.property(fc.oneof(documentArb, fc.string({ minLength: 1 })), (payloadOrError) => {
+          let state = documentsReducer(undefined, {});
 
-            // Start with pending
+          // Start with pending
+          state = documentsReducer(state, {
+            type: 'documents/fetchDocument/pending',
+          });
+          expect(state.loading).toBe(true);
+
+          // Must end in either fulfilled or rejected
+          if (typeof payloadOrError === 'string') {
+            // Rejected
             state = documentsReducer(state, {
-              type: 'documents/fetchDocument/pending',
+              type: 'documents/fetchDocument/rejected',
+              payload: payloadOrError,
             });
-            expect(state.loading).toBe(true);
-
-            // Must end in either fulfilled or rejected
-            if (typeof payloadOrError === 'string') {
-              // Rejected
-              state = documentsReducer(state, {
-                type: 'documents/fetchDocument/rejected',
-                payload: payloadOrError,
-              });
-              expect(state.loading).toBe(false);
-              expect(state.error).toBe(payloadOrError);
-            } else {
-              // Fulfilled
-              state = documentsReducer(state, {
-                type: 'documents/fetchDocument/fulfilled',
-                payload: payloadOrError,
-              });
-              expect(state.loading).toBe(false);
-              expect(state.doc).toEqual(payloadOrError);
-              expect(state.error).toBeNull();
-            }
+            expect(state.loading).toBe(false);
+            expect(state.error).toBe(payloadOrError);
+          } else {
+            // Fulfilled
+            state = documentsReducer(state, {
+              type: 'documents/fetchDocument/fulfilled',
+              payload: payloadOrError,
+            });
+            expect(state.loading).toBe(false);
+            expect(state.doc).toEqual(payloadOrError);
+            expect(state.error).toBeNull();
           }
-        ),
+        }),
         { numRuns: 100 }
       );
     });
 
     it('should handle rapid successive operations correctly', () => {
       fc.assert(
-        fc.property(
-          fc.array(documentArb, { minLength: 2, maxLength: 5 }),
-          (docs) => {
-            let state = documentsReducer(undefined, {});
+        fc.property(fc.array(documentArb, { minLength: 2, maxLength: 5 }), (docs) => {
+          let state = documentsReducer(undefined, {});
 
-            // Simulate rapid successive fetches
-            for (const doc of docs) {
-              state = documentsReducer(state, {
-                type: 'documents/fetchDocument/pending',
-              });
-              expect(state.loading).toBe(true);
+          // Simulate rapid successive fetches
+          for (const doc of docs) {
+            state = documentsReducer(state, {
+              type: 'documents/fetchDocument/pending',
+            });
+            expect(state.loading).toBe(true);
 
-              state = documentsReducer(state, {
-                type: 'documents/fetchDocument/fulfilled',
-                payload: doc,
-              });
-              expect(state.loading).toBe(false);
-              expect(state.doc).toEqual(doc);
-            }
-
-            // Final state should have the last document
-            expect(state.doc).toEqual(docs[docs.length - 1]);
+            state = documentsReducer(state, {
+              type: 'documents/fetchDocument/fulfilled',
+              payload: doc,
+            });
+            expect(state.loading).toBe(false);
+            expect(state.doc).toEqual(doc);
           }
-        ),
+
+          // Final state should have the last document
+          expect(state.doc).toEqual(docs[docs.length - 1]);
+        }),
         { numRuns: 100 }
       );
     });

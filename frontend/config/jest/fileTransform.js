@@ -1,11 +1,11 @@
-import path from 'path';
+import path from 'node:path';
 
 // This is a custom Jest transformer turning file imports into filenames.
 // http://facebook.github.io/jest/docs/en/webpack.html
 // Updated for ESM support
 
 export default {
-  process(src, filename) {
+  process(_src, filename) {
     const assetFilename = JSON.stringify(path.basename(filename));
 
     if (filename.match(/\.svg$/)) {

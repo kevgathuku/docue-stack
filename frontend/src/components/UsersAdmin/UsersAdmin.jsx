@@ -1,15 +1,15 @@
+import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
-import PropTypes from 'prop-types';
-import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { fetchUsers, selectUsers, updateProfile } from '../../features/auth/authSlice';
 import { fetchRoles, selectRoles } from '../../features/roles/rolesSlice';
-import { fetchUsers, updateProfile, selectUsers } from '../../features/auth/authSlice';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 
 function UsersAdmin() {
   const dispatch = useAppDispatch();
   const users = useAppSelector(selectUsers);
   const roles = useAppSelector(selectRoles);
-  
+
   const [token] = useState(localStorage.getItem('user'));
   const [selectedRoles, setSelectedRoles] = useState({});
   const access = {
@@ -25,11 +25,11 @@ function UsersAdmin() {
 
   // Prepend the user object to the function arguments through bind
   const handleSelectChange = (user, val) => {
-    setSelectedRoles(prev => ({
+    setSelectedRoles((prev) => ({
       ...prev,
-      [user._id]: val
+      [user._id]: val,
     }));
-    
+
     // Update the user's Role
     // Don't update if the already existing role is the one chosen
     if (user.role._id !== val._id) {
@@ -39,10 +39,8 @@ function UsersAdmin() {
   };
 
   const renderUser = (user) => {
-    let accessRole = selectedRoles[user._id]
-      ? selectedRoles[user._id].title
-      : user.role.title;
-    let description = access[accessRole];
+    const accessRole = selectedRoles[user._id] ? selectedRoles[user._id].title : user.role.title;
+    const description = access[accessRole];
     return (
       <tr key={user._id}>
         <td>{`${user.name.first} ${user.name.last}`}</td>

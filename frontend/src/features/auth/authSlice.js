@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import request from 'superagent';
 import { BASE_URL } from '../../config/api.js';
 
@@ -7,7 +7,7 @@ const loadInitialState = () => {
   try {
     const token = localStorage.getItem('user');
     const userInfo = localStorage.getItem('userInfo');
-    
+
     if (token && userInfo) {
       const user = JSON.parse(userInfo);
       return {
@@ -22,7 +22,7 @@ const loadInitialState = () => {
   } catch (error) {
     console.error('Error loading initial auth state from localStorage:', error);
   }
-  
+
   return {
     token: '',
     user: {},
@@ -57,9 +57,7 @@ export const fetchUsers = createAsyncThunk(
   'auth/fetchUsers',
   async (token, { rejectWithValue }) => {
     try {
-      const result = await request
-        .get(`${BASE_URL}/api/users`)
-        .set('x-access-token', token);
+      const result = await request.get(`${BASE_URL}/api/users`).set('x-access-token', token);
       return result.body;
     } catch (err) {
       return rejectWithValue(err.response?.body?.error || err.message);
@@ -70,62 +68,51 @@ export const fetchUsers = createAsyncThunk(
 /**
  * Sign up a new user
  */
-export const signup = createAsyncThunk(
-  'auth/signup',
-  async (user, { rejectWithValue }) => {
-    try {
-      const result = await request.post(`${BASE_URL}/api/users`).send(user);
-      return result.body;
-    } catch (err) {
-      return rejectWithValue(err.response?.body?.error || err.message);
-    }
+export const signup = createAsyncThunk('auth/signup', async (user, { rejectWithValue }) => {
+  try {
+    const result = await request.post(`${BASE_URL}/api/users`).send(user);
+    return result.body;
+  } catch (err) {
+    return rejectWithValue(err.response?.body?.error || err.message);
   }
-);
+});
 
 /**
  * Log in an existing user
  */
-export const login = createAsyncThunk(
-  'auth/login',
-  async (credentials, { rejectWithValue }) => {
-    try {
-      const result = await request
-        .post(`${BASE_URL}/api/users/login`)
-        .send(credentials);
-      return result.body;
-    } catch (err) {
-      return rejectWithValue(err.response?.body?.error || err.message);
-    }
+export const login = createAsyncThunk('auth/login', async (credentials, { rejectWithValue }) => {
+  try {
+    const result = await request.post(`${BASE_URL}/api/users/login`).send(credentials);
+    return result.body;
+  } catch (err) {
+    return rejectWithValue(err.response?.body?.error || err.message);
   }
-);
+});
 
 /**
  * Log out the current user
  * Handles API call and localStorage cleanup
  */
-export const logout = createAsyncThunk(
-  'auth/logout',
-  async (token, { rejectWithValue }) => {
-    try {
-      const result = await request
-        .post(`${BASE_URL}/api/users/logout`)
-        .set('x-access-token', token)
-        .send({});
-      
-      // Clean up localStorage after successful logout
-      localStorage.removeItem('user');
-      localStorage.removeItem('userInfo');
-      
-      return result.body;
-    } catch (err) {
-      // Clean up localStorage even if API call fails
-      localStorage.removeItem('user');
-      localStorage.removeItem('userInfo');
-      
-      return rejectWithValue(err.response?.body?.error || err.message);
-    }
+export const logout = createAsyncThunk('auth/logout', async (token, { rejectWithValue }) => {
+  try {
+    const result = await request
+      .post(`${BASE_URL}/api/users/logout`)
+      .set('x-access-token', token)
+      .send({});
+
+    // Clean up localStorage after successful logout
+    localStorage.removeItem('user');
+    localStorage.removeItem('userInfo');
+
+    return result.body;
+  } catch (err) {
+    // Clean up localStorage even if API call fails
+    localStorage.removeItem('user');
+    localStorage.removeItem('userInfo');
+
+    return rejectWithValue(err.response?.body?.error || err.message);
   }
-);
+});
 
 /**
  * Get current session status
@@ -270,19 +257,19 @@ const authSlice = createSlice({
       .addCase(updateProfile.fulfilled, (state, action) => {
         const updatedUser = action.payload;
         state.profileUpdateError = '';
-        
+
         // Update the user in the users array if it exists
         if (state.users) {
           state.users = state.users.map((user) =>
             user._id === updatedUser._id ? updatedUser : user
           );
         }
-        
+
         // Update current user if it's the same user
         if (state.user._id === updatedUser._id) {
           state.user = updatedUser;
         }
-        
+
         state.profileUpdateResult = updatedUser;
       })
       .addCase(updateProfile.rejected, (state, action) => {
@@ -291,8 +278,8 @@ const authSlice = createSlice({
   },
 });
 
-// Export actions (currently none, but structure is ready)
-export const {} = authSlice.actions;
+// Export actions if needed in the future
+// export const {} = authSlice.actions;
 
 // Selectors
 export const selectUsers = (state) => state.auth.users;

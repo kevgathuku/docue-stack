@@ -6,64 +6,62 @@ const UserSchema = mongoose.Schema({
     type: String,
     unique: true,
     required: true,
-    trim: true
+    trim: true,
   },
   name: {
     first: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     last: {
       type: String,
       required: true,
-      trim: true
-    }
+      trim: true,
+    },
   },
   email: {
     type: String,
     lowercase: true,
     required: true,
     unique: true,
-    trim: true
+    trim: true,
   },
   password: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
   },
   role: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Role'
+    ref: 'Role',
   },
   loggedIn: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 });
 
-UserSchema.pre('save', function(next) {
-  const user = this;
-
+UserSchema.pre('save', function (next) {
   // Only hash the password if it has been modified (or is new)
-  if (!user.isModified('password')) {
+  if (!this.isModified('password')) {
     return next();
   }
 
   // Hash the user's password with 10 salt rounds
-  bcrypt.hash(user.password, 10, function(err, hash) {
+  bcrypt.hash(this.password, 10, (err, hash) => {
     if (err) {
       return next(err);
     }
     // Replace the cleartext password with the hashed one
-    user.password = hash;
+    this.password = hash;
     next();
   });
 });
 
 // Check if entered password is the same as the stored password
 // Returns true if the passwords match, false otherwise
-UserSchema.methods.comparePassword = function(password) {
+UserSchema.methods.comparePassword = function (password) {
   return bcrypt.compareSync(password, this.password);
 };
 

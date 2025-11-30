@@ -1,24 +1,53 @@
-'use strict';
-
-let jwt = require('jsonwebtoken');
-
-class ExtendedError extends Error {
-  constructor(message) {
-    super(message);
-    this.message = message;
-    this.stack = (new Error()).stack;
-    this.name = this.constructor.name;
-  }
-}
+const jwt = require('jsonwebtoken');
 
 // Takes a JWT token object and extracts the user info from the token
+const extractUserFromToken = (token) => {
+  const decodedUser = jwt.decode(token, {
+    complete: true,
+  });
+  // Returns the user object stored in the token
+  return decodedUser.payload;
+};
+
+// Checks if a user is the owner of a document
+// Handles ObjectId vs string comparison safely
+const isDocumentOwner = (userId, documentOwnerId) => {
+  return userId.toString() === documentOwnerId.toString();
+};
+
+// Checks if a user has permission to access a document based on role
+const canAccessDocument = (user, document) => {
+  // Owner always has access
+  if (isDocumentOwner(user._id, document.ownerId)) {
+    return true;
+  }
+
+  // Check role-based access
+  if (document.role && user.role) {
+    return user.role.accessLevel >= document.role.accessLevel;
+  }
+
+  return false;
+};
+
+// Checks if a user can delete a document (owner or admin)
+const canDeleteDocument = (user, document) => {
+  // Owner can delete
+  if (isDocumentOwner(user._id, document.ownerId)) {
+    return true;
+  }
+
+  // Admin (accessLevel 2) can delete
+  if (user.role && user.role.accessLevel === 2) {
+    return true;
+  }
+
+  return false;
+};
+
 module.exports = {
-  extractUserFromToken: (token) => {
-    let decodedUser = jwt.decode(token, {
-      complete: true
-    });
-    // Returns the user object stored in the token
-    return decodedUser.payload;
-  },
-  Error: ExtendedError
+  extractUserFromToken,
+  isDocumentOwner,
+  canAccessDocument,
+  canDeleteDocument,
 };

@@ -90,7 +90,7 @@ function NavBar(props) {
                 alt: "Docue Logo",
                 src: "/favicon.png"
               }),
-              "      Docue"
+              "Docue"
             ]
           }),
           JsxRuntime.jsx(React.Fragment, {

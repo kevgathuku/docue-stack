@@ -1,22 +1,22 @@
 /**
  * Cross-Component Property-Based Tests for Error Toast Notifications
- * 
+ *
  * **Feature: elm-to-react-migration, Property 15: Error responses show toast notifications**
  * **Validates: Requirements 1.4, 2.7, 3.3, 4.4, 5.4**
- * 
+ *
  * These tests verify that all components consistently display error toast notifications
  * when API errors occur, regardless of the error format or component.
  */
 
-import * as fc from 'fast-check';
-import { render, fireEvent, waitFor, cleanup } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
-import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
+import * as fc from 'fast-check';
+import { Provider } from 'react-redux';
+import { BrowserRouter } from 'react-router-dom';
 import authReducer from '../../features/auth/authSlice';
 import rolesReducer from '../../features/roles/rolesSlice';
-import Login from '../Login/Login.res.js';
 import CreateRole from '../CreateRole/CreateRole.res.js';
+import Login from '../Login/Login.res.js';
 import SignUp from '../SignUp/SignUp.res.js';
 
 describe('Cross-Component Error Toast Property Tests', () => {
@@ -98,14 +98,14 @@ describe('Cross-Component Error Toast Property Tests', () => {
 
   /**
    * **Property 15: Error responses show toast notifications**
-   * 
+   *
    * For any API error response, the system should display an error toast notification
    * with the error message.
    */
   describe('Property 15: Error responses show toast notifications', () => {
     // Arbitrary for generating non-empty error messages
     const errorMessageArb = fc.oneof(
-      fc.string({ minLength: 1, maxLength: 100 }).filter(s => s.trim().length > 0),
+      fc.string({ minLength: 1, maxLength: 100 }).filter((s) => s.trim().length > 0),
       fc.constantFrom(
         'Network error',
         'Server error',
@@ -127,7 +127,7 @@ describe('Cross-Component Error Toast Property Tests', () => {
         fc.asyncProperty(errorMessageArb, async (errorMessage) => {
           // Reset for this iteration
           toastCalls = [];
-          
+
           // Create store with login error
           const store = createMockStore({
             auth: {
@@ -153,11 +153,11 @@ describe('Cross-Component Error Toast Property Tests', () => {
               expect(toastCalls.length).toBeGreaterThan(0);
 
               // Find error toasts (className should be 'error-toast')
-              const errorToasts = toastCalls.filter(call => call.className === 'error-toast');
+              const errorToasts = toastCalls.filter((call) => call.className === 'error-toast');
               expect(errorToasts.length).toBeGreaterThan(0);
 
               // Verify the error message is in one of the toasts
-              const hasErrorMessage = errorToasts.some(call => call.message === errorMessage);
+              const hasErrorMessage = errorToasts.some((call) => call.message === errorMessage);
               expect(hasErrorMessage).toBe(true);
             });
           } finally {
@@ -170,7 +170,7 @@ describe('Cross-Component Error Toast Property Tests', () => {
 
     /**
      * Test 2: CreateRole component displays error toast for any creation error
-     * 
+     *
      * Note: CreateRole only displays error toasts after form submission when createAttempted is true.
      * The error must be set in Redux state AFTER the form is submitted for the effect to trigger.
      * For this test, we verify that validation errors (empty title) show error toasts.
@@ -180,7 +180,7 @@ describe('Cross-Component Error Toast Property Tests', () => {
         fc.asyncProperty(fc.constant(''), async () => {
           // Reset for this iteration
           toastCalls = [];
-          
+
           // Create store without error initially
           const store = createMockStore();
 
@@ -197,12 +197,12 @@ describe('Cross-Component Error Toast Property Tests', () => {
               expect(toastCalls.length).toBeGreaterThan(0);
 
               // Find error toasts
-              const errorToasts = toastCalls.filter(call => call.className === 'error-toast');
+              const errorToasts = toastCalls.filter((call) => call.className === 'error-toast');
               expect(errorToasts.length).toBeGreaterThan(0);
 
               // Verify the error message is about providing a title
-              const hasErrorMessage = errorToasts.some(call => 
-                call.message.includes('Role Title') || call.message.includes('title')
+              const hasErrorMessage = errorToasts.some(
+                (call) => call.message.includes('Role Title') || call.message.includes('title')
               );
               expect(hasErrorMessage).toBe(true);
             });
@@ -222,7 +222,7 @@ describe('Cross-Component Error Toast Property Tests', () => {
         fc.asyncProperty(errorMessageArb, async (errorMessage) => {
           // Reset for this iteration
           toastCalls = [];
-          
+
           // Create store with signup error
           const store = createMockStore({
             auth: {
@@ -254,11 +254,11 @@ describe('Cross-Component Error Toast Property Tests', () => {
               expect(toastCalls.length).toBeGreaterThan(0);
 
               // Find error toasts
-              const errorToasts = toastCalls.filter(call => call.className === 'error-toast');
+              const errorToasts = toastCalls.filter((call) => call.className === 'error-toast');
               expect(errorToasts.length).toBeGreaterThan(0);
 
               // Verify the error message is in one of the toasts
-              const hasErrorMessage = errorToasts.some(call => call.message === errorMessage);
+              const hasErrorMessage = errorToasts.some((call) => call.message === errorMessage);
               expect(hasErrorMessage).toBe(true);
             });
           } finally {
@@ -277,7 +277,7 @@ describe('Cross-Component Error Toast Property Tests', () => {
         fc.asyncProperty(errorMessageArb, async (errorMessage) => {
           // Reset for this iteration
           toastCalls = [];
-          
+
           // Test Login component
           const loginStore = createMockStore({
             auth: {
@@ -298,16 +298,16 @@ describe('Cross-Component Error Toast Property Tests', () => {
 
             await waitFor(() => {
               // Verify error toasts have consistent format
-              const errorToasts = toastCalls.filter(call => call.className === 'error-toast');
+              const errorToasts = toastCalls.filter((call) => call.className === 'error-toast');
               expect(errorToasts.length).toBeGreaterThan(0);
 
               // All error toasts should have:
               // - duration of 2000ms
               // - className of 'error-toast'
-              errorToasts.forEach(toast => {
+              for (const toast of errorToasts) {
                 expect(toast.duration).toBe(2000);
                 expect(toast.className).toBe('error-toast');
-              });
+              }
             });
           } finally {
             unmount();
@@ -327,7 +327,7 @@ describe('Cross-Component Error Toast Property Tests', () => {
           async (shortPassword) => {
             // Reset for this iteration
             toastCalls = [];
-            
+
             const store = createMockStore();
 
             const { container, unmount } = renderWithProviders(<SignUp />, store);
@@ -350,12 +350,12 @@ describe('Cross-Component Error Toast Property Tests', () => {
 
               // Should show validation error toast
               expect(toastCalls.length).toBeGreaterThan(0);
-              const errorToasts = toastCalls.filter(call => call.className === 'error-toast');
+              const errorToasts = toastCalls.filter((call) => call.className === 'error-toast');
               expect(errorToasts.length).toBeGreaterThan(0);
 
               // Should contain validation error message
               const hasValidationError = errorToasts.some(
-                call => call.message.includes('password') || call.message.includes('6')
+                (call) => call.message.includes('password') || call.message.includes('6')
               );
               expect(hasValidationError).toBe(true);
             } finally {

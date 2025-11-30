@@ -1,8 +1,8 @@
 // Test to verify ReScript type definitions compile and export correctly
 
 import * as AuthTypes from '../auth/AuthTypes.res.js';
-import * as RoleTypes from '../roles/RoleTypes.res.js';
 import * as DocumentTypes from '../documents/DocumentTypes.res.js';
+import * as RoleTypes from '../roles/RoleTypes.res.js';
 
 describe('ReScript Type Definitions', () => {
   describe('AuthTypes', () => {
@@ -81,9 +81,9 @@ describe('ReScript Type Definitions', () => {
         username: 'testuser',
         name: {
           first: 'Test',
-          last: 'User'
+          last: 'User',
         },
-        email: 'test@example.com'
+        email: 'test@example.com',
       };
 
       const result = AuthTypes.decodeUser(userJson);
@@ -102,7 +102,7 @@ describe('ReScript Type Definitions', () => {
       const roleJson = {
         _id: '456',
         title: 'admin',
-        accessLevel: 2
+        accessLevel: 2,
       };
 
       const result = RoleTypes.decodeRole(roleJson);
@@ -120,7 +120,7 @@ describe('ReScript Type Definitions', () => {
         _id: '789',
         title: 'Test Document',
         content: 'Test content',
-        ownerId: '123'
+        ownerId: '123',
       };
 
       const result = DocumentTypes.decodeDocument(docJson);

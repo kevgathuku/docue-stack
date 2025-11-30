@@ -1,11 +1,8 @@
-'use strict';
-
-const jwt = require('jsonwebtoken'),
-  extractUserFromToken = require('./utils').extractUserFromToken,
-  Error = require('./utils').Error,
-  Documents = require('../models/documents'),
-  Roles = require('../models/roles'),
-  Users = require('../models/users');
+const jwt = require('jsonwebtoken');
+const { extractUserFromToken, canAccessDocument, canDeleteDocument } = require('./utils');
+const Documents = require('../models/documents');
+const Roles = require('../models/roles');
+const Users = require('../models/users');
 
 module.exports = {
   create: async (req, res, next) => {
@@ -22,10 +19,10 @@ module.exports = {
 
       // Find if the document already exists
       const document = await Documents.findOne({ title: req.body.title });
-      
+
       if (document) {
         // If the document already exists send a validation error
-        let docErr = new Error('Document already exists');
+        const docErr = new Error('Document already exists');
         docErr.status = 400;
         return next(docErr);
       }
@@ -33,9 +30,9 @@ module.exports = {
       // Decode the user info from the token
       const decodedUser = jwt.decode(token, { complete: true });
       const user = await Users.findById(decodedUser.payload._id);
-      
+
       if (!user) {
-        let err = new Error('User does not exist');
+        const err = new Error('User does not exist');
         err.status = 400;
         return next(err);
       }
@@ -49,7 +46,7 @@ module.exports = {
 
       // Find the corresponding role in the DB
       const fetchedRole = await Roles.findOne({ title: role }).exec();
-      
+
       if (!fetchedRole) {
         return next(new Error('Role not found'));
       }
@@ -59,7 +56,7 @@ module.exports = {
         title: req.body.title,
         content: req.body.content,
         ownerId: decodedUser.payload._id,
-        role: fetchedRole
+        role: fetchedRole,
       });
 
       res.status(201).json(newDocument);
@@ -73,31 +70,25 @@ module.exports = {
       // Extract the user info from the token
       const token = req.body.token || req.headers['x-access-token'];
       const user = extractUserFromToken(token);
-      
+
       // Validate whether a user can access a specific document
       const doc = await Documents.findById(req.params.id).populate('role').exec();
-      
+
       if (!doc) {
         return next(new Error('Document not found'));
       }
 
-      // If the user is the doc owner, allow access
-      if (user._id == doc.ownerId) {
-        return next();
-      }
-      
       if (doc.role === undefined) {
         return next(new Error('The document does not specify a role'));
       }
-      
-      if (user.role.accessLevel >= doc.role.accessLevel) {
-        // If the user's accessLevel is equal or higher to the one
-        // specified by the doc, allow access
+
+      // Use helper to check access
+      if (canAccessDocument(user, doc)) {
         return next();
       }
-      
+
       res.status(403).json({
-        error: 'You are not allowed to access this document'
+        error: 'You are not allowed to access this document',
       });
     } catch (err) {
       next(err);
@@ -109,26 +100,21 @@ module.exports = {
       // Extract the user info from the token
       const token = req.body.token || req.headers['x-access-token'];
       const user = extractUserFromToken(token);
-      
+
       // Validate whether a user can delete a specific document
       const doc = await Documents.findById(req.params.id).populate('role').exec();
-      
+
       if (!doc) {
         return next(new Error('Document not found'));
       }
 
-      // If the user is the doc owner, allow access
-      if (user._id == doc.ownerId) {
+      // Use helper to check delete permission
+      if (canDeleteDocument(user, doc)) {
         return next();
       }
-      
-      if (user.role.accessLevel === 2) {
-        // If the user is an admin, allow access
-        return next();
-      }
-      
+
       res.status(403).json({
-        error: 'You are not allowed to delete this document'
+        error: 'You are not allowed to delete this document',
       });
     } catch (err) {
       next(err);
@@ -144,11 +130,11 @@ module.exports = {
       )
         .populate('ownerId')
         .exec();
-      
+
       if (!document) {
         return next(new Error('Document not found'));
       }
-      
+
       res.send(document);
     } catch (err) {
       next(err);
@@ -161,11 +147,11 @@ module.exports = {
         .populate('role')
         .populate('ownerId')
         .exec();
-      
+
       if (!document) {
         return next(new Error('Document not found'));
       }
-      
+
       res.send(document);
     } catch (err) {
       next(err);
@@ -175,11 +161,11 @@ module.exports = {
   delete: async (req, res, next) => {
     try {
       const doc = await Documents.findOneAndDelete({ _id: req.params.id });
-      
+
       if (!doc) {
         return next(new Error('Document not found'));
       }
-      
+
       res.sendStatus(204);
     } catch (err) {
       next(err);
@@ -192,24 +178,17 @@ module.exports = {
       const token = req.body.token || req.headers['x-access-token'];
       const user = extractUserFromToken(token);
       // Set a default limit of 10 if one is not set
-      const limit = parseInt(req.query.limit) || 10;
-      
+      const limit = Number.parseInt(req.query.limit) || 10;
+
       const docs = await Documents.find({})
         .limit(limit)
         .populate('role')
         .populate('ownerId')
         .sort('-dateCreated')
         .exec();
-      
-      // Return docs with accessLevel lower or equal to user's access level
-      res.json(
-        docs.filter(function(doc) {
-          return (
-            doc.role.accessLevel <= user.role.accessLevel ||
-            doc.ownerId._id == user._id
-          );
-        })
-      );
+
+      // Return docs the user can access (using helper)
+      res.json(docs.filter((doc) => canAccessDocument(user, doc)));
     } catch (err) {
       next(err);
     }
@@ -221,9 +200,9 @@ module.exports = {
       const token = req.body.token || req.headers['x-access-token'];
       const user = extractUserFromToken(token);
 
-      const limit = parseInt(req.query.limit) || 10;
+      const limit = Number.parseInt(req.query.limit) || 10;
       const role = await Roles.findOne({ title: req.params.role }).exec();
-      
+
       if (!role) {
         return next(new Error('Role not found'));
       }
@@ -233,12 +212,8 @@ module.exports = {
         .limit(limit)
         .sort('-dateCreated')
         .exec();
-      
-      res.json(
-        docs.filter(function(doc) {
-          return doc.role.accessLevel <= user.role.accessLevel;
-        })
-      );
+
+      res.json(docs.filter((doc) => doc.role.accessLevel <= user.role.accessLevel));
     } catch (err) {
       next(err);
     }
@@ -250,7 +225,7 @@ module.exports = {
       const token = req.body.token || req.headers['x-access-token'];
       const user = extractUserFromToken(token);
 
-      const limit = parseInt(req.query.limit) || 10;
+      const limit = Number.parseInt(req.query.limit) || 10;
       // Ensure the date format is in the format expected
       const dateRegex = /\d{4}-\d{1,2}-\d{1,2}$/;
       // If the regex does not match, throw an error
@@ -266,7 +241,7 @@ module.exports = {
       // Save the next day in a nextDate variable
       // Modifies the tmp variable instead of the date variable
       const nextDate = new Date(tmp.setDate(tmp.getDate() + 1));
-      
+
       const docs = await Documents.find()
         // Date is greater than the date provided and less than one day ahead
         // i.e. documents created today
@@ -276,14 +251,10 @@ module.exports = {
         .populate('role')
         .limit(limit)
         .exec();
-      
-      res.json(
-        docs.filter(function(doc) {
-          return doc.role.accessLevel <= user.role.accessLevel;
-        })
-      );
+
+      res.json(docs.filter((doc) => doc.role.accessLevel <= user.role.accessLevel));
     } catch (err) {
       next(err);
     }
-  }
+  },
 };
