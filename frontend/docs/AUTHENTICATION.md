@@ -151,9 +151,10 @@ const session = useAppSelector(selectSession);
 3. **NavBar Component** (`src/components/NavBar/NavBar.res`)
    - **PRIMARY RESPONSIBILITY**: UI rendering and logout handling
    - Displays navigation based on Redux state
-   - Handles logout flow (clears localStorage and Redux)
+   - Handles logout flow (dispatches logout action to Redux)
    - Initializes Materialize UI components
    - **Does NOT validate sessions** (handled by PrivateRoute)
+   - **Does NOT directly manage localStorage** (handled by authSlice)
    - **Migrated to ReScript** for type safety and compile-time guarantees
 
 4. **Login/SignUp Components**
@@ -269,9 +270,9 @@ const session = useAppSelector(selectSession);
 1. User clicks logout
 2. NavBar dispatches logout(token) action
 3. Backend invalidates session
-4. Redux clears token, user, and session state
-5. NavBar clears localStorage
-6. NavBar redirects to home page
+4. authSlice clears token, user, and session state in Redux
+5. authSlice clears localStorage (user and userInfo)
+6. NavBar detects logoutResult change and redirects to home page
 ```
 
 ---
@@ -313,14 +314,16 @@ return <Navigate to="/auth" />;
 
 **What it does:**
 - ✅ Renders navigation UI based on Redux state
-- ✅ Handles logout flow (clears localStorage and Redux)
+- ✅ Handles logout flow (dispatches logout action)
+- ✅ Redirects to home after logout completes
 - ✅ Initializes Materialize UI components
 
 **What it doesn't do:**
 - ❌ Validate sessions
+- ❌ Directly manage localStorage (handled by authSlice)
 - ❌ Make redirect decisions (except after explicit logout)
 
-**Key Point**: Does NOT validate sessions, does NOT make redirect decisions.
+**Key Point**: Does NOT validate sessions, does NOT directly manage localStorage.
 
 **Implementation Pattern (ReScript)**:
 ```rescript
@@ -332,10 +335,9 @@ React.useEffect1(() => {
 }, [loggedIn])
 
 // Handle logout result - redirect when logout completes
+// Note: localStorage cleanup is handled by the logout thunk in authSlice
 React.useEffect1(() => {
   if logoutResult != "" {
-    removeItem("user")
-    removeItem("userInfo")
     navigate("/")
   }
   None
@@ -346,13 +348,16 @@ let handleLogout = React.useCallback0((evt: ReactEvent.Mouse.t) => {
   ReactEvent.Mouse.preventDefault(evt)
   
   switch getItemOption("user") {
-  | Some(token) => reduxDispatch(logout(token))
+  | Some(token) => {
+      // Dispatch logout action - authSlice handles localStorage cleanup
+      reduxDispatch(logout(token))
+    }
   | None => ()
   }
 })
 ```
 
-**Note**: NavBar has been migrated to ReScript (`NavBar.res`) for type safety and compile-time guarantees.
+**Note**: NavBar has been migrated to ReScript (`NavBar.res`) for type safety and compile-time guarantees. localStorage management is handled by authSlice, not directly by NavBar.
 
 ### Login/SignUp (Authentication Forms)
 
@@ -643,6 +648,13 @@ open Materialize
 @module("../../features/auth/authSlice")
 external logout: string => {..} = "logout"
 
+// External bindings for Materialize helpers (data-* attributes not supported in ReScript JSX)
+@module("./MaterializeHelpers")
+external createDropdownButton: (string, ReactEvent.Mouse.t => unit) => React.element = "createDropdownButton"
+
+@module("./MaterializeHelpers")
+external createMobileMenuButton: (ReactEvent.Mouse.t => unit) => React.element = "createMobileMenuButton"
+
 @react.component
 let make = (~pathname: string) => {
   let reduxDispatch = useDispatch()
@@ -678,10 +690,9 @@ let make = (~pathname: string) => {
   }, [loggedIn])
   
   // Handle logout result - redirect when logout completes
+  // Note: localStorage cleanup is handled by the logout thunk in authSlice
   React.useEffect1(() => {
     if logoutResult != "" {
-      removeItem("user")
-      removeItem("userInfo")
       navigate("/")
     }
     None
@@ -692,23 +703,30 @@ let make = (~pathname: string) => {
     ReactEvent.Mouse.preventDefault(evt)
     
     switch getItemOption("user") {
-    | Some(token) => reduxDispatch(logout(token))
+    | Some(token) => {
+        // Dispatch logout action - authSlice handles localStorage cleanup
+        reduxDispatch(logout(token))
+      }
     | None => ()
     }
   })
   
-  // Render navbar (conditional on pathname)
+  // Render navbar with React Router Links for client-side navigation
+  // Uses MaterializeHelpers for elements with data-* attributes
   // ...
 }
 ```
 
 **Key Features**:
 - ✅ Type-safe Redux integration with proper null handling
-- ✅ Only handles logout flow
+- ✅ Only handles logout flow (dispatches action, redirects after completion)
 - ✅ No session validation logic
+- ✅ No direct localStorage management (handled by authSlice)
 - ✅ No redirect decisions (except after explicit logout)
 - ✅ Compile-time guarantees prevent runtime errors
 - ✅ Uses Materialize bindings for UI initialization
+- ✅ Uses React Router Link components for client-side navigation
+- ✅ Uses MaterializeHelpers.js for elements requiring data-* attributes
 
 ### authSlice.js - Session State Management
 
@@ -1147,10 +1165,12 @@ PrivateRoute:
 
 NavBar:
   ✓ Renders UI based on Redux state
-  ✓ Handles logout flow
+  ✓ Handles logout flow (dispatches action)
+  ✓ Redirects to home after logout completes
   ✓ Initializes Materialize components
   ✗ NO session validation
-  ✗ NO redirect decisions
+  ✗ NO direct localStorage management
+  ✗ NO redirect decisions (except post-logout)
 ```
 
 ### Flow Diagrams
@@ -1192,13 +1212,15 @@ Page Load
 ### Files Modified
 
 1. `frontend/src/components/PrivateRoute.jsx` - Added session validation
-2. `frontend/src/components/NavBar/NavBar.res` - **Migrated to ReScript**, removed session validation
+2. `frontend/src/components/NavBar/NavBar.res` - **Migrated to ReScript**, removed session validation and direct localStorage management
 3. `frontend/src/components/NavBar/NavBar.res.js` - Compiled output (auto-generated)
-4. `frontend/src/components/Login/Login.res` - Added Session Validation Guard
-5. `frontend/src/components/SignUp/SignUp.res` - Migrated to ReScript with Session Validation Guard
-6. `frontend/src/features/auth/authSlice.js` - Ensured proper initial state
-7. `frontend/src/bindings/Materialize.res` - Added Materialize UI bindings (dropdown, sideNav, tooltips)
-8. `frontend/docs/AUTHENTICATION.md` - Updated documentation
+4. `frontend/src/components/NavBar/MaterializeHelpers.js` - Helper functions for Materialize elements with data-* attributes
+5. `frontend/src/components/Login/Login.res` - Added Session Validation Guard
+6. `frontend/src/components/SignUp/SignUp.res` - Migrated to ReScript with Session Validation Guard
+7. `frontend/src/features/auth/authSlice.js` - Ensured proper initial state, handles localStorage cleanup in logout thunk
+8. `frontend/src/bindings/Materialize.res` - Added Materialize UI bindings (dropdown, sideNav, tooltips)
+9. `frontend/src/bindings/ReactRouter.res` - Added Link component binding for client-side navigation
+10. `frontend/docs/AUTHENTICATION.md` - Updated documentation
 
 ---
 
@@ -1208,11 +1230,13 @@ Page Load
 - `src/components/PrivateRoute.jsx` - **Route protection and session validation** (PRIMARY)
 - `src/components/NavBar/NavBar.res` - UI rendering and logout handling (ReScript)
 - `src/components/NavBar/NavBar.res.js` - Compiled NavBar output (auto-generated)
+- `src/components/NavBar/MaterializeHelpers.js` - Helper functions for Materialize elements with data-* attributes
 - `src/components/Login/Login.res` - Login form (ReScript)
 - `src/components/SignUp/SignUp.res` - Signup form (ReScript)
-- `src/features/auth/authSlice.js` - Redux Toolkit auth slice (session state management)
+- `src/features/auth/authSlice.js` - Redux Toolkit auth slice (session state management, localStorage cleanup)
 - `src/store/hooks.js` - Redux hooks (useAppDispatch, useAppSelector)
 - `src/bindings/Redux.res` - Redux bindings for ReScript
+- `src/bindings/ReactRouter.res` - React Router bindings for ReScript (Link component)
 - `src/bindings/Materialize.res` - Materialize UI bindings for ReScript
 - `src/bindings/LocalStorage.res` - LocalStorage bindings for ReScript
 
