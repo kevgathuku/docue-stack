@@ -28,16 +28,36 @@ Access the app at `http://localhost:3000` (frontend proxies API to backend)
 
 ## Code Quality
 
-### Formatting
+### Formatting with Biome
 - Use Biome for code formatting: `pnpm format`
+- Check formatting without changes: `pnpm format:check`
 - Format runs on the entire monorepo
+- Configured in `biome.json` at the root
+- Ignores compiled files (*.res.js, *.bs.js)
 - Consider setting up pre-commit hooks for auto-formatting
 
-### Linting
-- Backend uses ESLint with babel-eslint parser
-- Frontend uses ESLint with React plugin
-- Both have `.eslintrc` files with project-specific rules
-- Run linting before committing changes
+### Linting with Biome
+- Lint code: `pnpm lint`
+- Auto-fix issues: `pnpm lint:fix`
+- Check and fix everything: `pnpm check:fix`
+- Biome provides fast, modern linting for JavaScript/TypeScript
+
+### Frontend-Specific Commands
+```bash
+# Format frontend only
+pnpm --filter frontend format
+
+# Lint frontend only
+pnpm --filter frontend lint
+
+# Check and fix frontend
+pnpm --filter frontend check:fix
+```
+
+### Legacy Linting (Deprecated)
+- Backend still uses ESLint with babel-eslint parser
+- Frontend has `.eslintrc` (being phased out in favor of Biome)
+- Biome is now the preferred tool for both packages
 
 ### Testing
 - Always run tests before pushing: `pnpm --filter <package> test`

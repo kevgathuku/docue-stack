@@ -355,6 +355,34 @@ See `frontend/MODERNIZATION.md` for complete modernization details.
 8. **Type Redux state** - Create ReScript type definitions for all slices
 9. **Run res:watch during development** - Automatic ReScript compilation
 10. **Use ReScript for new critical components** - Leverage compile-time type safety
+11. **Format and lint with Biome** - Run `pnpm format` and `pnpm lint` before committing
+
+### Code Quality with Biome
+
+Biome is the modern, fast formatter and linter for the frontend:
+
+```bash
+# Format code
+pnpm --filter frontend format
+
+# Check formatting without changes
+pnpm --filter frontend format:check
+
+# Lint code
+pnpm --filter frontend lint
+
+# Auto-fix linting issues
+pnpm --filter frontend lint:fix
+
+# Check and fix everything
+pnpm --filter frontend check:fix
+```
+
+**Configuration**: `biome.json` at root level
+- Ignores compiled ReScript files (*.res.js, *.bs.js)
+- 2-space indentation
+- Single quotes for JS, double quotes for JSX
+- 100 character line width
 
 ### ReScript Best Practices
 

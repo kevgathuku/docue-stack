@@ -1,5 +1,5 @@
 // ReScript bindings for Materialize CSS
-// These bindings provide type-safe access to Materialize toast notifications
+// These bindings provide type-safe access to Materialize toast notifications and component initialization
 
 // External binding to Materialize toast (uses window.Materialize.toast)
 @scope(("window", "Materialize")) @val
@@ -20,6 +20,35 @@ let showInfo = (message: string): unit => {
   toast(message, 2000, "info-toast")
 }
 
+// Initialize Materialize dropdown components
+let initDropdown = (): unit => {
+  try {
+    %raw(`window.$('.dropdown-button').dropdown()`)
+  } catch {
+  | _ => () // Silently fail if jQuery/Materialize not loaded
+  }
+}
+
+// Initialize Materialize sidenav components
+let initSideNav = (): unit => {
+  try {
+    %raw(`window.$('.button-collapse').sideNav()`)
+  } catch {
+  | _ => () // Silently fail if jQuery/Materialize not loaded
+  }
+}
+
+// Initialize Materialize tooltips
+let initTooltips = (): unit => {
+  try {
+    %raw(`window.$('.tooltipped').tooltip()`)
+  } catch {
+  | _ => () // Silently fail if jQuery/Materialize not loaded
+  }
+}
+
 // Example usage:
 // Materialize.showSuccess("Login successful!")
 // Materialize.showError("Invalid credentials")
+// Materialize.initDropdown()
+// Materialize.initSideNav()

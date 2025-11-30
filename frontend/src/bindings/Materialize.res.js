@@ -13,9 +13,36 @@ function showInfo(message) {
   window.Materialize.toast(message, 2000, "info-toast");
 }
 
+function initDropdown() {
+  try {
+    return (window.$('.dropdown-button').dropdown());
+  } catch (exn) {
+    return;
+  }
+}
+
+function initSideNav() {
+  try {
+    return (window.$('.button-collapse').sideNav());
+  } catch (exn) {
+    return;
+  }
+}
+
+function initTooltips() {
+  try {
+    return (window.$('.tooltipped').tooltip());
+  } catch (exn) {
+    return;
+  }
+}
+
 export {
   showSuccess,
   showError,
   showInfo,
+  initDropdown,
+  initSideNav,
+  initTooltips,
 }
 /* No side effect */

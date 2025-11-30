@@ -5807,6 +5807,7 @@ img.responsive {
   top: 5px;
   width: 32px;
   height: 32px;
+  margin-right: 5px;
 }
 #header-logo-top {
   position: relative;
