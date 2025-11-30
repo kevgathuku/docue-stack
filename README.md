@@ -70,6 +70,7 @@ Each document defines access rights (which roles can access it) and tracks publi
 
    Edit `frontend/.env` with your configuration:
    - `NODE_ENV` - Environment (`development`, `test`, or `production`)
+   - `VITE_API_BASE_URL` - Backend API URL (default: `http://localhost:8000`)
 
 ## Running the Application
 

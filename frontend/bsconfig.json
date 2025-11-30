@@ -11,6 +11,10 @@
       "subdirs": false
     },
     {
+      "dir": "src/config",
+      "subdirs": false
+    },
+    {
       "dir": "src/features",
       "subdirs": true
     },

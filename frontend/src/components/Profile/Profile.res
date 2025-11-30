@@ -1,5 +1,7 @@
 // Profile.res - ReScript Profile component with view/edit toggle and validation
 
+open Api
+
 // Profile-specific user type (simpler than AuthTypes.user)
 type profileUser = {
   id: string,
@@ -95,15 +97,7 @@ let reducer = (state: state, action: action): state => {
   }
 }
 
-// Get base URL from environment
-let getBaseUrl = (): string => {
-  let nodeEnv = %raw(`process.env.NODE_ENV`)
-  if nodeEnv == "development" {
-    "http://localhost:8000"
-  } else {
-    "https://docue.herokuapp.com"
-  }
-}
+
 
 // Decode profile user from JSON
 let decodeProfileUser = (json: JSON.t): result<profileUser, string> => {
@@ -181,7 +175,6 @@ let updateUserProfile = async (
   lastName: string,
   password: option<string>,
 ): result<profileUser, string> => {
-  let baseUrl = getBaseUrl()
   let url = `${baseUrl}/api/users/${userId}`
 
   // Create request body

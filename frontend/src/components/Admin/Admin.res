@@ -3,6 +3,7 @@
 
 open Fetch
 open LocalStorage
+open Api
 
 // Stats type matching backend response
 type stats = {
@@ -16,14 +17,6 @@ type state =
   | Loading
   | Loaded(stats)
   | Error(string)
-
-// Get base URL based on environment
-let getBaseUrl = (): string => {
-  switch %raw(`process.env.NODE_ENV`) {
-  | "development" => "http://localhost:8000"
-  | _ => "https://docue.herokuapp.com"
-  }
-}
 
 // Decode stats from JSON using raw JavaScript
 let decodeStats = (_json: JSON.t): result<stats, string> => {
@@ -41,7 +34,6 @@ let decodeStats = (_json: JSON.t): result<stats, string> => {
 // Fetch stats from API
 let fetchStats = async (token: string): result<stats, string> => {
   try {
-    let baseUrl = getBaseUrl()
     let url = baseUrl ++ "/api/stats"
     let response = await get(url, Some(token))
 

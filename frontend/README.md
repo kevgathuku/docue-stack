@@ -147,8 +147,18 @@ if (user && session.loggedIn) {
 Create a `.env` file (copy from `.env.example`):
 
 ```bash
-NODE_ENV=development  # development, test, or production
+NODE_ENV=development                    # development, test, or production
+VITE_API_BASE_URL=http://localhost:8000 # Backend API URL
 ```
+
+**Environment Variable Details:**
+
+- `NODE_ENV` - Sets the application environment mode
+- `VITE_API_BASE_URL` - Backend API base URL (must be prefixed with `VITE_` to be exposed to the client)
+  - Development: `http://localhost:8000`
+  - Production: Set to your deployed backend URL
+
+All environment variables prefixed with `VITE_` are exposed to the client-side code via `import.meta.env`.
 
 ## Elm Integration
 

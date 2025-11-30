@@ -4,6 +4,7 @@
 open Fetch
 open LocalStorage
 open RoleTypes
+open Api
 
 // Component state
 type state =
@@ -11,18 +12,9 @@ type state =
   | Loaded(roleList)
   | Error(string)
 
-// Get base URL based on environment
-let getBaseUrl = (): string => {
-  switch %raw(`process.env.NODE_ENV`) {
-  | "development" => "http://localhost:8000"
-  | _ => "https://docue.herokuapp.com"
-  }
-}
-
 // Fetch roles from API
 let fetchRoles = async (token: string): result<roleList, string> => {
   try {
-    let baseUrl = getBaseUrl()
     let url = baseUrl ++ "/api/roles"
     let response = await get(url, Some(token))
 
