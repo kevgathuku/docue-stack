@@ -20,7 +20,7 @@ describe('NavBar', function() {
     });
 
     // Mock jQuery functions
-    window.$ = jest.fn((selector) => ({
+    window.$ = jest.fn(() => ({
       dropdown: jest.fn(),
       sideNav: jest.fn(),
     }));
@@ -194,7 +194,7 @@ describe('NavBar', function() {
         },
       });
 
-      const { container } = render(
+      render(
         <Provider store={userStore}>
           <BrowserRouter
             future={{

@@ -11,7 +11,13 @@
     "test:ci": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage --ci",
     "res:build": "rescript build",
     "res:watch": "rescript watch",
-    "res:clean": "rescript clean"
+    "res:clean": "rescript clean",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "check": "biome check .",
+    "check:fix": "biome check --write ."
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.0",

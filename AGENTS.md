@@ -325,8 +325,8 @@ pnpm --filter frontend test:ci
 - Comprehensive API tests
 
 ### General
-- Use Biome for formatting: `pnpm format`
-- Follow ESLint rules
+- Use Biome for formatting and linting: `pnpm format` and `pnpm lint`
+- Auto-fix issues: `pnpm check:fix`
 - Write tests for new features
 - Keep commits focused and atomic
 
