@@ -135,4 +135,163 @@ describe('NavBar', function() {
       expect(loginLinks.length).toBeGreaterThan(0);
     });
   });
+
+  describe('Admin User Features', function() {
+    it('should show admin settings link for admin users', function() {
+      // Create a store with logged-in admin user
+      const adminStore = configureStore({
+        reducer: {
+          auth: authReducer,
+        },
+        preloadedState: {
+          auth: {
+            user: {
+              _id: '123',
+              email: 'admin@example.com',
+              name: { first: 'Admin', last: 'User' },
+              role: { title: 'admin', accessLevel: 3 },
+            },
+            token: 'admin-token',
+            session: { loggedIn: true },
+          },
+        },
+      });
+
+      const { container } = render(
+        <Provider store={adminStore}>
+          <BrowserRouter
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true,
+            }}
+          >
+            <NavBar pathname="/dashboard" />
+          </BrowserRouter>
+        </Provider>
+      );
+
+      // Should show Settings link in dropdown for admin
+      expect(screen.getByText('Settings')).toBeInTheDocument();
+    });
+
+    it('should not show admin settings link for regular users', function() {
+      // Create a store with logged-in regular user
+      const userStore = configureStore({
+        reducer: {
+          auth: authReducer,
+        },
+        preloadedState: {
+          auth: {
+            user: {
+              _id: '456',
+              email: 'user@example.com',
+              name: { first: 'Regular', last: 'User' },
+              role: { title: 'user', accessLevel: 1 },
+            },
+            token: 'user-token',
+            session: { loggedIn: true },
+          },
+        },
+      });
+
+      const { container } = render(
+        <Provider store={userStore}>
+          <BrowserRouter
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true,
+            }}
+          >
+            <NavBar pathname="/dashboard" />
+          </BrowserRouter>
+        </Provider>
+      );
+
+      // Should not show Settings link for regular user
+      expect(screen.queryByText('Settings')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Logout Functionality', function() {
+    it('should handle logout click when token exists', function() {
+      // Mock localStorage.getItem to return a token
+      Storage.prototype.getItem = jest.fn(() => 'test-token');
+
+      const loggedInStore = configureStore({
+        reducer: {
+          auth: authReducer,
+        },
+        preloadedState: {
+          auth: {
+            user: {
+              _id: '123',
+              email: 'test@example.com',
+              name: { first: 'Test', last: 'User' },
+            },
+            token: 'test-token',
+            session: { loggedIn: true },
+          },
+        },
+      });
+
+      const { container } = render(
+        <Provider store={loggedInStore}>
+          <BrowserRouter
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true,
+            }}
+          >
+            <NavBar pathname="/dashboard" />
+          </BrowserRouter>
+        </Provider>
+      );
+
+      // Find logout button by id (more reliable than text with spaces)
+      const logoutButton = container.querySelector('#logout-btn');
+      expect(logoutButton).toBeInTheDocument();
+      
+      logoutButton.click();
+
+      // Verify localStorage.getItem was called
+      expect(Storage.prototype.getItem).toHaveBeenCalledWith('user');
+    });
+
+    it('should redirect to home after logout completes', function() {
+      const loggedInStore = configureStore({
+        reducer: {
+          auth: authReducer,
+        },
+        preloadedState: {
+          auth: {
+            user: {
+              _id: '123',
+              email: 'test@example.com',
+              name: { first: 'Test', last: 'User' },
+            },
+            token: 'test-token',
+            session: { loggedIn: true },
+            logoutResult: 'success',
+          },
+        },
+      });
+
+      render(
+        <Provider store={loggedInStore}>
+          <BrowserRouter
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true,
+            }}
+          >
+            <NavBar pathname="/dashboard" />
+          </BrowserRouter>
+        </Provider>
+      );
+
+      // Verify localStorage items were removed when logoutResult is set
+      expect(Storage.prototype.removeItem).toHaveBeenCalledWith('user');
+      expect(Storage.prototype.removeItem).toHaveBeenCalledWith('userInfo');
+    });
+  });
 });
