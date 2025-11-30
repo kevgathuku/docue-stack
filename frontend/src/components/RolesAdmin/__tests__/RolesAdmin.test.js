@@ -3,26 +3,11 @@ import { render, screen, waitFor } from '@testing-library/react';
 import RolesAdmin from '../RolesAdmin.res.js';
 
 describe('RolesAdmin', function() {
-  let mockFetch;
-  let mockGetItem;
   let tooltipCalls;
 
   beforeEach(() => {
     // Reset mock values
-    mockGetItem = null;
     tooltipCalls = [];
-    
-    // Mock localStorage - needs to be set on global.localStorage
-    Object.defineProperty(global, 'localStorage', {
-      value: {
-        getItem: (key) => mockGetItem,
-        setItem: () => {},
-        removeItem: () => {},
-        clear: () => {},
-      },
-      writable: true,
-      configurable: true,
-    });
     
     // Mock jQuery tooltip initialization
     global.$ = (selector) => {
@@ -31,41 +16,21 @@ describe('RolesAdmin', function() {
         tooltip: () => {},
       };
     };
-
-    // Mock fetch API
-    mockFetch = null;
-    global.fetch = async (url, options) => {
-      if (mockFetch) {
-        return mockFetch(url, options);
-      }
-      throw new Error('Fetch not mocked');
-    };
   });
 
   describe('Component Rendering', function() {
     it('renders without crashing', function() {
-      mockGetItem = null;
-      const { container } = render(<RolesAdmin />);
+      const { container } = render(<RolesAdmin roles={null} loading={false} error={null} />);
       expect(container).toBeTruthy();
     });
 
     it('renders table structure when roles are loaded', async function() {
-      // Mock token
-      mockGetItem = 'test-token';
-
-      // Mock successful API response
       const mockRoles = [
-        { _id: '1', title: 'Admin', accessLevel: 2 },
-        { _id: '2', title: 'Staff', accessLevel: 1 },
+        { id: '1', title: 'Admin', accessLevel: 2 },
+        { id: '2', title: 'Staff', accessLevel: 1 },
       ];
 
-      mockFetch = async () => ({
-        ok: true,
-        status: 200,
-        json: async () => mockRoles,
-      });
-
-      render(<RolesAdmin />);
+      render(<RolesAdmin roles={mockRoles} loading={false} error={null} />);
 
       // Wait for roles to load
       await waitFor(() => {
@@ -88,16 +53,11 @@ describe('RolesAdmin', function() {
     });
 
     it('renders floating action button', async function() {
-      mockGetItem = 'test-token';
+      const mockRoles = [
+        { id: '1', title: 'Admin', accessLevel: 2 },
+      ];
 
-      const mockRoles = [];
-      mockFetch = async () => ({
-        ok: true,
-        status: 200,
-        json: async () => mockRoles,
-      });
-
-      const { container } = render(<RolesAdmin />);
+      const { container } = render(<RolesAdmin roles={mockRoles} loading={false} error={null} />);
 
       await waitFor(() => {
         const fab = container.querySelector('.fixed-action-btn');
@@ -111,16 +71,9 @@ describe('RolesAdmin', function() {
     });
 
     it('initializes Materialize tooltips', async function() {
-      mockGetItem = 'test-token';
-
       const mockRoles = [];
-      mockFetch = async () => ({
-        ok: true,
-        status: 200,
-        json: async () => mockRoles,
-      });
 
-      render(<RolesAdmin />);
+      render(<RolesAdmin roles={mockRoles} loading={false} error={null} />);
 
       // Wait for component to render
       await waitFor(() => {
@@ -134,15 +87,7 @@ describe('RolesAdmin', function() {
     });
 
     it('displays error message on API failure', async function() {
-      mockGetItem = 'test-token';
-
-      // Mock failed API response
-      mockFetch = async () => ({
-        ok: false,
-        status: 500,
-      });
-
-      render(<RolesAdmin />);
+      render(<RolesAdmin roles={null} loading={false} error="Failed to fetch roles: HTTP 500" />);
 
       await waitFor(() => {
         expect(screen.getByText(/Error:/)).toBeInTheDocument();
@@ -153,17 +98,15 @@ describe('RolesAdmin', function() {
       });
     });
 
-    it('displays error when no authentication token', async function() {
-      mockGetItem = null;
-
-      render(<RolesAdmin />);
+    it('displays no roles message when roles array is empty', async function() {
+      render(<RolesAdmin roles={null} loading={false} error={null} />);
 
       await waitFor(() => {
-        expect(screen.getByText(/Error:/)).toBeInTheDocument();
+        expect(screen.getByText('Manage Roles')).toBeInTheDocument();
       });
 
       await waitFor(() => {
-        expect(screen.getByText(/No authentication token found/)).toBeInTheDocument();
+        expect(screen.getByText(/No roles found/)).toBeInTheDocument();
       });
     });
   });

@@ -1,33 +1,8 @@
 // RolesAdmin component - displays roles table with management options
 // Migrated from Elm to ReScript
+// Receives Redux state as props from RolesAdminContainer.jsx
 
-open Fetch
-open LocalStorage
 open RoleTypes
-open Api
-
-// Component state
-type state =
-  | Loading
-  | Loaded(roleList)
-  | Error(string)
-
-// Fetch roles from API
-let fetchRoles = async (token: string): result<roleList, string> => {
-  try {
-    let url = baseUrl ++ "/api/roles"
-    let response = await get(url, Some(token))
-
-    if ok(response) {
-      let data = await json(response)
-      decodeRoleList(data)
-    } else {
-      Error("Failed to fetch roles: HTTP " ++ Int.toString(status(response)))
-    }
-  } catch {
-  | _ => Error("Network error occurred")
-  }
-}
 
 // Initialize Materialize tooltips using external binding
 @val @scope("window")
@@ -43,35 +18,14 @@ let initTooltips = (): unit => {
 }
 
 @react.component
-let make = () => {
-  let (state, setState) = React.useState(() => Loading)
-
-  // Fetch roles on component mount
-  React.useEffect0(() => {
-    let token = getItemOption("user")
-
-    switch token {
-    | Some(t) => {
-        let loadRoles = async () => {
-          let result = await fetchRoles(t)
-          switch result {
-          | Ok(roles) => setState(_ => Loaded(roles))
-          | Error(msg) => setState(_ => Error(msg))
-          }
-        }
-        let _ = loadRoles()
-      }
-    | None => setState(_ => Error("No authentication token found"))
-    }
-
-    None
-  })
-
-  // Initialize tooltips after render
+let make = (~roles: Nullable.t<roleList>, ~loading: bool, ~error: Nullable.t<string>) => {
+  // Initialize tooltips after roles load
   React.useEffect1(() => {
-    initTooltips()
+    if !loading {
+      initTooltips()
+    }
     None
-  }, [state])
+  }, [loading])
 
   // Render a single role row
   let renderRole = (role: role) => {
@@ -81,9 +35,8 @@ let make = () => {
     </tr>
   }
 
-  // Render based on state
-  switch state {
-  | Loading =>
+  // Render based on props
+  if loading {
     <div className="container">
       <div className="card-panel">
         <h2 className="header center-align"> {React.string("Manage Roles")} </h2>
@@ -94,43 +47,57 @@ let make = () => {
         </div>
       </div>
     </div>
-
-  | Error(msg) =>
-    <div className="container">
-      <div className="card-panel">
-        <h2 className="header center-align"> {React.string("Manage Roles")} </h2>
-        <div className="row">
-          <div className="col s12 center-align">
-            <p className="flow-text red-text"> {React.string("Error: " ++ msg)} </p>
+  } else {
+    switch (error->Nullable.toOption, roles->Nullable.toOption) {
+    | (Some(errorMsg), _) =>
+      <div className="container">
+        <div className="card-panel">
+          <h2 className="header center-align"> {React.string("Manage Roles")} </h2>
+          <div className="row">
+            <div className="col s12 center-align">
+              <p className="flow-text red-text"> {React.string("Error: " ++ errorMsg)} </p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-  | Loaded(roles) =>
-    <div className="container">
-      <div className="card-panel">
-        <h2 className="header center-align"> {React.string("Manage Roles")} </h2>
-        <div className="row">
-          <div className="col s10 offset-s1 center-align">
-            <table className="centered">
-              <thead>
-                <tr>
-                  <th> {React.string("Role")} </th>
-                  <th> {React.string("Access Level")} </th>
-                </tr>
-              </thead>
-              <tbody> {roles->Array.map(renderRole)->React.array} </tbody>
-            </table>
+    | (None, Some(rolesArray)) =>
+      <div className="container">
+        <div className="card-panel">
+          <h2 className="header center-align"> {React.string("Manage Roles")} </h2>
+          <div className="row">
+            <div className="col s10 offset-s1 center-align">
+              <table className="centered">
+                <thead>
+                  <tr>
+                    <th> {React.string("Role")} </th>
+                    <th> {React.string("Access Level")} </th>
+                  </tr>
+                </thead>
+                <tbody> {rolesArray->Array.map(renderRole)->React.array} </tbody>
+              </table>
+            </div>
+          </div>
+          <div className="fixed-action-btn" style={%raw(`{bottom: "45px", right: "24px"}`)}>
+            <a className="btn-floating btn-large tooltipped pink" href="/admin/roles/create">
+              <i className="material-icons"> {React.string("edit")} </i>
+            </a>
           </div>
         </div>
-        <div className="fixed-action-btn" style={%raw(`{bottom: "45px", right: "24px"}`)}>
-          <a className="btn-floating btn-large tooltipped pink" href="/admin/roles/create">
-            <i className="material-icons"> {React.string("edit")} </i>
-          </a>
+      </div>
+
+    | (None, None) =>
+      <div className="container">
+        <div className="card-panel">
+          <h2 className="header center-align"> {React.string("Manage Roles")} </h2>
+          <div className="row">
+            <div className="col s12 center-align">
+              <p className="flow-text"> {React.string("No roles found")} </p>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    }
   }
 }
 
