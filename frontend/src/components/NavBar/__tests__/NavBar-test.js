@@ -48,7 +48,7 @@ describe('NavBar', function() {
 
   describe('Component Rendering', function() {
     it('renders the correct mobile links', function() {
-      renderWithProviders(<NavBar pathname="/dashboard" />);
+      renderWithProviders(<NavBar pathname="/auth" />);
       
       // It should find the correct title
       expect(screen.getByText(/Docue/i)).toBeInTheDocument();
@@ -66,7 +66,7 @@ describe('NavBar', function() {
     });
 
     it('logo links to root when user is not logged in', function() {
-      const { container } = renderWithProviders(<NavBar pathname="/dashboard" />);
+      const { container } = renderWithProviders(<NavBar pathname="/auth" />);
       
       // Find the logo link
       const logoLink = container.querySelector('.brand-logo');
