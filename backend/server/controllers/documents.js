@@ -1,5 +1,10 @@
 const jwt = require('jsonwebtoken');
-const extractUserFromToken = require('./utils').extractUserFromToken;
+const {
+  extractUserFromToken,
+  isDocumentOwner,
+  canAccessDocument,
+  canDeleteDocument,
+} = require('./utils');
 const Documents = require('../models/documents');
 const Roles = require('../models/roles');
 const Users = require('../models/users');
@@ -78,18 +83,12 @@ module.exports = {
         return next(new Error('Document not found'));
       }
 
-      // If the user is the doc owner, allow access
-      if (user._id === doc.ownerId) {
-        return next();
-      }
-
       if (doc.role === undefined) {
         return next(new Error('The document does not specify a role'));
       }
 
-      if (user.role.accessLevel >= doc.role.accessLevel) {
-        // If the user's accessLevel is equal or higher to the one
-        // specified by the doc, allow access
+      // Use helper to check access
+      if (canAccessDocument(user, doc)) {
         return next();
       }
 
@@ -114,13 +113,8 @@ module.exports = {
         return next(new Error('Document not found'));
       }
 
-      // If the user is the doc owner, allow access
-      if (user._id === doc.ownerId) {
-        return next();
-      }
-
-      if (user.role.accessLevel === 2) {
-        // If the user is an admin, allow access
+      // Use helper to check delete permission
+      if (canDeleteDocument(user, doc)) {
         return next();
       }
 
@@ -198,12 +192,8 @@ module.exports = {
         .sort('-dateCreated')
         .exec();
 
-      // Return docs with accessLevel lower or equal to user's access level
-      res.json(
-        docs.filter(
-          (doc) => doc.role.accessLevel <= user.role.accessLevel || doc.ownerId._id === user._id
-        )
-      );
+      // Return docs the user can access (using helper)
+      res.json(docs.filter((doc) => canAccessDocument(user, doc)));
     } catch (err) {
       next(err);
     }
