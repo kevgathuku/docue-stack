@@ -3,9 +3,9 @@
  * These tests verify that the bindings compile correctly and test their functionality
  */
 
-import { existsSync } from 'fs';
-import { dirname, resolve } from 'path';
-import { fileURLToPath } from 'url';
+import { existsSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { jest } from '@jest/globals';
 
 // ESM equivalent of __dirname
@@ -97,7 +97,7 @@ describe('ReScript Bindings', () => {
     });
 
     afterEach(() => {
-      delete global.M;
+      global.M = undefined;
     });
 
     it('should call toast with success options (showSuccess pattern)', () => {
@@ -152,7 +152,7 @@ describe('ReScript Bindings', () => {
     });
 
     afterEach(() => {
-      delete global.fetch;
+      global.fetch = undefined;
     });
 
     it('should test HTTP method conversion pattern', () => {

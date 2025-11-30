@@ -1,9 +1,9 @@
-const express = require('express'),
-  router = express.Router(),
-  Documents = require('../models/documents'),
-  Roles = require('../models/roles'),
-  UsersController = require('../controllers/users'),
-  Users = require('../models/users');
+const express = require('express');
+const router = express.Router();
+const Documents = require('../models/documents');
+const Roles = require('../models/roles');
+const UsersController = require('../controllers/users');
+const Users = require('../models/users');
 
 router.use('/api', require('./roles'));
 router.use('/api', require('./users'));

@@ -1,7 +1,7 @@
-const express = require('express'),
-  Documents = require('../controllers/documents'),
-  Users = require('../controllers/users'),
-  router = express.Router();
+const express = require('express');
+const Documents = require('../controllers/documents');
+const Users = require('../controllers/users');
+const router = express.Router();
 
 router
   .route('/documents')

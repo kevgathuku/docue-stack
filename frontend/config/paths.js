@@ -1,6 +1,6 @@
-const path = require('path');
-const fs = require('fs');
-const url = require('url');
+const path = require('node:path');
+const fs = require('node:fs');
+const url = require('node:url');
 
 // Make sure any symlinks in the project folder are resolved:
 // https://github.com/facebook/create-react-app/issues/637
@@ -13,11 +13,11 @@ function ensureSlash(inputPath, needsSlash) {
   const hasSlash = inputPath.endsWith('/');
   if (hasSlash && !needsSlash) {
     return inputPath.substr(0, inputPath.length - 1);
-  } else if (!hasSlash && needsSlash) {
-    return `${inputPath}/`;
-  } else {
-    return inputPath;
   }
+  if (!hasSlash && needsSlash) {
+    return `${inputPath}/`;
+  }
+  return inputPath;
 }
 
 const getPublicUrl = (appPackageJson) => envPublicUrl || require(appPackageJson).homepage;

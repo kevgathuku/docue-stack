@@ -1,9 +1,8 @@
-const jwt = require('jsonwebtoken'),
-  extractUserFromToken = require('./utils').extractUserFromToken,
-  Error = require('./utils').Error,
-  Documents = require('../models/documents'),
-  Roles = require('../models/roles'),
-  Users = require('../models/users');
+const jwt = require('jsonwebtoken');
+const extractUserFromToken = require('./utils').extractUserFromToken;
+const Documents = require('../models/documents');
+const Roles = require('../models/roles');
+const Users = require('../models/users');
 
 module.exports = {
   create: async (req, res, next) => {
@@ -80,7 +79,7 @@ module.exports = {
       }
 
       // If the user is the doc owner, allow access
-      if (user._id == doc.ownerId) {
+      if (user._id === doc.ownerId) {
         return next();
       }
 
@@ -116,7 +115,7 @@ module.exports = {
       }
 
       // If the user is the doc owner, allow access
-      if (user._id == doc.ownerId) {
+      if (user._id === doc.ownerId) {
         return next();
       }
 
@@ -202,7 +201,7 @@ module.exports = {
       // Return docs with accessLevel lower or equal to user's access level
       res.json(
         docs.filter(
-          (doc) => doc.role.accessLevel <= user.role.accessLevel || doc.ownerId._id == user._id
+          (doc) => doc.role.accessLevel <= user.role.accessLevel || doc.ownerId._id === user._id
         )
       );
     } catch (err) {

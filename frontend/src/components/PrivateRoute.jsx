@@ -48,7 +48,7 @@ export default function PrivateRoute({ children }) {
     return (
       <div className="container">
         <div className="progress">
-          <div className="indeterminate"></div>
+          <div className="indeterminate" />
         </div>
         <p className="center-align">Checking authentication...</p>
       </div>
@@ -69,7 +69,7 @@ export default function PrivateRoute({ children }) {
     return (
       <div className="container">
         <div className="progress">
-          <div className="indeterminate"></div>
+          <div className="indeterminate" />
         </div>
         <p className="center-align">Validating session...</p>
       </div>

@@ -117,7 +117,7 @@ describe('Documents Spec', () => {
     it('should return documents limited by a specified number', async () => {
       const limit = 2;
       const res = await request(app)
-        .get('/api/documents?limit=' + limit)
+        .get(`/api/documents?limit=${limit}`)
         .set('x-access-token', token);
 
       expect(res.statusCode).toBe(200);
@@ -148,7 +148,7 @@ describe('Documents Spec', () => {
 
     it('should correctly update a document', async () => {
       const res = await request(app)
-        .put('/api/documents/' + documentID)
+        .put(`/api/documents/${documentID}`)
         .set('x-access-token', token)
         .send({
           title: 'Brand',
@@ -174,7 +174,7 @@ describe('Documents Spec', () => {
 
     it('should correctly fetch a single document', async () => {
       const res = await request(app)
-        .get('/api/documents/' + documentID)
+        .get(`/api/documents/${documentID}`)
         .set('x-access-token', token);
 
       expect(res.statusCode).toBe(200);
@@ -215,7 +215,7 @@ describe('Documents Spec', () => {
 
     it('should allow access to authorized users', async () => {
       const res = await request(app)
-        .get('/api/documents/' + documentID)
+        .get(`/api/documents/${documentID}`)
         .set('x-access-token', staffToken);
 
       expect(res.statusCode).toBe(200);
@@ -225,7 +225,7 @@ describe('Documents Spec', () => {
 
     it('should not allow unauthorized viewing of a document', async () => {
       const res = await request(app)
-        .get('/api/documents/' + documentID)
+        .get(`/api/documents/${documentID}`)
         .set('x-access-token', token);
 
       expect(res.statusCode).toBe(403);
@@ -234,7 +234,7 @@ describe('Documents Spec', () => {
 
     it('should not allow unauthorized editing of documents', async () => {
       const res = await request(app)
-        .put('/api/documents/' + documentID)
+        .put(`/api/documents/${documentID}`)
         .set('x-access-token', token)
         .send({
           title: 'Users docs',
@@ -246,7 +246,7 @@ describe('Documents Spec', () => {
 
     it('should not allow unauthorized deletion of documents', async () => {
       const res = await request(app)
-        .delete('/api/documents/' + documentID)
+        .delete(`/api/documents/${documentID}`)
         .set('x-access-token', token);
 
       expect(res.statusCode).toBe(403);
@@ -274,7 +274,7 @@ describe('Documents Spec', () => {
 
     it('should correctly delete a document', async () => {
       const res = await request(app)
-        .delete('/api/documents/' + documentID)
+        .delete(`/api/documents/${documentID}`)
         .set('x-access-token', token);
 
       expect(res.statusCode).toBe(204);
@@ -290,7 +290,7 @@ describe('Documents Spec', () => {
     it('should return documents accessible by the given role', async () => {
       // Get the documents accessible by the test role
       const res = await request(app)
-        .get('/api/documents/roles/' + testRole)
+        .get(`/api/documents/roles/${testRole}`)
         .set('x-access-token', token)
         .set('Accept', 'application/json');
 
@@ -306,7 +306,7 @@ describe('Documents Spec', () => {
     const testDate = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
     it('should return documents created on the date provided', async () => {
       const res = await request(app)
-        .get('/api/documents/created/' + testDate)
+        .get(`/api/documents/created/${testDate}`)
         .set('x-access-token', token)
         .set('Accept', 'application/json');
 

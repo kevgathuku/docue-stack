@@ -6,7 +6,7 @@ await jest.unstable_mockModule('sweetalert', () => ({
 }));
 
 // Import after mocking
-const React = (await import('react')).default;
+const _React = (await import('react')).default;
 const { render, screen } = await import('@testing-library/react');
 const { Provider } = await import('react-redux');
 const { BrowserRouter } = await import('react-router-dom');

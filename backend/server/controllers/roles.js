@@ -11,10 +11,11 @@ module.exports = {
         return res.status(400).json({
           error: 'The role title is required',
         });
-      } else if (validRoles.indexOf(req.body.title) === -1) {
+      }
+      if (validRoles.indexOf(req.body.title) === -1) {
         // Handle an invalid role title
         return res.status(400).json({
-          error: req.body.title + ' is not a valid role title',
+          error: `${req.body.title} is not a valid role title`,
         });
       }
 
@@ -51,7 +52,7 @@ module.exports = {
     }
   },
 
-  all: async (req, res) => {
+  all: async (_req, res) => {
     try {
       const roles = await Role.find().exec();
       res.json(roles);

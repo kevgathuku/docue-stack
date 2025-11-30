@@ -29,7 +29,7 @@ describe('Auth Slice Property-Based Tests', () => {
 
     const tokenArb = fc.string({ minLength: 10, maxLength: 50 });
 
-    const errorArb = fc.oneof(fc.string({ minLength: 1 }), fc.constant(null));
+    const _errorArb = fc.oneof(fc.string({ minLength: 1 }), fc.constant(null));
 
     it('should correctly handle fetchUsers fulfilled actions', () => {
       fc.assert(

@@ -1,10 +1,10 @@
-const _ = require('underscore'),
-  jwt = require('jsonwebtoken'),
-  extractUserFromToken = require('./utils').extractUserFromToken,
-  Error = require('./utils').Error,
-  Documents = require('../models/documents'),
-  Users = require('../models/users'),
-  Roles = require('../models/roles');
+const _ = require('underscore');
+const jwt = require('jsonwebtoken');
+const extractUserFromToken = require('./utils').extractUserFromToken;
+const Error = require('./utils').Error;
+const Documents = require('../models/documents');
+const Users = require('../models/users');
+const Roles = require('../models/roles');
 
 module.exports = {
   create: (req, res, next) => {
@@ -199,28 +199,28 @@ module.exports = {
           err = new Error('Authentication failed. User Not Found.');
           err.status = 404;
           throw err;
-        } else if (!user.comparePassword(req.body.password)) {
+        }
+        if (!user.comparePassword(req.body.password)) {
           // If the password provided is wrong.
           err = new Error('Authentication failed. Wrong password.');
           err.status = 401;
           throw err;
-        } else {
-          user.password = null;
-          const tokenUser = {
-            _id: user._id,
-            role: user.role,
-            loggedIn: user.loggedIn,
-          };
-          // User is found and password is correct
-          // Sign the user object with the app secret
-          const token = jwt.sign(tokenUser, req.app.get('superSecret'), {
-            expiresIn: 86400, // expires in 24 hours
-          });
-          res.json({
-            user: user,
-            token: token,
-          });
         }
+        user.password = null;
+        const tokenUser = {
+          _id: user._id,
+          role: user.role,
+          loggedIn: user.loggedIn,
+        };
+        // User is found and password is correct
+        // Sign the user object with the app secret
+        const token = jwt.sign(tokenUser, req.app.get('superSecret'), {
+          expiresIn: 86400, // expires in 24 hours
+        });
+        res.json({
+          user: user,
+          token: token,
+        });
       })
       .catch((err) => {
         next(err);

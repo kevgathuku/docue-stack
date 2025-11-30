@@ -78,7 +78,7 @@ describe('Roles Spec', () => {
         .set('x-access-token', token);
 
       expect(res.statusCode).toBe(400);
-      expect(res.body.error).toBe(invalidTitle + ' is not a valid role title');
+      expect(res.body.error).toBe(`${invalidTitle} is not a valid role title`);
     });
   });
 

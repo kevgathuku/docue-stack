@@ -196,8 +196,8 @@ const documentsSlice = createSlice({
   },
 });
 
-// Export actions (currently none, but structure is ready)
-export const {} = documentsSlice.actions;
+// Export actions if needed in the future
+// export const { someAction } = documentsSlice.actions;
 
 // Selectors
 export const selectDocuments = (state) => state.documents.docs;

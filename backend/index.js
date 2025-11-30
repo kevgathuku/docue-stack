@@ -1,9 +1,9 @@
-const express = require('express'),
-  compression = require('compression'),
-  cors = require('cors'),
-  morgan = require('morgan'),
-  app = express(),
-  isProduction = process.env.NODE_ENV === 'production';
+const express = require('express');
+const compression = require('compression');
+const cors = require('cors');
+const morgan = require('morgan');
+const app = express();
+const isProduction = process.env.NODE_ENV === 'production';
 
 // Load the env variables only in DEV mode
 if (!isProduction) {
@@ -44,7 +44,7 @@ const port = process.env.PORT || 8000; // set our port
 
 app.use(require('./server/routes'));
 
-app.use((err, req, res, next) => {
+app.use((err, _req, res, next) => {
   if (res.headersSent) {
     return next(err);
   }
@@ -54,7 +54,7 @@ app.use((err, req, res, next) => {
 });
 
 // catch 404 errors
-app.use((req, res) => {
+app.use((_req, res) => {
   const err = new Error('Not Found');
   res.status(404).json({
     error: err.message,

@@ -278,8 +278,8 @@ const authSlice = createSlice({
   },
 });
 
-// Export actions (currently none, but structure is ready)
-export const {} = authSlice.actions;
+// Export actions if needed in the future
+// export const {} = authSlice.actions;
 
 // Selectors
 export const selectUsers = (state) => state.auth.users;

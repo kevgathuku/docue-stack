@@ -26,7 +26,7 @@ describe('Admin ReScript Component', () => {
     // Mock localStorage
     Object.defineProperty(global, 'localStorage', {
       value: {
-        getItem: (key) => mockGetItem,
+        getItem: (_key) => mockGetItem,
         setItem: () => {},
         removeItem: () => {},
         clear: () => {},

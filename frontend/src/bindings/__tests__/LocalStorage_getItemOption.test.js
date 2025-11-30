@@ -3,8 +3,8 @@
  * This test validates the actual ReScript implementation
  */
 
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { jest } from '@jest/globals';
 
 // ESM equivalent of __dirname
@@ -74,8 +74,8 @@ describe('LocalStorage.getItemOption (ReScript implementation)', () => {
 
 describe('Verification: ReScript implementation matches our test', () => {
   test('compiled file exists and exports getItemOption', async () => {
-    const fs = await import('fs');
-    const path = await import('path');
+    const fs = await import('node:fs');
+    const path = await import('node:path');
 
     const compiledPath = path.resolve(__dirname, '../LocalStorage.res.js');
     expect(fs.existsSync(compiledPath)).toBe(true);

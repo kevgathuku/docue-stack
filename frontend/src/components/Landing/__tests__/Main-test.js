@@ -18,7 +18,7 @@ describe('DefaultLayout component', () => {
     });
 
     // Mock jQuery functions for NavBar
-    window.$ = jest.fn((selector) => ({
+    window.$ = jest.fn((_selector) => ({
       dropdown: jest.fn(),
       sideNav: jest.fn(),
     }));

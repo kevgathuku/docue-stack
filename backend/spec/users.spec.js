@@ -52,7 +52,7 @@ describe('User Spec', () => {
       const userToken = createRes.body.token;
 
       const getRes = await request(app)
-        .get('/api/users/' + userID)
+        .get(`/api/users/${userID}`)
         .set('x-access-token', userToken);
 
       expect(getRes.statusCode).toBe(200);
@@ -152,7 +152,7 @@ describe('User Spec', () => {
 
     it("should fetch the user's own profile successfully", async () => {
       const res = await request(app)
-        .get('/api/users/' + user._id)
+        .get(`/api/users/${user._id}`)
         .set('Accept', 'application/json')
         .set('x-access-token', token);
 
@@ -164,7 +164,7 @@ describe('User Spec', () => {
 
     it("should not allow a user to fetch another user's profile", async () => {
       const res = await request(app)
-        .get('/api/users/' + user._id)
+        .get(`/api/users/${user._id}`)
         .set('Accept', 'application/json')
         .set('x-access-token', staffToken);
 
@@ -183,7 +183,7 @@ describe('User Spec', () => {
 
     it('should update a user successfully', async () => {
       const res = await request(app)
-        .put('/api/users/' + userId)
+        .put(`/api/users/${userId}`)
         .send({
           username: 'theImp',
           firstname: 'Half',
@@ -227,9 +227,7 @@ describe('User Spec', () => {
     });
 
     it('should delete a user successfully', async () => {
-      const res = await request(app)
-        .delete('/api/users/' + userId)
-        .set('x-access-token', token);
+      const res = await request(app).delete(`/api/users/${userId}`).set('x-access-token', token);
 
       expect(res.statusCode).toBe(204);
     });
@@ -250,7 +248,7 @@ describe('User Spec', () => {
 
       const userId = doc[0].ownerId;
       const res = await request(app)
-        .get('/api/users/' + userId + '/documents')
+        .get(`/api/users/${userId}/documents`)
         .expect('Content-Type', /json/)
         .set('x-access-token', token)
         .expect(200);

@@ -9,7 +9,7 @@ describe('DocList', () => {
   beforeEach(() => {
     // Mock jQuery tooltip functions
     const tooltipMock = jest.fn();
-    window.$ = jest.fn((selector) => ({
+    window.$ = jest.fn((_selector) => ({
       tooltip: tooltipMock,
     }));
     window.$.tooltipMock = tooltipMock;

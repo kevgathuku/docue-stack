@@ -87,8 +87,8 @@ const rolesSlice = createSlice({
   },
 });
 
-// Export actions (currently none, but structure is ready)
-export const {} = rolesSlice.actions;
+// Export actions if needed in the future
+// export const {} = rolesSlice.actions;
 
 // Selectors
 export const selectRoles = (state) => state.roles.roles;

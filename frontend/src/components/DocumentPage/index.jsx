@@ -65,7 +65,7 @@ const DocumentPage = ({ navigate, match }) => {
     );
   };
 
-  const handleDocumentEdit = (docToEdit, event) => {
+  const handleDocumentEdit = (_docToEdit, event) => {
     // Prevent the default action for clicking on a link
     event.preventDefault();
     // Get the id of the <a> tag that triggered the modal
@@ -74,7 +74,7 @@ const DocumentPage = ({ navigate, match }) => {
     window.$(id).openModal();
   };
 
-  const onEditUpdate = (updatedDoc) => {
+  const onEditUpdate = (_updatedDoc) => {
     // The doc will be updated via Redux state when the edit completes
     // This callback is kept for compatibility with DocEdit component
   };

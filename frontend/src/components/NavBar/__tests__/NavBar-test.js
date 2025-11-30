@@ -29,7 +29,7 @@ describe('NavBar', () => {
     Storage.prototype.removeItem = jest.fn();
   });
 
-  const renderWithProviders = (component, pathname = '/dashboard') => {
+  const renderWithProviders = (component, _pathname = '/dashboard') => {
     return render(
       <Provider store={mockStore}>
         <BrowserRouter
