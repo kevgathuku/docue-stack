@@ -3,29 +3,32 @@ inclusion: fileMatch
 fileMatchPattern: "frontend/**/*"
 ---
 
-# Frontend Standards (React + Elm)
+# Frontend Standards (React + ReScript)
 
 ## Technology Stack
 
 - **React**: 18.3.1 (modernized from 16.6)
-- **Elm**: Hybrid architecture with Elm components
-- **ReScript**: Type-safe functional language compiling to JavaScript
-- **State Management**: Redux Toolkit with slices and async thunks
+- **ReScript**: 12.0.0 - Type-safe functional language compiling to JavaScript
+- **State Management**: Redux Toolkit 2.11.0 with slices and async thunks
 - **Routing**: React Router 6.30.2
 - **Build Tool**: Vite 6.x with fast HMR
-- **Testing**: Jest 29.x + React Testing Library for React, elm-test for Elm
+- **Testing**: Jest 29.x + React Testing Library
 - **Styling**: CSS with normalize.css
 - **Property-Based Testing**: fast-check for correctness properties
 
 ## Hybrid Architecture
 
-This app uses React, Elm, and ReScript:
-- React handles the main application shell and most UI
-- Elm components are embedded for specific features (Login, Admin, etc.)
-- ReScript is being introduced for new components with strong type safety
-- Vite plugin handles Elm compilation
-- ReScript compiler handles .res file compilation
-- All compiled to JavaScript as part of the Vite build
+This app uses React and ReScript:
+- React handles the main application shell and most UI components
+- ReScript provides type-safe components for critical features (8 components migrated from Elm)
+- ReScript compiler handles `.res` file compilation to `.res.js`
+- Vite handles bundling and HMR for both JavaScript and ReScript
+- All compiled to optimized JavaScript in production builds
+
+**Migrated ReScript Components:**
+- Login, SignUp, Profile (authentication and user management)
+- Admin, RolesAdmin, CreateRole (admin features)
+- Landing, NotFound (static pages)
 
 ## Code Style
 
@@ -103,21 +106,41 @@ This is a pnpm workspace monorepo. Use these commands:
 # Install dependencies
 pnpm --filter frontend install
 
-# Run development server (Vite)
-pnpm --filter frontend start
+# Development
+pnpm --filter frontend start              # Start Vite dev server (port 3000)
 
-# Run tests
-pnpm --filter frontend test
+# Building
+pnpm --filter frontend build              # Build ReScript + Vite production bundle
+pnpm --filter frontend preview            # Preview production build locally
 
-# Run Elm tests
-pnpm --filter frontend test:elm
+# Testing
+pnpm --filter frontend test               # Run Jest tests
+pnpm --filter frontend test:ci            # Run tests with coverage for CI
 
-# Build for production
-pnpm --filter frontend build
-
-# Preview production build
-pnpm --filter frontend preview
+# ReScript
+pnpm --filter frontend res:build          # Compile ReScript files once
+pnpm --filter frontend res:watch          # Watch and auto-compile ReScript files
+pnpm --filter frontend res:clean          # Clean ReScript build artifacts
 ```
+
+### Recommended Development Workflow
+
+Run these in separate terminals for optimal development experience:
+
+**Terminal 1**: ReScript compiler in watch mode
+```bash
+pnpm --filter frontend res:watch
+```
+
+**Terminal 2**: Vite dev server
+```bash
+pnpm --filter frontend start
+```
+
+This enables:
+- Automatic ReScript compilation on file changes (< 100ms)
+- Hot Module Replacement (HMR) in browser (< 50ms)
+- Fast development iteration
 
 ## ReScript Development
 
@@ -126,72 +149,60 @@ pnpm --filter frontend preview
 ReScript files (`.res`) are compiled to JavaScript (`.res.js`) automatically:
 
 ```bash
-# Compile ReScript files
-pnpm --filter frontend exec rescript build
+# Compile ReScript files once
+pnpm --filter frontend res:build
+
+# Watch mode (auto-compile on changes) - RECOMMENDED for development
+pnpm --filter frontend res:watch
 
 # Clean compiled files
-pnpm --filter frontend exec rescript clean
-
-# Watch mode (auto-compile on changes)
-pnpm --filter frontend exec rescript build -w
+pnpm --filter frontend res:clean
 ```
 
-### ReScript Migration Tools
-
-The `@rescript/tools` package provides utilities for migrating deprecated APIs:
-
-```bash
-# Migrate a single file from deprecated APIs to modern ones
-pnpm --filter frontend exec rescript-tools migrate src/path/to/file.res
-
-# Migrate all files in the project
-pnpm --filter frontend exec rescript-tools migrate-all .
-```
-
-**Common migrations:**
-- `Js.Json.t` → `JSON.t`
-- `Js.Json.decodeObject` → `JSON.Decode.object`
-- `Js.Json.decodeString` → `JSON.Decode.string`
-- `Js.Dict.empty` → `Dict.make`
-- `Js.Dict.get` → `Dict.get`
-- `Js.Dict.set` → `Dict.set`
-
-**Configuration:**
-
-Add `@rescript/tools` to `bsconfig.json`:
-
-```json
-{
-  "dev-dependencies": [
-    "@rescript/tools"
-  ]
-}
-```
-
-Then install:
-
-```bash
-pnpm --filter frontend add -D @rescript/tools
-```
+**Build Process:**
+1. ReScript compiler compiles `.res` → `.res.js` (in-source)
+2. Vite bundles `.res.js` files with other JavaScript
+3. Production build: `pnpm build` runs ReScript build first, then Vite build
 
 ### ReScript File Organization
 
 ```
-frontend/src/
-├── bindings/           # JavaScript interop bindings
-│   ├── Redux.res      # Redux Toolkit bindings
-│   ├── ReactRouter.res # React Router bindings
-│   └── Materialize.res # Materialize CSS bindings
-├── features/          # Type definitions for Redux state
-│   ├── auth/
-│   │   └── AuthTypes.res
-│   ├── roles/
-│   │   └── RoleTypes.res
-│   └── documents/
-│       └── DocumentTypes.res
-└── components/        # ReScript React components
-    └── *.res
+frontend/
+├── src/
+│   ├── bindings/              # JavaScript interop bindings
+│   │   ├── Redux.res         # Redux Toolkit (useDispatch, useSelector)
+│   │   ├── ReactRouter.res   # React Router (useNavigate)
+│   │   ├── Materialize.res   # Toast notifications
+│   │   ├── LocalStorage.res  # localStorage API
+│   │   └── Fetch.res         # HTTP client
+│   ├── features/             # Type definitions for Redux state
+│   │   ├── auth/
+│   │   │   ├── authSlice.js  # Redux slice (JavaScript)
+│   │   │   └── AuthTypes.res # Type definitions (ReScript)
+│   │   ├── roles/
+│   │   │   ├── rolesSlice.js
+│   │   │   └── RoleTypes.res
+│   │   └── documents/
+│   │       ├── documentsSlice.js
+│   │       └── DocumentTypes.res
+│   └── components/           # React components (JS + ReScript)
+│       ├── Login/
+│       │   ├── Login.res     # ReScript component
+│       │   ├── Login.res.js  # Compiled output (auto-generated)
+│       │   └── __tests__/
+│       │       └── Login.test.js
+│       └── [other components...]
+├── bsconfig.json             # ReScript compiler configuration
+└── lib/bs/                   # ReScript build output (gitignored)
 ```
+
+### ReScript Configuration
+
+**bsconfig.json** - ReScript compiler settings:
+- **in-source compilation**: `.res.js` files generated next to `.res` files
+- **ES6 modules**: Compatible with Vite
+- **JSX v4**: Automatic React JSX runtime
+- **suffix**: `.res.js` for compiled files
 
 ## Testing Standards
 
@@ -316,13 +327,19 @@ frontend/
 
 ## Modernization Status
 
-✅ **Completed:**
+✅ **Completed (95% Complete):**
 - React 18.3.1 with new root API
-- Vite 6.x build system
-- Redux Toolkit state management
+- Vite 6.x build system (100x faster than Webpack 4)
+- Redux Toolkit state management (migrated from Flux)
 - React Testing Library (Enzyme removed)
 - React Router 6.30.2
+- ReScript integration (8 components migrated from Elm)
 - All tests passing (23 suites, 204 tests)
+
+**Performance Improvements:**
+- Dev server start: 10-15s → 135ms (100x faster)
+- HMR updates: 1-3s → <100ms (10-30x faster)
+- Compile-time type safety with ReScript
 
 See `frontend/MODERNIZATION.md` for complete modernization details.
 
@@ -330,12 +347,39 @@ See `frontend/MODERNIZATION.md` for complete modernization details.
 
 1. **Use Redux Toolkit patterns** - createSlice, createAsyncThunk, selectors
 2. **Test user behavior** - Use React Testing Library queries
-3. **Maintain Elm integration** - Don't break the hybrid architecture
-4. **Follow session validation** - Always check session.loggedIn
-5. **Write property-based tests** - For critical correctness properties
-6. **Use typed hooks** - useAppDispatch and useAppSelector
-7. **Keep slices focused** - One slice per feature domain
-8. **Export selectors** - Make state access reusable
-9. **Use modern ReScript APIs** - Run migration tools to update deprecated code
-10. **Type Redux state** - Create ReScript type definitions for all slices
+3. **Follow session validation** - Always check session.loggedIn
+4. **Write property-based tests** - For critical correctness properties
+5. **Use typed hooks** - useAppDispatch and useAppSelector
+6. **Keep slices focused** - One slice per feature domain
+7. **Export selectors** - Make state access reusable
+8. **Type Redux state** - Create ReScript type definitions for all slices
+9. **Run res:watch during development** - Automatic ReScript compilation
+10. **Use ReScript for new critical components** - Leverage compile-time type safety
+
+### ReScript Best Practices
+
+1. **Component Structure**:
+   - Use `@react.component` decorator
+   - Export with `let default = make`
+   - Keep components focused and small
+
+2. **Type Safety**:
+   - Use `option<'a>` instead of null/undefined
+   - Pattern match exhaustively
+   - Add explicit type annotations for clarity
+
+3. **JavaScript Interop**:
+   - Create bindings in `src/bindings/`
+   - Use external declarations for JS functions
+   - Keep bindings simple and focused
+
+4. **Testing**:
+   - Test ReScript components with Jest + RTL
+   - Test helper functions directly
+   - Integration tests validate bindings work
+
+5. **Development Workflow**:
+   - Always run `res:watch` in development
+   - Check compiler output for errors
+   - Leverage HMR for fast iteration
 

@@ -151,7 +151,7 @@ export default {
 # Build ReScript files once
 pnpm res:build
 
-# Watch mode - auto-recompile on changes
+# Watch mode - auto-recompile on changes (RECOMMENDED for development)
 pnpm res:watch
 
 # Clean compiled files
@@ -163,20 +163,31 @@ pnpm build
 
 ### Recommended Development Setup
 
+For the best development experience, run these commands in separate terminals:
+
 **Terminal 1**: Start ReScript compiler in watch mode
 ```bash
+cd frontend
 pnpm res:watch
 ```
 
 **Terminal 2**: Start Vite dev server
 ```bash
+cd frontend
 pnpm start
 ```
 
-This enables:
-- Automatic ReScript compilation on file changes
-- Hot Module Replacement (HMR) in browser
-- Fast development iteration (< 100ms for small changes)
+**Terminal 3** (optional): Run tests in watch mode
+```bash
+cd frontend
+pnpm test -- --watch
+```
+
+This setup enables:
+- ⚡ Automatic ReScript compilation on file changes (< 100ms)
+- 🔥 Hot Module Replacement (HMR) in browser
+- ✅ Instant test feedback
+- 🎯 Fast development iteration
 
 ### Hot Module Replacement (HMR)
 
@@ -187,7 +198,26 @@ HMR works seamlessly with ReScript:
 3. Vite detects `.res.js` file change
 4. Browser updates without full page reload
 
+**Performance:**
+- ReScript compilation: < 100ms for small changes
+- Vite HMR: < 50ms to update browser
+- Total feedback loop: < 150ms
+
 **Note**: Make sure both `res:watch` and `start` are running for optimal HMR experience.
+
+### Development Tips
+
+1. **Always run `res:watch` during development** - This ensures ReScript files are automatically compiled as you edit them.
+
+2. **Check the ReScript compiler output** - The compiler provides helpful error messages and warnings in Terminal 1.
+
+3. **Use the browser console** - ReScript components log errors to the browser console just like JavaScript.
+
+4. **Leverage type inference** - ReScript can infer most types, so you don't need to annotate everything.
+
+5. **Use pattern matching** - ReScript's pattern matching is exhaustive and helps catch bugs at compile time.
+
+6. **Keep bindings simple** - Start with minimal bindings and expand as needed.
 
 ### File Structure
 
@@ -849,14 +879,166 @@ pnpm res:build
   - `design.md` - Technical design
   - `tasks.md` - Implementation tasks
 
+## Migrated Components
+
+The following components have been successfully migrated to ReScript:
+
+### Static Components
+1. **Landing** (`components/Landing/Landing.res`)
+   - Static hero section with CTA button
+   - No state or API calls
+   - Simplest component pattern
+
+2. **NotFound** (`components/NotFound/NotFound.res`)
+   - Static 404 error page
+   - Simple error message display
+
+### Form Components with Redux
+3. **Login** (`components/Login/Login.res`)
+   - Form state with useReducer
+   - Redux integration (useDispatch, useSelector)
+   - Form validation and submission
+   - Toast notifications on success/error
+   - Navigation after login
+
+4. **CreateRole** (`components/CreateRole/CreateRole.res`)
+   - Form state management
+   - Redux action dispatch
+   - Navigation on success
+   - Error handling with toasts
+
+5. **SignUp** (`components/SignUp/SignUp.res`)
+   - Multi-field form (firstname, lastname, email, password)
+   - Password validation (matching, length)
+   - Redux integration
+   - localStorage updates
+   - Demonstrates React → ReScript pattern
+
+### API Integration Components
+6. **Admin** (`components/Admin/Admin.res`)
+   - API fetching with useEffect
+   - Stats display (users, documents, roles)
+   - Error handling
+   - Authenticated API calls
+
+7. **RolesAdmin** (`components/RolesAdmin/RolesAdmin.res`)
+   - API fetching for roles list
+   - Table rendering with data
+   - Materialize tooltip initialization
+   - Floating action button
+
+### Complex Components
+8. **Profile** (`components/Profile/Profile.res`)
+   - View/edit mode toggle
+   - Complex form with validation
+   - Password validation (match, length > 6)
+   - API calls with authentication
+   - localStorage updates
+   - Multiple useEffect hooks
+   - Most complex component pattern
+
+## Component Patterns
+
+### Pattern 1: Static Component
+```rescript
+// Simple component with no state
+@react.component
+let make = () => {
+  <div>
+    <h1> {React.string("Hello World")} </h1>
+  </div>
+}
+
+let default = make
+```
+
+### Pattern 2: Form with Local State
+```rescript
+// Form with useReducer for state management
+type state = { email: string, password: string }
+type action = UpdateEmail(string) | UpdatePassword(string)
+
+let reducer = (state, action) => {
+  switch action {
+  | UpdateEmail(email) => {...state, email}
+  | UpdatePassword(password) => {...state, password}
+  }
+}
+
+@react.component
+let make = () => {
+  let (state, dispatch) = React.useReducer(reducer, {
+    email: "",
+    password: "",
+  })
+  
+  // ... render form
+}
+```
+
+### Pattern 3: Redux Integration
+```rescript
+// Component with Redux hooks
+open Redux
+open ReactRouter
+
+@react.component
+let make = () => {
+  let dispatch = useDispatch()
+  let navigate = useNavigate()
+  let user = useSelector(store => store.auth.user)
+  
+  // ... use Redux state and dispatch
+}
+```
+
+### Pattern 4: API Calls
+```rescript
+// Component with API fetching
+@react.component
+let make = () => {
+  let (data, setData) = React.useState(() => None)
+  
+  React.useEffect0(() => {
+    let fetchData = async () => {
+      let response = await Fetch.get("/api/data", Some(token))
+      if Fetch.ok(response) {
+        let json = await Fetch.json(response)
+        setData(_ => Some(json))
+      }
+    }
+    fetchData()->ignore
+    None
+  })
+  
+  // ... render data
+}
+```
+
 ## Next Steps
 
-With the infrastructure complete, proceed with:
+The ReScript migration is complete! All 8 components have been migrated from Elm to ReScript.
 
-1. **Task 3**: Create type definitions for Redux state
-2. **Task 4**: Migrate Landing component (simplest)
-3. **Task 5**: Migrate NotFound component (simple)
-4. **Task 6**: Migrate Login component (moderate)
-5. Continue with remaining components per task list
+### Future Enhancements (Optional)
+
+1. **Migrate More React Components**
+   - Use patterns from SignUp migration
+   - Start with leaf components
+   - Progress to more complex components
+
+2. **Improve Type Safety**
+   - Add more specific types
+   - Create domain-specific types
+   - Add JSON decoders for API responses
+
+3. **Optimize Performance**
+   - Add React.memo where appropriate
+   - Use useMemo for expensive computations
+   - Implement code splitting
+
+4. **Enhance Testing**
+   - Add more property-based tests
+   - Test edge cases
+   - Add integration tests
 
 For detailed task information, see `.kiro/specs/elm-to-react-migration/tasks.md`.

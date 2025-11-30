@@ -7,21 +7,21 @@ React + Elm hybrid frontend for the document management system. See the [root RE
 ### Technology Stack
 
 - **React 18.x** - UI framework with functional components and hooks
-- **Elm 0.19.x** - Embedded components for specific features
+- **ReScript** - Type-safe functional language that compiles to JavaScript
 - **Redux Toolkit** - State management with slices and async thunks
 - **React Router 6.x** - Client-side routing
 - **Vite** - Build tool and dev server
-- **Jest + React Testing Library** - React component testing
-- **elm-test** - Elm component testing
+- **Jest + React Testing Library** - Component testing
 - **fast-check** - Property-based testing
 
-### Hybrid React + Elm
+### Hybrid React + ReScript
 
-This application uses both React and Elm:
-- React handles the main application shell and most UI components
-- Elm components are embedded for specific features (Login, Admin, etc.)
-- `ReactElm` utility bridges React and Elm via ports
-- Elm files compile as part of the Vite build process
+This application uses both React (JavaScript) and ReScript:
+- React handles most UI components and application logic
+- ReScript components provide compile-time type safety for critical features
+- 8 components migrated from Elm to ReScript (Login, Profile, Admin, RolesAdmin, CreateRole, Landing, NotFound, SignUp)
+- ReScript compiles to JavaScript and integrates seamlessly with React
+- Type-safe bindings for Redux, React Router, and other JavaScript libraries
 
 ### State Management
 
@@ -66,43 +66,72 @@ The frontend proxies API requests to `http://localhost:8000` (ensure backend is 
 ```
 frontend/
 ├── src/
-│   ├── components/        # React components
-│   │   ├── Auth/         # Authentication UI
-│   │   ├── Dashboard/    # Document list
-│   │   ├── DocumentPage/ # Document detail/edit
-│   │   └── *.elm         # Elm components
-│   ├── features/         # Redux slices
+│   ├── components/        # React and ReScript components
+│   │   ├── Auth/         # Authentication UI (React)
+│   │   ├── Dashboard/    # Document list (React)
+│   │   ├── DocumentPage/ # Document detail/edit (React)
+│   │   ├── Login/        # Login form (ReScript)
+│   │   ├── Profile/      # User profile (ReScript)
+│   │   ├── Admin/        # Admin dashboard (ReScript)
+│   │   ├── RolesAdmin/   # Roles management (ReScript)
+│   │   ├── CreateRole/   # Create role form (ReScript)
+│   │   ├── Landing/      # Landing page (ReScript)
+│   │   ├── NotFound/     # 404 page (ReScript)
+│   │   └── SignUp/       # Sign up form (ReScript)
+│   ├── bindings/         # ReScript bindings for JavaScript libraries
+│   │   ├── Redux.res     # Redux Toolkit bindings
+│   │   ├── ReactRouter.res # React Router bindings
+│   │   ├── Materialize.res # Toast notifications
+│   │   ├── LocalStorage.res # localStorage API
+│   │   └── Fetch.res     # HTTP client
+│   ├── features/         # Redux slices and ReScript types
+│   │   ├── auth/
+│   │   │   ├── authSlice.js
+│   │   │   └── AuthTypes.res
+│   │   ├── documents/
+│   │   │   ├── documentsSlice.js
+│   │   │   └── DocumentTypes.res
+│   │   └── roles/
+│   │       ├── rolesSlice.js
+│   │       └── RoleTypes.res
 │   ├── store/            # Redux store config
-│   ├── utils/            # Helpers (ReactElm bridge)
+│   ├── utils/            # Utility functions
 │   └── styles/           # CSS
 ├── public/               # Static assets
 ├── config/               # Build configuration
-└── tests/                # Elm tests
+├── bsconfig.json         # ReScript compiler configuration
+└── lib/                  # ReScript build output
 ```
 
 ### Testing
 
 ```bash
-# Run all tests (React + Elm)
+# Run all tests
 pnpm --filter frontend test
 
-# Run React tests only
+# Run unit tests only
 pnpm --filter frontend test -- --testMatch="**/*.test.js"
 
 # Run property-based tests
 pnpm --filter frontend test -- --testMatch="**/*.properties.test.js"
 
-# Run Elm tests
-pnpm --filter frontend test:elm
-
 # Run tests in watch mode
 pnpm --filter frontend test -- --watch
+
+# Run with coverage
+pnpm --filter frontend test:ci
 ```
 
 **Test Organization:**
-- `*.test.js` - Unit tests for components and slices
+- `*.test.js` - Unit tests for React and ReScript components
 - `*.properties.test.js` - Property-based tests using fast-check
-- `*Test.elm` - Elm component tests
+- Tests are co-located with components in `__tests__/` directories
+
+**Test Results:**
+```
+Test Suites: 23 passed, 23 total
+Tests:       204 passed, 204 total
+```
 
 ### Building for Production
 
@@ -160,38 +189,62 @@ VITE_API_BASE_URL=http://localhost:8000 # Backend API URL
 
 All environment variables prefixed with `VITE_` are exposed to the client-side code via `import.meta.env`.
 
-## Elm Integration
+## ReScript Integration
 
-### Working with Elm Components
+### Working with ReScript Components
 
-Elm components are embedded in React using the `ReactElm` wrapper:
+ReScript components compile to JavaScript and can be imported directly:
 
 ```javascript
-import ReactElm from '../../utils/ReactElm';
-import Login from '../Login.elm';
+// Import compiled ReScript component
+import Login from './Login/Login.res.js';
 
-<ReactElm
-  src={Login}
-  flags={{ apiUrl: 'http://localhost:8000' }}
-  ports={setupPorts}
-/>
+// Use like any React component
+function App() {
+  return <Login />;
+}
 ```
 
-### Elm Development
+### ReScript Development
 
-- Elm files are in `src/components/*.elm`
-- Elm tests are in `tests/*Test.elm`
-- Elm compiler errors are shown in the browser during development
+**Build Commands:**
+```bash
+# Build ReScript files once
+pnpm res:build
+
+# Watch mode - auto-recompile on changes
+pnpm res:watch
+
+# Clean compiled files
+pnpm res:clean
+```
+
+**Recommended Workflow:**
+1. Terminal 1: `pnpm res:watch` (ReScript compiler in watch mode)
+2. Terminal 2: `pnpm start` (Vite dev server)
+
+This enables fast HMR with automatic ReScript compilation.
+
+**ReScript Files:**
+- Source files: `src/**/*.res`
+- Compiled output: `src/**/*.res.js` (auto-generated, in-source)
+- Type definitions: `src/features/**/*Types.res`
+- Bindings: `src/bindings/*.res`
+
+**Configuration:**
+- `bsconfig.json` - ReScript compiler configuration
+- In-source compilation with `.res.js` suffix
+- ES6 modules for Vite compatibility
+- JSX v4 with automatic runtime
 
 ## Additional Documentation
 
+- [Modernization Strategy](MODERNIZATION.md) - Complete modernization guide (React 18, Vite, Redux Toolkit, ReScript, Jest/Babel config)
+- [ReScript Guide](RESCRIPT_GUIDE.md) - Complete ReScript development guide
+- [React to ReScript Migration](REACT_TO_RESCRIPT_MIGRATION.md) - Migration patterns and best practices
 - [Authentication Patterns](AUTHENTICATION.md) - Session validation and auth flows
 - [Hooks Migration Guide](HOOKS_MIGRATION_GUIDE.md) - Class to functional components
-- [Modernization Strategy](MODERNIZATION.md) - Complete modernization guide including testing
-- [React 18 Migration](REACT_18_MIGRATION.md) - React 18 upgrade notes
-- [Vite Migration](VITE_MIGRATION.md) - Webpack to Vite migration
-- [Elm Quick Start](ELM_QUICK_START.md) - Elm basics
-- [Elm Debugging](ELM_DEBUGGING.md) - Debugging Elm components
+- [Testing Guide](TESTING.md) - Testing patterns and best practices
 
 ## Troubleshooting
 
@@ -207,9 +260,14 @@ pnpm --filter frontend start -- --port 3001
 
 Ensure the backend is running on port 8000. Check the proxy configuration in `vite.config.js`.
 
-### Elm Compilation Errors
+### ReScript Compilation Errors
 
-Elm compiler errors are usually very descriptive. Read the error message carefully - it often suggests the fix.
+ReScript compiler errors are descriptive and include suggestions. Common issues:
+
+- **"A ReScript build is already running"**: Kill the process with `pkill -f rescript` or run `pnpm res:clean`
+- **Type mismatch**: Add explicit type annotations or check pattern matching
+- **Import errors**: Ensure `.res.js` file exists and you're importing with the correct extension
+- **HMR not working**: Make sure both `res:watch` and `start` are running
 
 ### Redux DevTools Not Working
 
@@ -222,8 +280,13 @@ When working on the frontend:
 1. Follow React best practices (functional components, hooks)
 2. Use Redux Toolkit patterns (slices, thunks, selectors)
 3. Write tests for new features (unit + property-based)
-4. Ensure Elm code compiles without warnings
+4. For ReScript components:
+   - Run `pnpm res:watch` during development
+   - Follow ReScript naming conventions
+   - Add type annotations for clarity
+   - Export components with `let default = make`
 5. Test authentication flows thoroughly
 6. Run `pnpm format` before committing
+7. Ensure all tests pass: `pnpm test`
 
 See the [root README](../README.md) for general contribution guidelines.
