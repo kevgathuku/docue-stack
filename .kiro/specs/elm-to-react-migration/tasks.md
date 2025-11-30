@@ -345,7 +345,7 @@ This plan outlines the step-by-step migration of 7 Elm components and 1 React co
   - Include code examples from SignUp migration
   - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5, 15.6_
 
-- [ ] 14. Write cross-component property tests
+- [x] 14. Write cross-component property tests
   - Write property test for error toast display
   - **Property 15: Error responses show toast notifications**
   - **Validates: Requirements 1.4, 2.7, 3.3, 4.4, 5.4**
