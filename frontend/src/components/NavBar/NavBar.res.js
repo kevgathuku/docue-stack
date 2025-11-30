@@ -55,8 +55,6 @@ function NavBar(props) {
   }, [loggedIn]);
   React.useEffect(() => {
     if (logoutResult !== "") {
-      localStorage.removeItem("user");
-      localStorage.removeItem("userInfo");
       navigate("/");
     }
   }, [logoutResult]);

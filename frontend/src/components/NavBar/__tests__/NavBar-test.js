@@ -289,9 +289,11 @@ describe('NavBar', function() {
         </Provider>
       );
 
-      // Verify localStorage items were removed when logoutResult is set
-      expect(Storage.prototype.removeItem).toHaveBeenCalledWith('user');
-      expect(Storage.prototype.removeItem).toHaveBeenCalledWith('userInfo');
+      // Note: localStorage cleanup is now handled by the logout thunk in authSlice
+      // NavBar only handles navigation after logout completes
+      // The component should trigger navigation when logoutResult is set
+      const state = loggedInStore.getState();
+      expect(state.auth.logoutResult).toBe('success');
     });
   });
 });

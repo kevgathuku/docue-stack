@@ -73,10 +73,9 @@ let make = (~pathname: string) => {
   }, [loggedIn])
   
   // Handle logout result - redirect when logout completes
+  // Note: localStorage cleanup is handled by the logout thunk in authSlice
   React.useEffect1(() => {
     if logoutResult != "" {
-      removeItem("user")
-      removeItem("userInfo")
       navigate("/")
     }
     None

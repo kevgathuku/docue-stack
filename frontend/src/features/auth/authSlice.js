@@ -101,6 +101,7 @@ export const login = createAsyncThunk(
 
 /**
  * Log out the current user
+ * Handles API call and localStorage cleanup
  */
 export const logout = createAsyncThunk(
   'auth/logout',
@@ -110,8 +111,17 @@ export const logout = createAsyncThunk(
         .post(`${BASE_URL}/api/users/logout`)
         .set('x-access-token', token)
         .send({});
+      
+      // Clean up localStorage after successful logout
+      localStorage.removeItem('user');
+      localStorage.removeItem('userInfo');
+      
       return result.body;
     } catch (err) {
+      // Clean up localStorage even if API call fails
+      localStorage.removeItem('user');
+      localStorage.removeItem('userInfo');
+      
       return rejectWithValue(err.response?.body?.error || err.message);
     }
   }
@@ -209,9 +219,14 @@ const authSlice = createSlice({
         state.logoutError = '';
         state.token = '';
         state.user = {};
+        state.session = { loggedIn: false, loading: false };
         state.logoutResult = message;
       })
       .addCase(logout.rejected, (state, action) => {
+        // Clear state even on error since localStorage is already cleaned
+        state.token = '';
+        state.user = {};
+        state.session = { loggedIn: false, loading: false };
         state.logoutError = action.payload;
       });
 
