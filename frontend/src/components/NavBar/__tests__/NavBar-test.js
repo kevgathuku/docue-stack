@@ -65,6 +65,49 @@ describe('NavBar', function() {
       expect(logo.tagName).toBe('IMG');
     });
 
+    it('logo links to root when user is not logged in', function() {
+      const { container } = renderWithProviders(<NavBar pathname="/dashboard" />);
+      
+      // Find the logo link
+      const logoLink = container.querySelector('.brand-logo');
+      expect(logoLink).toBeInTheDocument();
+      expect(logoLink.getAttribute('href')).toBe('/');
+    });
+
+    it('logo links to dashboard when user is logged in', function() {
+      // Create a store with logged-in user
+      const loggedInStore = configureStore({
+        reducer: {
+          auth: authReducer,
+        },
+        preloadedState: {
+          auth: {
+            user: { _id: '123', email: 'test@example.com', name: { first: 'Test', last: 'User' } },
+            token: 'test-token',
+            session: { loggedIn: true },
+          },
+        },
+      });
+
+      const { container } = render(
+        <Provider store={loggedInStore}>
+          <BrowserRouter
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true,
+            }}
+          >
+            <NavBar pathname="/profile" />
+          </BrowserRouter>
+        </Provider>
+      );
+      
+      // Find the logo link
+      const logoLink = container.querySelector('.brand-logo');
+      expect(logoLink).toBeInTheDocument();
+      expect(logoLink.getAttribute('href')).toBe('/dashboard');
+    });
+
     it('does not render when pathname is /', function() {
       const { container } = renderWithProviders(<NavBar pathname="/" />);
       

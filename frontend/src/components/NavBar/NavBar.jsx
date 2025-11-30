@@ -65,7 +65,10 @@ class NavBar extends React.Component {
     return this.props.pathname === '/' ? null : (
       <nav className="transparent black-text" role="navigation">
         <div className="nav-wrapper container">
-          <Link className="brand-logo brand-logo-small" to="/">
+          <Link 
+            className="brand-logo brand-logo-small" 
+            to={this.props.loggedIn ? "/dashboard" : "/"}
+          >
             <img alt="Docue Logo" id="header-logo" src={logoSrc} />
             {'      Docue'}
           </Link>
