@@ -1,5 +1,3 @@
-
-
 const Role = require('../models/roles');
 
 module.exports = {
@@ -11,31 +9,31 @@ module.exports = {
       // in case of an error
       if (!req.body.title) {
         return res.status(400).json({
-          error: 'The role title is required'
+          error: 'The role title is required',
         });
       } else if (validRoles.indexOf(req.body.title) === -1) {
         // Handle an invalid role title
         return res.status(400).json({
-          error: req.body.title + ' is not a valid role title'
+          error: req.body.title + ' is not a valid role title',
         });
       }
 
       const newRole = {
         title: req.body.title,
-        accessLevel: null
+        accessLevel: null,
       };
       // Assign the access levels
       switch (newRole.title) {
-      case 'viewer':
-        newRole.accessLevel = 0;
-        break;
-      case 'staff':
-        newRole.accessLevel = 1;
-        break;
-      case 'admin':
-        newRole.accessLevel = 2;
-        break;
-      default:
+        case 'viewer':
+          newRole.accessLevel = 0;
+          break;
+        case 'staff':
+          newRole.accessLevel = 1;
+          break;
+        case 'admin':
+          newRole.accessLevel = 2;
+          break;
+        default:
       }
 
       // Try to create the new role and raise an error if it already exists
@@ -60,5 +58,5 @@ module.exports = {
     } catch (err) {
       res.status(500).json(err);
     }
-  }
+  },
 };

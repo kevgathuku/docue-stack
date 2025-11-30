@@ -1,5 +1,3 @@
-
-
 const _ = require('underscore'),
   jwt = require('jsonwebtoken'),
   extractUserFromToken = require('./utils').extractUserFromToken,
@@ -13,10 +11,9 @@ module.exports = {
     const required = ['username', 'firstname', 'lastname', 'email', 'password'];
     // If all the required fields are not present, raise an error
     // Returns true only if all the required fields are found in req.body
-    if (!required.every(field => field in req.body)) {
+    if (!required.every((field) => field in req.body)) {
       const err = new Error(
-        'Please provide the username, firstname, ' +
-          'lastname, email, and password values'
+        'Please provide the username, firstname, ' + 'lastname, email, and password values'
       );
       err.status = 400;
       next(err);
@@ -26,38 +23,38 @@ module.exports = {
     }
     // Find the role passed from the request body in the DB
     Roles.findOne({
-      title: req.body.role
+      title: req.body.role,
     })
       .exec()
-      .then(role => {
+      .then((role) => {
         // Create the user with the role specified
         // Return the user create promise
         return Users.create({
           username: req.body.username,
           name: {
             first: req.body.firstname,
-            last: req.body.lastname
+            last: req.body.lastname,
           },
           email: req.body.email,
           password: req.body.password,
           role: role,
-          loggedIn: true
+          loggedIn: true,
         });
       })
-      .then(user => {
+      .then((user) => {
         // Successful signup
         const tokenUser = _.pick(user, '_id', 'role', 'loggedIn');
         // Sign the user object with the app secret
         const token = jwt.sign(tokenUser, req.app.get('superSecret'), {
-          expiresIn: 86400 // expires in 24 hours
+          expiresIn: 86400, // expires in 24 hours
         });
         // Return the newly created user with the token included
         res.status(201).json({
           user: _.omit(user, 'password'),
-          token: token
+          token: token,
         });
       })
-      .catch(err => {
+      .catch((err) => {
         if (err.code === 11000) {
           // The user already exists
           const error = new Error('The User already exists');
@@ -71,23 +68,20 @@ module.exports = {
 
   get: (req, res, next) => {
     // Only an admin or owner can view their own profile
-    if (
-      req.decoded._id === req.params.id ||
-      req.decoded.role.title === 'admin'
-    ) {
+    if (req.decoded._id === req.params.id || req.decoded.role.title === 'admin') {
       // Don't send back the password field
       Users.findById(req.params.id, '_id name username email role loggedIn')
         .populate('role')
         .exec()
-        .then(user => {
+        .then((user) => {
           res.json(user);
         })
-        .catch(err => {
+        .catch((err) => {
           next(err);
         });
     } else {
       res.status(403).json({
-        error: 'Unauthorized Access'
+        error: 'Unauthorized Access',
       });
     }
   },
@@ -95,38 +89,35 @@ module.exports = {
   update: (req, res, next) => {
     // A user can only update their own profile
     // An admin can edit any user's profile i.e. roles
-    if (
-      req.decoded._id === req.params.id ||
-      req.decoded.role.title === 'admin'
-    ) {
+    if (req.decoded._id === req.params.id || req.decoded.role.title === 'admin') {
       // Set the name fields in the format expected by the model
       if (_.has(req.body, 'firstname') || _.has(req.body, 'lastname')) {
         req.body.name = {
           first: req.body.firstname,
-          last: req.body.lastname
+          last: req.body.lastname,
         };
       }
       Users.findByIdAndUpdate(
         req.params.id,
         {
-          $set: req.body
+          $set: req.body,
         },
         // Return the updated user object
         {
-          new: true
+          new: true,
         }
       )
         .populate('role')
         .exec()
-        .then(user => {
+        .then((user) => {
           res.send(user);
         })
-        .catch(err => {
+        .catch((err) => {
           next(err);
         });
     } else {
       res.status(403).json({
-        error: 'Unauthorized Access'
+        error: 'Unauthorized Access',
       });
     }
   },
@@ -135,18 +126,15 @@ module.exports = {
     try {
       // A user can only delete their own profile
       // An admin can also delete a user
-      if (
-        req.decoded._id === req.params.id ||
-        req.decoded.role.title === 'admin'
-      ) {
+      if (req.decoded._id === req.params.id || req.decoded.role.title === 'admin') {
         await Users.findOneAndDelete({
-          _id: req.params.id
+          _id: req.params.id,
         }).exec();
-        
+
         res.sendStatus(204);
       } else {
         res.status(403).json({
-          error: 'Unauthorized Access'
+          error: 'Unauthorized Access',
         });
       }
     } catch (err) {
@@ -159,10 +147,10 @@ module.exports = {
     try {
       const docs = await Documents.find()
         .where({
-          ownerId: req.params.id
+          ownerId: req.params.id,
         })
         .exec();
-      
+
       res.json(docs);
     } catch (err) {
       next(err);
@@ -173,16 +161,16 @@ module.exports = {
     // This action is available to admin roles only
     if (req.decoded.role.title !== 'admin') {
       res.status(403).json({
-        error: 'Unauthorized Access'
+        error: 'Unauthorized Access',
       });
     } else {
       Users.find()
         .populate('role')
         .exec()
-        .then(users => {
+        .then((users) => {
           res.json(users);
         })
-        .catch(err => {
+        .catch((err) => {
           res.next(err);
         });
     }
@@ -192,20 +180,20 @@ module.exports = {
     // Find the user and set the loggedIn flag to true
     Users.findOneAndUpdate(
       {
-        username: req.body.username
+        username: req.body.username,
       },
       {
         $set: {
-          loggedIn: true
-        }
+          loggedIn: true,
+        },
       }, // Return the updated user object
       {
-        new: true
+        new: true,
       }
     )
       .populate('role')
       .exec()
-      .then(user => {
+      .then((user) => {
         let err;
         if (!user) {
           err = new Error('Authentication failed. User Not Found.');
@@ -221,20 +209,20 @@ module.exports = {
           const tokenUser = {
             _id: user._id,
             role: user.role,
-            loggedIn: user.loggedIn
+            loggedIn: user.loggedIn,
           };
           // User is found and password is correct
           // Sign the user object with the app secret
           const token = jwt.sign(tokenUser, req.app.get('superSecret'), {
-            expiresIn: 86400 // expires in 24 hours
+            expiresIn: 86400, // expires in 24 hours
           });
           res.json({
             user: user,
-            token: token
+            token: token,
           });
         }
       })
-      .catch(err => {
+      .catch((err) => {
         next(err);
       });
   },
@@ -244,15 +232,15 @@ module.exports = {
     const token = req.body.token || req.headers['x-access-token'];
     const user = extractUserFromToken(token);
     Users.findByIdAndUpdate(user._id, {
-      loggedIn: false
+      loggedIn: false,
     })
       .exec()
       .then(() => {
         res.json({
-          message: 'Successfully logged out'
+          message: 'Successfully logged out',
         });
       })
-      .catch(err => {
+      .catch((err) => {
         next(err);
       });
   },
@@ -268,10 +256,10 @@ module.exports = {
       const user = extractUserFromToken(token);
       if (!user.loggedIn) {
         return res.status(401).json({
-          error: 'Unauthorized Access. Please login first'
+          error: 'Unauthorized Access. Please login first',
         });
       }
-      
+
       try {
         // verifies secret and checks expiry time
         const decoded = jwt.verify(token, req.app.get('superSecret'));
@@ -281,13 +269,13 @@ module.exports = {
         next();
       } catch {
         res.status(401).json({
-          error: 'Failed to authenticate token.'
+          error: 'Failed to authenticate token.',
         });
       }
     } else {
       // if there is no token return an error
       res.status(403).send({
-        error: 'No token provided.'
+        error: 'No token provided.',
       });
     }
   },
@@ -301,31 +289,31 @@ module.exports = {
       try {
         // verifies secret and checks expiry time
         const decoded = jwt.verify(token, req.app.get('superSecret'));
-        
+
         // Return user's loggedIn status from the DB
         const user = await Users.findById(decoded._id).populate('role').exec();
-        
+
         if (!user) {
           res.json({
-            loggedIn: false
+            loggedIn: false,
           });
         } else {
           res.json({
             user: user,
-            loggedIn: user.loggedIn
+            loggedIn: user.loggedIn,
           });
         }
       } catch {
         // If the token cannot be verified, return false
         res.json({
-          loggedIn: false
+          loggedIn: false,
         });
       }
     } else {
       // if there is no token, return a logged out status
       res.json({
-        loggedIn: false
+        loggedIn: false,
       });
     }
-  }
+  },
 };

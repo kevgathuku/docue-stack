@@ -1,14 +1,9 @@
-
-
 const Users = require('../controllers/users');
 
 const express = require('express'),
   router = express.Router();
 
-router
-  .route('/users/')
-  .post(Users.create)
-  .get(Users.authenticate, Users.all);
+router.route('/users/').post(Users.create).get(Users.authenticate, Users.all);
 
 // Route to get whether a user is logged in or Not
 router.get('/users/session', Users.getSession);

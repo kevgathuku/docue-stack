@@ -1,5 +1,3 @@
-
-
 var env = process.env.NODE_ENV || 'development';
 
 // load .env only in dev mode
@@ -11,17 +9,18 @@ const Roles = require('../server/models/roles');
 const titles = Object.keys(Roles.ACCESS_LEVEL);
 
 exports.up = (next) => {
-
   const tasks = titles.map((title) => {
     const update = {
       title: title,
-      accessLevel: Roles.ACCESS_LEVEL[title]
+      accessLevel: Roles.ACCESS_LEVEL[title],
     };
-    return Roles.findOneAndUpdate({title: title}, update, {upsert: true});
+    return Roles.findOneAndUpdate({ title: title }, update, { upsert: true });
   });
 
   Promise.all(tasks)
-    .then(()=> { next(); })
+    .then(() => {
+      next();
+    })
     .catch((error) => {
       console.error(error);
       next();
@@ -29,8 +28,7 @@ exports.up = (next) => {
 };
 
 exports.down = (next) => {
-
-  Roles.remove({ title: { $in: titles}})
+  Roles.remove({ title: { $in: titles } })
     .then(() => next())
     .catch((error) => {
       console.error(error);

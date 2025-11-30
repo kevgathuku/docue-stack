@@ -22,9 +22,9 @@ async function listUsers() {
     });
 
     console.log('\n📋 Users in database:\n');
-    
+
     const users = await User.find({}).populate('role');
-    
+
     if (users.length === 0) {
       console.log('No users found in database.\n');
       process.exit(0);
@@ -39,9 +39,9 @@ async function listUsers() {
       console.log(`    Logged In: ${user.loggedIn}`);
       console.log('');
     }
-    
+
     console.log(`Total users: ${users.length}\n`);
-    
+
     process.exit(0);
   } catch (error) {
     console.error('\n❌ Error listing users:', error.message);

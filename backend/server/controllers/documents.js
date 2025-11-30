@@ -1,5 +1,3 @@
-
-
 const jwt = require('jsonwebtoken'),
   extractUserFromToken = require('./utils').extractUserFromToken,
   Error = require('./utils').Error,
@@ -22,7 +20,7 @@ module.exports = {
 
       // Find if the document already exists
       const document = await Documents.findOne({ title: req.body.title });
-      
+
       if (document) {
         // If the document already exists send a validation error
         const docErr = new Error('Document already exists');
@@ -33,7 +31,7 @@ module.exports = {
       // Decode the user info from the token
       const decodedUser = jwt.decode(token, { complete: true });
       const user = await Users.findById(decodedUser.payload._id);
-      
+
       if (!user) {
         const err = new Error('User does not exist');
         err.status = 400;
@@ -49,7 +47,7 @@ module.exports = {
 
       // Find the corresponding role in the DB
       const fetchedRole = await Roles.findOne({ title: role }).exec();
-      
+
       if (!fetchedRole) {
         return next(new Error('Role not found'));
       }
@@ -59,7 +57,7 @@ module.exports = {
         title: req.body.title,
         content: req.body.content,
         ownerId: decodedUser.payload._id,
-        role: fetchedRole
+        role: fetchedRole,
       });
 
       res.status(201).json(newDocument);
@@ -73,10 +71,10 @@ module.exports = {
       // Extract the user info from the token
       const token = req.body.token || req.headers['x-access-token'];
       const user = extractUserFromToken(token);
-      
+
       // Validate whether a user can access a specific document
       const doc = await Documents.findById(req.params.id).populate('role').exec();
-      
+
       if (!doc) {
         return next(new Error('Document not found'));
       }
@@ -85,19 +83,19 @@ module.exports = {
       if (user._id == doc.ownerId) {
         return next();
       }
-      
+
       if (doc.role === undefined) {
         return next(new Error('The document does not specify a role'));
       }
-      
+
       if (user.role.accessLevel >= doc.role.accessLevel) {
         // If the user's accessLevel is equal or higher to the one
         // specified by the doc, allow access
         return next();
       }
-      
+
       res.status(403).json({
-        error: 'You are not allowed to access this document'
+        error: 'You are not allowed to access this document',
       });
     } catch (err) {
       next(err);
@@ -109,10 +107,10 @@ module.exports = {
       // Extract the user info from the token
       const token = req.body.token || req.headers['x-access-token'];
       const user = extractUserFromToken(token);
-      
+
       // Validate whether a user can delete a specific document
       const doc = await Documents.findById(req.params.id).populate('role').exec();
-      
+
       if (!doc) {
         return next(new Error('Document not found'));
       }
@@ -121,14 +119,14 @@ module.exports = {
       if (user._id == doc.ownerId) {
         return next();
       }
-      
+
       if (user.role.accessLevel === 2) {
         // If the user is an admin, allow access
         return next();
       }
-      
+
       res.status(403).json({
-        error: 'You are not allowed to delete this document'
+        error: 'You are not allowed to delete this document',
       });
     } catch (err) {
       next(err);
@@ -144,11 +142,11 @@ module.exports = {
       )
         .populate('ownerId')
         .exec();
-      
+
       if (!document) {
         return next(new Error('Document not found'));
       }
-      
+
       res.send(document);
     } catch (err) {
       next(err);
@@ -161,11 +159,11 @@ module.exports = {
         .populate('role')
         .populate('ownerId')
         .exec();
-      
+
       if (!document) {
         return next(new Error('Document not found'));
       }
-      
+
       res.send(document);
     } catch (err) {
       next(err);
@@ -175,11 +173,11 @@ module.exports = {
   delete: async (req, res, next) => {
     try {
       const doc = await Documents.findOneAndDelete({ _id: req.params.id });
-      
+
       if (!doc) {
         return next(new Error('Document not found'));
       }
-      
+
       res.sendStatus(204);
     } catch (err) {
       next(err);
@@ -193,20 +191,19 @@ module.exports = {
       const user = extractUserFromToken(token);
       // Set a default limit of 10 if one is not set
       const limit = Number.parseInt(req.query.limit) || 10;
-      
+
       const docs = await Documents.find({})
         .limit(limit)
         .populate('role')
         .populate('ownerId')
         .sort('-dateCreated')
         .exec();
-      
+
       // Return docs with accessLevel lower or equal to user's access level
       res.json(
-        docs.filter((doc) => (
-            doc.role.accessLevel <= user.role.accessLevel ||
-            doc.ownerId._id == user._id
-          ))
+        docs.filter(
+          (doc) => doc.role.accessLevel <= user.role.accessLevel || doc.ownerId._id == user._id
+        )
       );
     } catch (err) {
       next(err);
@@ -221,7 +218,7 @@ module.exports = {
 
       const limit = Number.parseInt(req.query.limit) || 10;
       const role = await Roles.findOne({ title: req.params.role }).exec();
-      
+
       if (!role) {
         return next(new Error('Role not found'));
       }
@@ -231,10 +228,8 @@ module.exports = {
         .limit(limit)
         .sort('-dateCreated')
         .exec();
-      
-      res.json(
-        docs.filter((doc) => doc.role.accessLevel <= user.role.accessLevel)
-      );
+
+      res.json(docs.filter((doc) => doc.role.accessLevel <= user.role.accessLevel));
     } catch (err) {
       next(err);
     }
@@ -262,7 +257,7 @@ module.exports = {
       // Save the next day in a nextDate variable
       // Modifies the tmp variable instead of the date variable
       const nextDate = new Date(tmp.setDate(tmp.getDate() + 1));
-      
+
       const docs = await Documents.find()
         // Date is greater than the date provided and less than one day ahead
         // i.e. documents created today
@@ -272,12 +267,10 @@ module.exports = {
         .populate('role')
         .limit(limit)
         .exec();
-      
-      res.json(
-        docs.filter((doc) => doc.role.accessLevel <= user.role.accessLevel)
-      );
+
+      res.json(docs.filter((doc) => doc.role.accessLevel <= user.role.accessLevel));
     } catch (err) {
       next(err);
     }
-  }
+  },
 };

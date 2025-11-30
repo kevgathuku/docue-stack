@@ -1,5 +1,3 @@
-
-
 const Documents = require('../server/models/documents');
 const Roles = require('../server/models/roles');
 const Users = require('../server/models/users');
@@ -10,13 +8,11 @@ const testPassword = 'youKnowNothing';
 
 const getLoginToken = async (user) => {
   // Get a login token using async/await
-  const res = await request(app)
-    .post('/api/users/login')
-    .send({
-      username: user.username,
-      password: testPassword
-    });
-  
+  const res = await request(app).post('/api/users/login').send({
+    username: user.username,
+    password: testPassword,
+  });
+
   return res.body.token;
 };
 
@@ -25,46 +21,46 @@ const seedRoles = () => {
   const roles = [
     {
       title: 'viewer',
-      accessLevel: 0
+      accessLevel: 0,
     },
     {
       title: 'staff',
-      accessLevel: 1
-    }
+      accessLevel: 1,
+    },
   ];
   // return a promise
   return Roles.create(roles);
 };
 
-const seedUsers = role => {
+const seedUsers = (role) => {
   // Documents will be created with the first user, role = viewer
   const users = [
     {
       username: 'jsnow',
       name: {
         first: 'John',
-        last: 'Snow'
+        last: 'Snow',
       },
       email: 'jsnow@winterfell.org',
       password: testPassword,
-      role: role
+      role: role,
     },
     {
       username: 'nstark',
       name: {
         first: 'Ned',
-        last: 'Stark'
+        last: 'Stark',
       },
       email: 'nstark@winterfell.org',
       password: 'winterIsComing',
-      role: role
-    }
+      role: role,
+    },
   ];
 
   return Users.create(users);
 };
 
-const seedDocuments = async user => {
+const seedDocuments = async (user) => {
   // Create dates with clear separation to ensure proper ordering
   const now = new Date();
   const tomorrow = new Date(now);
@@ -78,7 +74,7 @@ const seedDocuments = async user => {
     content: '1Doc',
     ownerId: user._id,
     role: user.role,
-    dateCreated: now
+    dateCreated: now,
   });
 
   await Documents.create({
@@ -86,7 +82,7 @@ const seedDocuments = async user => {
     content: '2Doc',
     ownerId: user._id,
     role: user.role,
-    dateCreated: tomorrow
+    dateCreated: tomorrow,
   });
 
   await Documents.create({
@@ -94,7 +90,7 @@ const seedDocuments = async user => {
     content: '3Doc',
     ownerId: user._id,
     role: user.role,
-    dateCreated: dayAfterTomorrow
+    dateCreated: dayAfterTomorrow,
   });
 
   return user;

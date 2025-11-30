@@ -1,5 +1,3 @@
-
-
 const express = require('express'),
   compression = require('compression'),
   cors = require('cors'),
@@ -27,7 +25,7 @@ app.use(compression());
 // this will let us get the data from a POST
 app.use(
   express.urlencoded({
-    extended: true
+    extended: true,
   })
 );
 app.use(express.json());
@@ -37,8 +35,8 @@ app.use(
   cors({
     allowedHeaders: [
       'Access-Control-Allow-Headers',
-      'Origin, X-Requested-With, Content-Type, Accept, x-access-token'
-    ]
+      'Origin, X-Requested-With, Content-Type, Accept, x-access-token',
+    ],
   })
 );
 
@@ -51,7 +49,7 @@ app.use((err, req, res, next) => {
     return next(err);
   }
   res.status(err.status || 500).json({
-    error: err.message
+    error: err.message,
   });
 });
 
@@ -59,7 +57,7 @@ app.use((err, req, res, next) => {
 app.use((req, res) => {
   const err = new Error('Not Found');
   res.status(404).json({
-    error: err.message
+    error: err.message,
   });
 });
 
