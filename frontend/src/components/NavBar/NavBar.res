@@ -9,6 +9,13 @@ open Materialize
 @module("../../features/auth/authSlice")
 external logout: string => {..} = "logout"
 
+// External bindings for Materialize helpers (data-* attributes not supported in ReScript JSX)
+@module("./MaterializeHelpers")
+external createDropdownButton: (string, ReactEvent.Mouse.t => unit) => React.element = "createDropdownButton"
+
+@module("./MaterializeHelpers")
+external createMobileMenuButton: (ReactEvent.Mouse.t => unit) => React.element = "createMobileMenuButton"
+
 @react.component
 let make = (~pathname: string) => {
   // Redux hooks
@@ -98,90 +105,87 @@ let make = (~pathname: string) => {
   if pathname == "/" {
     React.null
   } else {
-    // Render navbar - use raw function to pass variables into JSX scope
-    let renderNav = %raw(`
-      function(loggedIn, userFirstName, isAdmin, handleLogout) {
-        return (
-          <nav className="transparent black-text" role="navigation">
-            <div className="nav-wrapper container">
-              <a 
-                className="brand-logo brand-logo-small"
-                href={loggedIn ? "/dashboard" : "/"}
-              >
-                <img alt="Docue Logo" id="header-logo" src="/favicon.png" />
-                {"      Docue"}
-              </a>
-              <a 
-                href="#" 
-                data-activates="mobile-demo" 
-                className="button-collapse"
-              >
-                <i className="material-icons" style={{color: 'grey'}}>
-                  menu
-                </i>
-              </a>
-              
-              <ul className="side-nav" id="mobile-demo">
-                <li>
-                  <a href="/">Home</a>
-                </li>
-                <li>
-                  {loggedIn ? (
-                    <a href="/profile">Profile</a>
-                  ) : (
-                    <a href="/auth">Login</a>
-                  )}
-                </li>
-                <li>
-                  {loggedIn ? (
-                    <a href="#" onClick={handleLogout}>Logout</a>
-                  ) : (
-                    <a href="/auth">Sign Up</a>
-                  )}
-                </li>
-              </ul>
-              
-              <ul className="right hide-on-med-and-down" id="nav-mobile">
-                <li>
-                  {loggedIn ? (
-                    <div>
-                      <ul id="dropdown" className="dropdown-content">
-                        <li>
-                          <a href="/profile">My Profile</a>
+    // Render navbar with proper React Router Links for client-side navigation
+    <nav className="transparent black-text" role="navigation">
+      <div className="nav-wrapper container">
+        <ReactRouter.Link
+          to={loggedIn ? "/dashboard" : "/"}
+          className="brand-logo brand-logo-small"
+        >
+          <img alt="Docue Logo" id="header-logo" src="/favicon.png" />
+          {React.string("Docue")}
+        </ReactRouter.Link>
+        
+        // Mobile menu button
+        <React.Fragment>
+          {createMobileMenuButton(evt => ReactEvent.Mouse.preventDefault(evt))}
+        </React.Fragment>
+        
+        <ul className="side-nav" id="mobile-demo">
+          <li>
+            <ReactRouter.Link to="/">
+              {React.string("Home")}
+            </ReactRouter.Link>
+          </li>
+          <li>
+            {loggedIn
+              ? <ReactRouter.Link to="/profile">
+                  {React.string("Profile")}
+                </ReactRouter.Link>
+              : <ReactRouter.Link to="/auth">
+                  {React.string("Login")}
+                </ReactRouter.Link>}
+          </li>
+          <li>
+            {loggedIn
+              ? <a href="#" onClick={handleLogout}>
+                  {React.string("Logout")}
+                </a>
+              : <ReactRouter.Link to="/auth">
+                  {React.string("Sign Up")}
+                </ReactRouter.Link>}
+          </li>
+        </ul>
+        
+        // Desktop nav
+        <ul className="right hide-on-med-and-down" id="nav-mobile">
+          <li>
+            {loggedIn
+              ? <div>
+                  <ul id="dropdown" className="dropdown-content">
+                    <li>
+                      <ReactRouter.Link to="/profile">
+                        {React.string("My Profile")}
+                      </ReactRouter.Link>
+                    </li>
+                    <li>
+                      <ReactRouter.Link to="/dashboard">
+                        {React.string("All Documents")}
+                      </ReactRouter.Link>
+                    </li>
+                    {isAdmin
+                      ? <li>
+                          <ReactRouter.Link to="/admin">
+                            {React.string("Settings")}
+                          </ReactRouter.Link>
                         </li>
-                        <li>
-                          <a href="/dashboard">All Documents</a>
-                        </li>
-                        {isAdmin ? (
-                          <li>
-                            <a href="/admin">Settings</a>
-                          </li>
-                        ) : null}
-                        <li className="divider"></li>
-                        <li>
-                          <a href="#" id="logout-btn" onClick={handleLogout}> Logout</a>
-                        </li>
-                      </ul>
-                      <a 
-                        className="dropdown-button"
-                        data-activates="dropdown"
-                        data-beloworigin="true"
-                        data-constrainwidth="false"
-                      >
-                        {userFirstName}
-                        <i className="material-icons right">arrow_drop_down</i>
+                      : React.null}
+                    <li className="divider" />
+                    <li>
+                      <a href="#" id="logout-btn" onClick={handleLogout}>
+                        {React.string(" Logout")}
                       </a>
-                    </div>
-                  ) : null}
-                </li>
-              </ul>
-            </div>
-          </nav>
-        );
-      }
-    `)
-    
-    renderNav(loggedIn, userFirstName, isAdmin, handleLogout)
+                    </li>
+                  </ul>
+                  <React.Fragment>
+                    {createDropdownButton(userFirstName, evt => ReactEvent.Mouse.preventDefault(evt))}
+                  </React.Fragment>
+                </div>
+              : React.null}
+          </li>
+        </ul>
+      </div>
+    </nav>
   }
 }
 

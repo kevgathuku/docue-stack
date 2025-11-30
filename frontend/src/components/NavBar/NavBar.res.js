@@ -5,10 +5,20 @@ import * as Materialize from "../../bindings/Materialize.res.js";
 import * as ReactRedux from "react-redux";
 import * as LocalStorage from "../../bindings/LocalStorage.res.js";
 import * as ReactRouterDom from "react-router-dom";
+import * as JsxRuntime from "react/jsx-runtime";
+import * as MaterializeHelpers from "./MaterializeHelpers";
 import * as AuthSlice from "../../features/auth/authSlice";
 
 function logout(prim) {
   return AuthSlice.logout(prim);
+}
+
+function createDropdownButton(prim0, prim1) {
+  return MaterializeHelpers.createDropdownButton(prim0, prim1);
+}
+
+function createMobileMenuButton(prim) {
+  return MaterializeHelpers.createMobileMenuButton(prim);
 }
 
 function NavBar(props) {
@@ -67,87 +77,115 @@ function NavBar(props) {
   }, []);
   if (props.pathname === "/") {
     return null;
+  } else {
+    return JsxRuntime.jsx("nav", {
+      children: JsxRuntime.jsxs("div", {
+        children: [
+          JsxRuntime.jsxs(ReactRouterDom.Link, {
+            to: loggedIn ? "/dashboard" : "/",
+            className: "brand-logo brand-logo-small",
+            children: [
+              JsxRuntime.jsx("img", {
+                id: "header-logo",
+                alt: "Docue Logo",
+                src: "/favicon.png"
+              }),
+              "      Docue"
+            ]
+          }),
+          JsxRuntime.jsx(React.Fragment, {
+            children: MaterializeHelpers.createMobileMenuButton(evt => {
+              evt.preventDefault();
+            })
+          }),
+          JsxRuntime.jsxs("ul", {
+            children: [
+              JsxRuntime.jsx("li", {
+                children: JsxRuntime.jsx(ReactRouterDom.Link, {
+                  to: "/",
+                  children: "Home"
+                })
+              }),
+              JsxRuntime.jsx("li", {
+                children: loggedIn ? JsxRuntime.jsx(ReactRouterDom.Link, {
+                    to: "/profile",
+                    children: "Profile"
+                  }) : JsxRuntime.jsx(ReactRouterDom.Link, {
+                    to: "/auth",
+                    children: "Login"
+                  })
+              }),
+              JsxRuntime.jsx("li", {
+                children: loggedIn ? JsxRuntime.jsx("a", {
+                    children: "Logout",
+                    href: "#",
+                    onClick: handleLogout
+                  }) : JsxRuntime.jsx(ReactRouterDom.Link, {
+                    to: "/auth",
+                    children: "Sign Up"
+                  })
+              })
+            ],
+            className: "side-nav",
+            id: "mobile-demo"
+          }),
+          JsxRuntime.jsx("ul", {
+            children: JsxRuntime.jsx("li", {
+              children: loggedIn ? JsxRuntime.jsxs("div", {
+                  children: [
+                    JsxRuntime.jsxs("ul", {
+                      children: [
+                        JsxRuntime.jsx("li", {
+                          children: JsxRuntime.jsx(ReactRouterDom.Link, {
+                            to: "/profile",
+                            children: "My Profile"
+                          })
+                        }),
+                        JsxRuntime.jsx("li", {
+                          children: JsxRuntime.jsx(ReactRouterDom.Link, {
+                            to: "/dashboard",
+                            children: "All Documents"
+                          })
+                        }),
+                        match[2] ? JsxRuntime.jsx("li", {
+                            children: JsxRuntime.jsx(ReactRouterDom.Link, {
+                              to: "/admin",
+                              children: "Settings"
+                            })
+                          }) : null,
+                        JsxRuntime.jsx("li", {
+                          className: "divider"
+                        }),
+                        JsxRuntime.jsx("li", {
+                          children: JsxRuntime.jsx("a", {
+                            children: " Logout",
+                            id: "logout-btn",
+                            href: "#",
+                            onClick: handleLogout
+                          })
+                        })
+                      ],
+                      className: "dropdown-content",
+                      id: "dropdown"
+                    }),
+                    JsxRuntime.jsx(React.Fragment, {
+                      children: MaterializeHelpers.createDropdownButton(match[1], evt => {
+                        evt.preventDefault();
+                      })
+                    })
+                  ]
+                }) : null
+            }),
+            className: "right hide-on-med-and-down",
+            id: "nav-mobile"
+          })
+        ],
+        className: "nav-wrapper container"
+      }),
+      className: "transparent black-text",
+      role: "navigation"
+    });
   }
-  let renderNav = (function(loggedIn, userFirstName, isAdmin, handleLogout) {
-        return (
-          <nav className="transparent black-text" role="navigation">
-            <div className="nav-wrapper container">
-              <a 
-                className="brand-logo brand-logo-small"
-                href={loggedIn ? "/dashboard" : "/"}
-              >
-                <img alt="Docue Logo" id="header-logo" src="/favicon.png" />
-                {"      Docue"}
-              </a>
-              <a 
-                href="#" 
-                data-activates="mobile-demo" 
-                className="button-collapse"
-              >
-                <i className="material-icons" style={{color: 'grey'}}>
-                  menu
-                </i>
-              </a>
-              
-              <ul className="side-nav" id="mobile-demo">
-                <li>
-                  <a href="/">Home</a>
-                </li>
-                <li>
-                  {loggedIn ? (
-                    <a href="/profile">Profile</a>
-                  ) : (
-                    <a href="/auth">Login</a>
-                  )}
-                </li>
-                <li>
-                  {loggedIn ? (
-                    <a href="#" onClick={handleLogout}>Logout</a>
-                  ) : (
-                    <a href="/auth">Sign Up</a>
-                  )}
-                </li>
-              </ul>
-              
-              <ul className="right hide-on-med-and-down" id="nav-mobile">
-                <li>
-                  {loggedIn ? (
-                    <div>
-                      <ul id="dropdown" className="dropdown-content">
-                        <li>
-                          <a href="/profile">My Profile</a>
-                        </li>
-                        <li>
-                          <a href="/dashboard">All Documents</a>
-                        </li>
-                        {isAdmin ? (
-                          <li>
-                            <a href="/admin">Settings</a>
-                          </li>
-                        ) : null}
-                        <li className="divider"></li>
-                        <li>
-                          <a href="#" id="logout-btn" onClick={handleLogout}> Logout</a>
-                        </li>
-                      </ul>
-                      <a 
-                        className="dropdown-button"
-                        data-activates="dropdown"
-                        data-beloworigin="true"
-                        data-constrainwidth="false"
-                      >
-                        {userFirstName}
-                        <i className="material-icons right">arrow_drop_down</i>
-                      </a>
-                    </div>
-                  ) : null}
-                </li>
-              </ul>
-            </div>
-          </nav>
-        );
-      });
-  return renderNav(loggedIn, match[1], match[2], handleLogout);
 }
 
 let make = NavBar;
@@ -156,6 +194,8 @@ let $$default = NavBar;
 
 export {
   logout,
+  createDropdownButton,
+  createMobileMenuButton,
   make,
   $$default as default,
 }
