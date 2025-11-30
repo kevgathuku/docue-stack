@@ -1,10 +1,5 @@
 const jwt = require('jsonwebtoken');
-const {
-  extractUserFromToken,
-  isDocumentOwner,
-  canAccessDocument,
-  canDeleteDocument,
-} = require('./utils');
+const { extractUserFromToken, canAccessDocument, canDeleteDocument } = require('./utils');
 const Documents = require('../models/documents');
 const Roles = require('../models/roles');
 const Users = require('../models/users');
