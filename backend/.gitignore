@@ -50,3 +50,4 @@ public/build/
 
 # Migration
 migrations/.migrate
+.vercel

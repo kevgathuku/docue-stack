@@ -5,6 +5,15 @@ const Roles = require('../models/roles');
 const UsersController = require('../controllers/users');
 const Users = require('../models/users');
 
+// Public healthcheck endpoint - no authentication required
+router.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    service: 'docue-api',
+  });
+});
+
 router.use('/api', require('./roles'));
 router.use('/api', require('./users'));
 router.use('/api', require('./documents'));

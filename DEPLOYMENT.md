@@ -7,7 +7,7 @@ This guide covers deploying both the backend API and frontend to Vercel.
 1. **Vercel Account**: Sign up at [vercel.com](https://vercel.com)
 2. **Vercel CLI**: Install globally
    ```bash
-   npm install -g vercel
+   pnpm add -g vercel
    ```
 3. **MongoDB Atlas**: Set up a hosted MongoDB instance at [mongodb.com/cloud/atlas](https://www.mongodb.com/cloud/atlas)
 
@@ -164,10 +164,15 @@ vercel
 ### Test the API
 
 ```bash
-# Health check
+# Health check (public endpoint - no authentication required)
+curl https://your-backend-api.vercel.app/api/health
+
+# Should return: {"status":"ok","timestamp":"...","service":"docue-api"}
+
+# Test authenticated endpoint
 curl https://your-backend-api.vercel.app/api/roles
 
-# Should return 403 (no token) - this means API is working
+# Should return 403 (no token) - this means API authentication is working
 ```
 
 ### Test the Frontend
