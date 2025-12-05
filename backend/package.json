@@ -2,7 +2,7 @@
   "name": "backend",
   "version": "0.1.1",
   "engines": {
-    "node": "22.x"
+    "node": "24.x"
   },
   "private": true,
   "scripts": {
