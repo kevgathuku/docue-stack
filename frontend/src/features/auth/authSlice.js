@@ -235,12 +235,16 @@ const authSlice = createSlice({
           };
           state.user = user;
         } else {
+          // Token is invalid - clear both Redux state AND localStorage
           state.token = '';
           state.user = {};
           state.session = {
             loggedIn: false,
             loading: false,
           };
+          // Clear invalid token from localStorage to prevent infinite loops
+          localStorage.removeItem('user');
+          localStorage.removeItem('userInfo');
         }
         state.sessionError = '';
       })
@@ -250,6 +254,9 @@ const authSlice = createSlice({
           loggedIn: false,
           loading: false,
         };
+        // Clear invalid token from localStorage on error
+        localStorage.removeItem('user');
+        localStorage.removeItem('userInfo');
       });
 
     // Update profile

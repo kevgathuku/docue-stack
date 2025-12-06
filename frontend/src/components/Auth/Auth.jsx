@@ -59,13 +59,17 @@ class Authenticate extends React.PureComponent {
 }
 
 // Wrapper component that redirects logged-in users to dashboard
+// This validates sessions to redirect already-logged-in users away from /auth
+// NOTE: This is safe because authSlice clears localStorage on invalid tokens,
+// preventing infinite loops (see INVALID_TOKEN_FIX.md)
 function AuthWithRedirect(props) {
   const dispatch = useAppDispatch();
   const session = useAppSelector(selectSession);
   const token = localStorage.getItem('user');
 
   // Trigger session validation when component mounts with a token
-  // This is the inverse of PrivateRoute - we check if user is logged in
+  // This checks if the user is already logged in and should be redirected
+  // Safe from infinite loops because invalid tokens are cleared from localStorage
   useEffect(() => {
     if (token && !session.loading && !session.loggedIn) {
       console.log('[Auth] Checking if user is already logged in');
