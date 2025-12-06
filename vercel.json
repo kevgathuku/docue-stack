@@ -12,7 +12,8 @@
       "src": "frontend/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "build"
+        "distDir": "build",
+        "outputDirectory": "build"
       }
     }
   ],
@@ -33,5 +34,6 @@
     "NODE_ENV": "production"
   },
   "installCommand": "pnpm install",
-  "buildCommand": "cd frontend && pnpm build"
+  "buildCommand": "cd frontend && pnpm build",
+  "outputDirectory": "frontend/build"
 }
