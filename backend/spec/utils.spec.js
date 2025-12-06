@@ -34,6 +34,30 @@ describe('Utils Spec', () => {
 
       expect(isDocumentOwner(userId, ownerId)).toBe(true);
     });
+
+    it('should handle populated ownerId (User object with _id)', () => {
+      const userId = '507f1f77bcf86cd799439011';
+      // Simulate a populated ownerId (full User object)
+      const populatedOwnerId = {
+        _id: '507f1f77bcf86cd799439011',
+        name: { first: 'John', last: 'Doe' },
+        email: 'john@example.com',
+        toString: () => '[object Object]', // This is what causes the bug
+      };
+
+      expect(isDocumentOwner(userId, populatedOwnerId)).toBe(true);
+    });
+
+    it('should handle populated ownerId with non-matching ID', () => {
+      const userId = '507f1f77bcf86cd799439011';
+      const populatedOwnerId = {
+        _id: '507f1f77bcf86cd799439012',
+        name: { first: 'Jane', last: 'Doe' },
+        toString: () => '[object Object]',
+      };
+
+      expect(isDocumentOwner(userId, populatedOwnerId)).toBe(false);
+    });
   });
 
   describe('canAccessDocument', () => {
@@ -98,6 +122,23 @@ describe('Utils Spec', () => {
       };
 
       expect(canAccessDocument(user, document)).toBe(false);
+    });
+
+    it('should allow access when ownerId is populated (User object)', () => {
+      const user = {
+        _id: '507f1f77bcf86cd799439011',
+        role: { accessLevel: 0 },
+      };
+      const document = {
+        ownerId: {
+          _id: '507f1f77bcf86cd799439011',
+          name: { first: 'John', last: 'Doe' },
+          toString: () => '[object Object]',
+        },
+        role: { accessLevel: 2 },
+      };
+
+      expect(canAccessDocument(user, document)).toBe(true);
     });
   });
 

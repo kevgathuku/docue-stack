@@ -11,8 +11,11 @@ const extractUserFromToken = (token) => {
 
 // Checks if a user is the owner of a document
 // Handles ObjectId vs string comparison safely
+// Also handles populated ownerId (when it's a User object vs just an ID)
 const isDocumentOwner = (userId, documentOwnerId) => {
-  return userId.toString() === documentOwnerId.toString();
+  // If ownerId is populated (an object with _id), extract the _id
+  const ownerIdValue = documentOwnerId._id || documentOwnerId;
+  return userId.toString() === ownerIdValue.toString();
 };
 
 // Checks if a user has permission to access a document based on role
