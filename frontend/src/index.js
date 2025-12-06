@@ -16,7 +16,7 @@ import { DefaultLayout } from './components/Landing/Main.jsx';
 import NotFound from './components/NotFound/NotFound.res.js';
 import PrivateRoute from './components/PrivateRoute.jsx';
 import Profile from './components/Profile/Profile.res.js';
-import RolesAdmin from './components/RolesAdmin/RolesAdmin.res.js';
+import RolesAdmin from './components/RolesAdmin/RolesAdminContainer.jsx';
 import UsersAdmin from './components/UsersAdmin/UsersAdmin.jsx';
 
 import 'normalize.css/normalize.css';
