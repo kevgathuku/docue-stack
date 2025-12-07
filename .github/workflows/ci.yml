@@ -13,7 +13,7 @@ jobs:
     
     strategy:
       matrix:
-        node-version: [22.x]
+        node-version: [24.x]
         mongodb-version: ['7.0']
     
     steps:
@@ -66,7 +66,7 @@ jobs:
     
     strategy:
       matrix:
-        node-version: [22.x]
+        node-version: [24.x]
     
     steps:
       - name: Checkout code
@@ -106,7 +106,7 @@ jobs:
           if-no-files-found: ignore
 
   format-check:
-    name: Code Formatting
+    name: Linting and Formatting Check
     runs-on: ubuntu-latest
     
     steps:
@@ -121,12 +121,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22.x
+          node-version: 24.x
           cache: 'pnpm'
       
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       
-      - name: Check code formatting
-        run: pnpm format:check || echo "Format check not configured"
+      - name: Check linting and formatting
+        run: pnpm run ci
         continue-on-error: true

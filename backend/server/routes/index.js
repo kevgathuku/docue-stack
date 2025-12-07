@@ -6,7 +6,7 @@ const UsersController = require('../controllers/users');
 const Users = require('../models/users');
 
 // Public healthcheck endpoint - no authentication required
-router.get('/api/health', (req, res) => {
+router.get('/api/health', (_req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),

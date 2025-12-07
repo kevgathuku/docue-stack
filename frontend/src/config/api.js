@@ -12,4 +12,6 @@
 // - Development: Use localhost:8000 (backend runs separately)
 export const BASE_URL =
   (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL) ||
-  (typeof import.meta !== 'undefined' && import.meta.env?.MODE === 'production' ? '' : 'http://localhost:8000');
+  (typeof import.meta !== 'undefined' && import.meta.env?.MODE === 'production'
+    ? ''
+    : 'http://localhost:8000');
