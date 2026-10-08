@@ -63,12 +63,15 @@
           [:div.note-body (h/raw html-body)]
           [:p [:a {:href "#" :onclick "window.close()"} "Close"]]))
 
+(defn note-head [note]
+  (list [:h1 (:title note)]
+        (when (seq (:tags note))
+          [:p.tags (str/join ", " (:tags note))])
+        [:div.note-body (h/raw (:content_html note))]))
+
 (defn note-view [note]
   (layout (:title note)
-          [:h1 (:title note)]
-          (when (seq (:tags note))
-            [:p.tags (str/join ", " (:tags note))])
-          [:div.note-body (h/raw (:content_html note))]
+          (note-head note)
           [:h2 "Share"]
           (if (:share_token note)
             [:div
@@ -85,7 +88,4 @@
 
 (defn shared-note-view [note]
   (layout (:title note)
-          [:h1 (:title note)]
-          (when (seq (:tags note))
-            [:p.tags (str/join ", " (:tags note))])
-          [:div.note-body (h/raw (:content_html note))]))
+          (note-head note)))

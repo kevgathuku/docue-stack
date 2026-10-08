@@ -26,4 +26,4 @@
   "Markdown source in, sanitized HTML out. Raw HTML in the source is
   stripped by the policy, so stored output is safe for anonymous readers."
   [md]
-  (.sanitize policy (.render renderer (.parse parser (or md "")))))
+  (.sanitize policy (.render renderer (.parse parser md))))

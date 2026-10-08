@@ -12,11 +12,6 @@
             [ring.middleware.session :refer [wrap-session]]
             [ring.middleware.session.cookie :refer [cookie-store]]))
 
-(defn- json-resp [status body]
-  {:status status
-   :headers {"Content-Type" "application/json"}
-   :body (json/write-str body)})
-
 (defn- html [status body]
   {:status status
    :headers {"Content-Type" "text/html"}
@@ -83,11 +78,14 @@
      :body (views/not-found-page)}))
 
 
+(defn- note-params [params]
+  {:title (str/trim (get params "title" ""))
+   :content-md (get params "content_md" "")
+   :tags (notes/parse-tags (get params "tags" ""))})
+
 (defn- create-note! [{:keys [params session]}]
   (let [owner-id (:user-id session)
-        title (str/trim (get params "title" ""))
-        content-md (get params "content_md" "")
-        tags (notes/parse-tags (get params "tags" ""))]
+        {:keys [title content-md tags]} (note-params params)]
     (if (str/blank? title)
       (html 422 (views/note-form "/notes" {:title title :content_md content-md :tags tags}
                                  "Title is required"))
@@ -100,9 +98,7 @@
 (defn- update-note! [{:keys [params session] :as req}]
   (let [owner-id (:user-id session)
         id (note-id (get-in req [:path-params :id]))
-        title (str/trim (get params "title" ""))
-        content-md (get params "content_md" "")
-        tags (notes/parse-tags (get params "tags" ""))
+{:keys [title content-md tags]} (note-params params)
         form (fn [error] (views/note-form (str "/notes/" (get-in req [:path-params :id]))
                                              {:id id :title title :content_md content-md :tags tags
                                               :updated_at (get params "updated_at")}
@@ -172,9 +168,11 @@
          ["/s/:token" {:get show-shared-note}]
          ["/api/health"
           {:get (fn [_]
-                  (json-resp 200 {:status "ok"
-                                  :timestamp (str (java.time.Instant/now))
-                                  :service "docue-api"}))}]]
+{:status 200
+                   :headers {"Content-Type" "application/json"}
+                   :body (json/write-str {:status "ok"
+                                           :timestamp (str (java.time.Instant/now))
+                                           :service "docue-api"})})}]]
        ;; Static segments win over :id (e.g. /notes/new); conflicts disabled.
        {:conflicts (constantly nil)})
        (ring/create-default-handler {:not-found not-found}))

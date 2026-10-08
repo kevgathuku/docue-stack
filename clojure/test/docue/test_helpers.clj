@@ -5,7 +5,6 @@
             [docue.markdown :as markdown]
             [docue.router :as router]
             [next.jdbc :as jdbc]
-            [next.jdbc.result-set :as rs]
             [ring.mock.request :as mock]))
 
 (defn migrate-once [f]
@@ -48,12 +47,12 @@
 (defn user-id [username]
   (:id (jdbc/execute-one! (db/datasource)
                            ["SELECT id FROM users WHERE username = ?" username]
-                           {:builder-fn rs/as-unqualified-lower-maps})))
+                           db/unqualified)))
 
 (defn note-id [title]
   (:id (jdbc/execute-one! (db/datasource)
                            ["SELECT id FROM notes WHERE title = ?" title]
-                           {:builder-fn rs/as-unqualified-lower-maps})))
+                           db/unqualified)))
 
 (defn clean-db [f]
   (when (not= "test" (db/app-env))

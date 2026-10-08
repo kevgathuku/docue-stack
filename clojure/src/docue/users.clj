@@ -1,16 +1,13 @@
 (ns docue.users
   (:require [buddy.hashers :as hashers]
             [docue.db :as db]
-            [next.jdbc :as jdbc]
-            [next.jdbc.result-set :as rs]))
-
-(def ^:private unqualified {:builder-fn rs/as-unqualified-lower-maps})
+            [next.jdbc :as jdbc]))
 
 (defn find-by-username [username]
   (jdbc/execute-one! (db/datasource)
                      ["SELECT id, username, name, password_hash FROM users WHERE username = ?"
                       username]
-                     unqualified))
+                     db/unqualified))
 
 (defn create! [username name password]
   (jdbc/execute! (db/datasource)
@@ -20,7 +17,7 @@
 (defn users-exist? []
   (pos? (:count (jdbc/execute-one! (db/datasource)
                                    ["SELECT COUNT(*) AS count FROM users"]
-                                   unqualified))))
+                                   db/unqualified))))
 
 (defn ensure-admin!
   "Creates the default admin user when the database is empty and a password

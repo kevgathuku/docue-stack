@@ -1,24 +1,11 @@
 (ns docue.auth-test
   (:require [clojure.test :refer [deftest is testing use-fixtures]]
-            [docue.db :as db]
             [docue.router :as router]
             [docue.test-helpers :as h]
             [docue.users :as users]
-            [next.jdbc :as jdbc]
             [ring.mock.request :as mock]))
 
-(defn migrate-once [f]
-  (db/migrate!)
-  (f))
-
-(defn clean-users [f]
-  (when (not= "test" (db/app-env))
-    (throw (ex-info "Refusing to wipe users outside the test env (run with APP_ENV=test)" {})))
-  (jdbc/execute! (db/datasource) ["DELETE FROM users"])
-  (try (f)
-       (finally (jdbc/execute! (db/datasource) ["DELETE FROM users"]))))
-
-(use-fixtures :once migrate-once)
+(use-fixtures :once h/migrate-once)
 (use-fixtures :each h/clean-db)
 
 (deftest login-page

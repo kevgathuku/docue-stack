@@ -1,6 +1,9 @@
 (ns docue.db
   (:require [migratus.core :as migratus]
-            [next.jdbc :as jdbc]))
+            [next.jdbc :as jdbc]
+            [next.jdbc.result-set :as rs]))
+
+(def unqualified {:builder-fn rs/as-unqualified-lower-maps})
 
 (defn app-env []
   (or (System/getenv "APP_ENV") "dev"))

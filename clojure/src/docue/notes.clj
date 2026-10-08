@@ -2,11 +2,7 @@
   (:require [clojure.string :as str]
             [docue.db :as db]
             [docue.markdown :as markdown]
-            [next.jdbc :as jdbc]
-            [next.jdbc.result-set :as rs])
-  (:import [java.security SecureRandom]))
-
-(def ^:private unqualified {:builder-fn rs/as-unqualified-lower-maps})
+            [next.jdbc :as jdbc]))
 
 (defn parse-tags [s]
   (->> (str/split (or s "") #",")
@@ -18,14 +14,13 @@
   (update row :tags (fn [tags] (if tags (vec (.getArray ^java.sql.Array tags)) []))))
 
 (defn all-for-owner
-  ([owner-id] (all-for-owner owner-id nil))
-  ([owner-id tag]
+  [owner-id tag]
    (let [sql (if tag
                ["SELECT id, title, tags, updated_at FROM notes WHERE owner_id = ? AND ? = ANY(tags) ORDER BY updated_at DESC"
                 owner-id tag]
                ["SELECT id, title, tags, updated_at FROM notes WHERE owner_id = ? ORDER BY updated_at DESC"
                 owner-id])]
-     (map with-tags (jdbc/execute! (db/datasource) sql unqualified)))))
+     (map with-tags (jdbc/execute! (db/datasource) sql db/unqualified))))
 
 (defn find-owned [id owner-id]
   (some-> (jdbc/execute-one!
@@ -33,7 +28,7 @@
              [(str "SELECT id, title, content_md, content_html, tags, share_token, updated_at"
                    " FROM notes WHERE id = ? AND owner_id = ?")
               id owner-id]
-             unqualified)
+             db/unqualified)
           with-tags))
 
 (defn- duplicate? [e]
@@ -48,7 +43,7 @@
                   " VALUES(?,?,?,?,?) RETURNING id")
              title content-md (markdown/render content-md)
              (into-array String tags) owner-id]
-            unqualified))
+            db/unqualified))
     (catch org.postgresql.util.PSQLException e
       (if (duplicate? e) {:error :duplicate-title} (throw e)))))
 
@@ -74,38 +69,29 @@
     (if (pos? n) :ok :missing)))
 
 (defn- random-token []
-  (let [bytes (byte-array 32)]
-    (.nextBytes (SecureRandom.) bytes)
-    (apply str (map #(format "%02x" (bit-and % 0xff)) bytes))))
+  (str/replace (str (random-uuid) (random-uuid)) "-" ""))
 
 (defn mint-share-token!
   "Sets a fresh share token on an owned note. Returns the token, or nil
   when the note is not owned by the user."
   [id owner-id]
-  (when (find-owned id owner-id)
-    (loop [attempts 6]
-      (let [res (try
-                  (:share_token
-                   (jdbc/execute-one!
-                    (db/datasource)
-                    [(str "UPDATE notes SET share_token = ?"
-                          " WHERE id = ? AND owner_id = ? RETURNING share_token")
-                     (random-token) id owner-id]
-                    unqualified))
-                  (catch org.postgresql.util.PSQLException e
-                    (if (= "23505" (.getSQLState e)) ::collision (throw e))))]
-        (if (= ::collision res)
-          (when (pos? attempts) (recur (dec attempts)))
-          res)))))
+  (:share_token
+   (jdbc/execute-one!
+    (db/datasource)
+    [(str "UPDATE notes SET share_token = ?"
+          " WHERE id = ? AND owner_id = ? RETURNING share_token")
+     (random-token) id owner-id]
+    db/unqualified)))
 
 (defn revoke-share-token!
   "Clears the share token. Returns :ok, or :missing when not owned."
   [id owner-id]
-  (if (find-owned id owner-id)
-    (do (jdbc/execute-one!
-           (db/datasource)
-           ["UPDATE notes SET share_token = NULL WHERE id = ? AND owner_id = ?" id owner-id])
-        :ok)
+  (if (:id (jdbc/execute-one!
+             (db/datasource)
+             ["UPDATE notes SET share_token = NULL WHERE id = ? AND owner_id = ? RETURNING id"
+              id owner-id]
+             db/unqualified))
+    :ok
     :missing))
 
 (defn find-by-share-token [token]
@@ -114,5 +100,5 @@
              [(str "SELECT id, title, content_html, tags"
                    " FROM notes WHERE share_token = ?")
               token]
-             unqualified)
+             db/unqualified)
           with-tags))
