@@ -1,0 +1,220 @@
+/* Docue — single stylesheet. Palette lives in :root; one block per
+   component below. System font stack, no webfonts, no animations. */
+
+:root {
+  --canvas: #f7f7f4;
+  --surface: #ffffff;
+  --ink: #1c1917;
+  --muted: #57534e;
+  --accent: #1d4ed8;
+  --accent-ink: #ffffff;
+  --danger: #b91c1c;
+  --border: #e7e5e4;
+  --radius: 10px;
+  --pill-peach-bg: #ffedd5;
+  --pill-peach-fg: #9a3412;
+  --pill-mint-bg: #d1fae5;
+  --pill-mint-fg: #065f46;
+  --pill-lav-bg: #ede9fe;
+  --pill-lav-fg: #5b21b6;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  line-height: 1.55;
+}
+
+.wrap { max-width: 860px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+
+/* top bar */
+
+.topbar { border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+
+.topbar .wrap {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+}
+
+.topbar nav { display: flex; align-items: center; gap: 1rem; margin-left: auto; }
+
+.topbar nav .logout-form { margin: 0; }
+
+.topbar nav .logout-form .btn { min-height: 0; padding: 0.35rem 0.8rem; }
+
+.topbar a.brand {
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+/* section labels, timestamps */
+
+.section-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 1.5rem 0 0.75rem;
+}
+
+.muted { color: var(--muted); font-size: 0.875rem; }
+
+/* links + focus */
+
+a { color: var(--accent); }
+
+a, button { cursor: pointer; }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* note cards */
+
+.cards { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.card a.title {
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.card a.title:hover { text-decoration: underline; }
+
+/* tag pills */
+
+.pill {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.15rem 0.65rem;
+  border-radius: 999px;
+  margin-right: 0.35rem;
+  white-space: nowrap;
+}
+
+.pill-0 { background: var(--pill-peach-bg); color: var(--pill-peach-fg); }
+.pill-1 { background: var(--pill-mint-bg); color: var(--pill-mint-fg); }
+.pill-2 { background: var(--pill-lav-bg); color: var(--pill-lav-fg); }
+
+/* forms */
+
+.form { display: grid; gap: 0.9rem; max-width: 640px; }
+
+.form label { font-weight: 600; font-size: 0.9rem; }
+
+.form input[type="text"],
+.form input[type="password"],
+.form textarea {
+  width: 100%;
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+}
+
+.form textarea { min-height: 14rem; resize: vertical; }
+
+.form-row { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; }
+
+.form-row form, .form-row p { margin: 0; }
+
+/* buttons */
+
+.btn {
+  display: inline-block;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 0.55rem 1.1rem;
+  min-height: 2.75rem;
+}
+
+.btn-primary { background: var(--accent); color: var(--accent-ink); }
+
+.btn-danger { background: transparent; color: var(--danger); border-color: var(--danger); }
+
+.btn-ghost { background: transparent; color: var(--ink); border-color: var(--border); }
+
+/* errors */
+
+.error {
+  background: #fef2f2;
+  color: var(--danger);
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  font-weight: 600;
+}
+
+/* rendered note body */
+
+.note-body { max-width: 68ch; }
+
+.note-body h1,
+.note-body h2,
+.note-body h3 { line-height: 1.25; margin: 1.4em 0 0.6em; }
+
+.note-body table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+
+.note-body th,
+.note-body td { border: 1px solid var(--border); padding: 0.45rem 0.7rem; text-align: left; }
+
+.note-body blockquote {
+  margin: 1em 0;
+  padding: 0.6rem 1rem;
+  background: #fefce8;
+  border-left: 3px solid #eab308;
+  border-radius: 0 8px 8px 0;
+}
+
+.note-body code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  background: #f5f5f4;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+
+.note-body pre code { display: block; padding: 0.8rem; overflow-x: auto; }
+
+/* share box */
+
+.share-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.share-box code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85em;
+  word-break: break-all;
+}

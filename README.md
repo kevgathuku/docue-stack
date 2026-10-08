@@ -1,205 +1,44 @@
-# Document Management System
+# Docue — private notes
 
-[![CI](https://github.com/kevgathuku/docue-stack/actions/workflows/ci.yml/badge.svg)](https://github.com/kevgathuku/docue-stack/actions/workflows/ci.yml)
+A single-process web app for private notes: markdown editing with gated
+preview, tags for organization, and read-only sharing by revocable link.
 
-A full-stack document management system that manages documents, users, and roles with role-based access control.
+Every note is private to its author by default. No roles, no admin
+interface, no public notes, no drafts. **Access rule: owner or token.**
 
-Each document defines access rights (which roles can access it) and tracks publication dates. Users are categorized by roles, and each user must have a defined role.
+Previously an Express + React system; rewritten in Clojure (see git history).
+Documents previously visible within a role are now private to their author.
 
-## Tech Stack
+## Stack
 
-### Backend
-- **Runtime**: Node.js 24.x
-- **Framework**: Express.js 4.x
-- **Database**: MongoDB 7.0+ with Mongoose 8.x ODM
-- **Authentication**: JWT with bcrypt
-- **Testing**: Jasmine with Supertest
+Clojure (Reitit + Jetty + Hiccup), Postgres, Ring sessions, server-rendered
+markdown. Details in [AGENTS.md](AGENTS.md) and [clojure/README.md](clojure/README.md).
 
-### Frontend
-- **Framework**: React 18.x + ReScript 12.x 
-- **State Management**: Redux Toolkit
-- **Routing**: React Router 6.x
-- **Build Tool**: Vite 6.x
-- **Testing**: Jest + React Testing Library
-
-### Monorepo
-- **Package Manager**: pnpm 12.x with workspaces
-- **Code Quality**: ESLint, Biome formatter
-- **CI/CD**: GitHub Actions
-
-## Requirements
-
-- Node.js 24.x
-- pnpm 12.x
-- MongoDB 7.0+
-
-## Installation
-
-1. Clone the repository and navigate to the project folder:
-
-   ```bash
-   git clone https://github.com/kevgathuku/docue-stack
-   cd docue-stack
-   ```
-
-2. Install all dependencies (from the root directory):
-
-   ```bash
-   pnpm install
-   ```
-
-3. Set up environment variables for the backend:
-
-   ```bash
-   cd backend
-   cp .env.example .env
-   ```
-
-   Edit `backend/.env` with your configuration:
-   - `PORT` - Server port (default: 8000)
-   - `SECRET` - Secret key for JWT token encryption
-   - `MONGODB_URL` - MongoDB connection URL
-   - `NODE_ENV` - Environment (`development`, `test`, or `production`)
-
-4. Set up environment variables for the frontend:
-
-   ```bash
-   cd ../frontend
-   cp .env.example .env
-   ```
-
-   Edit `frontend/.env` with your configuration:
-   - `NODE_ENV` - Environment (`development`, `test`, or `production`)
-   - `VITE_API_BASE_URL` - Backend API URL (default: `http://localhost:8000`)
-
-## Running the Application
-
-### Development Mode
-
-Run both backend and frontend in separate terminals:
+## Run it
 
 ```bash
-# Terminal 1 - Backend (runs on port 8000)
-pnpm --filter backend start
-
-# Terminal 2 - Frontend (runs on port 3000, proxies API to backend)
-pnpm --filter frontend start
+createdb docue
+cd clojure
+clojure -M -m docue.core   # migrates + serves on :8000
 ```
 
-Access the application at `http://localhost:3000`
-
-### Individual Services
+With Docker:
 
 ```bash
-# Backend only
-pnpm --filter backend start
-
-# Frontend only
-pnpm --filter frontend start
+cd clojure
+docker compose up --build  # app on :8000 + Postgres
 ```
 
-## Testing
+## Test it
 
 ```bash
-# Backend tests
-pnpm --filter backend test:simple
-
-# Frontend tests
-pnpm --filter frontend test
+cd clojure
+APP_ENV=test clojure -M:test -m docue.runner
+clj-kondo --lint src test
 ```
 
-For advanced testing scenarios (parallel execution, custom databases), see [backend/TESTING.md](backend/TESTING.md).
+## Use it
 
-## Code Quality
-
-```bash
-# Format all code with Biome
-pnpm format
-
-# Lint backend
-pnpm --filter backend lint
-
-# Lint and auto-fix backend
-pnpm --filter backend lint:fix
-
-# Lint frontend
-pnpm --filter frontend lint
-
-# Lint and auto-fix frontend
-pnpm --filter frontend lint:fix
-```
-
-## Project Structure
-
-```
-docue-stack/
-├── backend/              # Express.js API server
-│   ├── server/
-│   │   ├── config/      # Database and app configuration
-│   │   ├── controllers/ # Request handlers
-│   │   ├── models/      # Mongoose schemas
-│   │   └── routes/      # API routes
-│   ├── spec/            # Jasmine tests
-│   └── migrations/      # Database migrations
-├── frontend/            # React + ReScript application
-│   ├── src/            # Components, bindings, features (Redux), store
-│   ├── public/         # Static assets
-│   ├── bsconfig.json   # ReScript compiler config
-│   └── vite.config.js  # Vite build configuration
-└── .github/            # CI/CD workflows
-```
-
-## API Documentation
-
-The backend API runs on `http://localhost:8000` and provides the following endpoints:
-
-- **Authentication**: `/api/users/login`, `/api/users/logout`
-- **Users**: `/api/users` (CRUD operations)
-- **Documents**: `/api/documents` (CRUD operations with role-based access)
-- **Roles**: `/api/roles` (CRUD operations)
-
-All authenticated endpoints require an `x-access-token` header with a valid JWT token.
-
-## Deployment
-
-This project can be deployed to Vercel. See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions.
-
-Quick deploy:
-```bash
-# Install Vercel CLI
-npm install -g vercel
-
-# Deploy backend
-cd backend && vercel --prod
-
-# Deploy frontend
-cd frontend && vercel --prod
-```
-
-## Continuous Integration
-
-This project uses GitHub Actions for CI/CD. Tests run automatically on:
-- Push to `main` or `develop` branches
-- Pull requests to `main` or `develop`
-
-See `.github/workflows/` for workflow configurations.
-
-## Development Workflow
-
-For detailed development guidelines, see:
-- [Backend Testing Guide](backend/TESTING.md)
-- [Test Patterns](backend/TEST_PATTERNS.md)
-- [Monorepo Structure](.kiro/steering/monorepo-structure.md)
-- [Development Workflow](.kiro/steering/development-workflow.md)
-
-## Contributing
-
-1. Create a feature branch from `develop`
-2. Make your changes with tests
-3. Ensure all tests pass for the touched package(s) (see [Testing](#testing))
-4. Format code: `pnpm format`
-5. Submit a pull request to `develop`
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- `/` → your notes (sign up first, then log in)
+- Write markdown, **Preview** button renders without saving, tag inline
+- Note view → create/copy/regenerate/revoke the share link (`/s/:token`, read-only, no login)
