@@ -30,11 +30,36 @@
            [:h1 "Log in"]
            (when error [:p.error error])
            [:form.form {:method "post" :action "/login"}
+            [:label {:for "identifier"} "Email or username"]
+            [:input {:type "text" :id "identifier" :name "identifier"}]
+            [:div.form-row [:button.btn.btn-primary {:type "submit"} "Email me a login link"]]]
+           [:p "No account? " [:a {:href "/signup"} "Sign up"]])))
+
+(defn signup-form
+  ([] (signup-form {} nil))
+  ([values error]
+   (layout "Sign up"
+           [:h1 "Sign up"]
+           (when error [:p.error error])
+           [:form.form {:method "post" :action "/signup"}
             [:label {:for "username"} "Username"]
-            [:input {:type "text" :id "username" :name "username"}]
-            [:label {:for "password"} "Password"]
-            [:input {:type "password" :id "password" :name "password"}]
-            [:div.form-row [:button.btn.btn-primary {:type "submit"} "Log in"]]])))
+            [:input {:type "text" :id "username" :name "username"
+                      :value (:username values "")}]
+            [:label {:for "email"} "Email"]
+            [:input {:type "email" :id "email" :name "email"
+                      :value (:email values "")}]
+            [:div.form-row [:button.btn.btn-primary {:type "submit"} "Create account"]]]
+           [:p "Have an account? " [:a {:href "/login"} "Log in"]])))
+
+(defn inbox-notice []
+  (layout "Check your inbox"
+          [:h1 "Check your inbox"]
+          [:p "If that identifies an account, a login link is on its way. It expires in 15 minutes."]))
+
+(defn bad-link []
+  (layout "Link invalid"
+          [:h1 "Link invalid or expired"]
+          [:p [:a {:href "/login"} "Request a fresh link"]]))
 
 (defn notes-list [notes active-tag]
   (layout "My notes"

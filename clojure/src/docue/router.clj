@@ -1,8 +1,8 @@
 (ns docue.router
-  (:require [buddy.hashers :as hashers]
-            [clojure.data.json :as json]
+  (:require [clojure.data.json :as json]
             [clojure.string :as str]
             [docue.db :as db]
+            [docue.magic :as magic]
             [docue.markdown :as markdown]
             [docue.notes :as notes]
             [docue.users :as users]
@@ -36,17 +36,40 @@
       (handler req)
       {:status 302 :headers {"Location" "/login"} :body ""})))
 
-(defn- login! [{:keys [params]}]
-  (let [{:strs [username password]} params
-        user (when (and username password) (users/find-by-username username))]
-    (if (and user (hashers/check password (:password_hash user)))
-      {:status 302
-       :headers {"Location" "/notes"}
-       :session {:user-id (:id user)}
-       :body ""}
-      {:status 401
-       :headers {"Content-Type" "text/html"}
-       :body (views/login-form "Invalid username or password")})))
+(defn- request-link! [{:keys [params]}]
+  (if (= :unknown-identifier (magic/request-link! (get params "identifier" "")))
+    (html 422 (views/login-form "Enter your email to sign up, or your username to log in"))
+    (html 200 (views/inbox-notice))))
+
+(defn- signup! [{:keys [params]}]
+  (let [username (str/trim (get params "username" ""))
+        email (str/trim (get params "email" ""))
+        form (fn [error] (views/signup-form {:username username :email email} error))]
+    (cond
+      (or (str/blank? username) (str/blank? email))
+      (html 422 (form "Username and email are both required"))
+
+      (not (magic/email-like? email))
+      (html 422 (form "Enter a valid email address"))
+
+      (users/find-by-username username)
+      (html 422 (form "That username is already taken"))
+
+      (users/find-by-email email)
+      (html 422 (form "That email is already registered"))
+
+      :else
+      (do (users/create! username email)
+          (magic/request-link! email)
+          (html 200 (views/inbox-notice))))))
+
+(defn- verify-link! [req]
+  (if-let [user-id (magic/verify-link! (get-in req [:path-params :token]))]
+    {:status 302
+     :headers {"Location" "/notes"}
+     :session {:user-id user-id}
+     :body ""}
+    (html 404 (views/bad-link))))
 
 (defn- logout! [_req]
   {:status 302
@@ -133,10 +156,11 @@
                       {:status 302
                        :headers {"Location" (if (logged-in? req) "/notes" "/login")}
                        :body ""})}]
-         ["/login" {:get (fn [_] {:status 200
-                                  :headers {"Content-Type" "text/html"}
-                                  :body (views/login-form)})
-                    :post login!}]
+         ["/login" {:get (fn [_] (html 200 (views/login-form)))
+                    :post request-link!}]
+         ["/signup" {:get (fn [_] (html 200 (views/signup-form)))
+                     :post signup!}]
+         ["/auth/:token" {:get verify-link!}]
          ["/logout" {:post logout!}]
          ["/notes" {:get (require-login
                             (fn [req]

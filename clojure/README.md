@@ -47,5 +47,6 @@ docker compose up --build     # app on :8000 + Postgres
 | `DATABASE_URL` | localhost `docue`; **required in prod** | JDBC URL for dev and prod |
 | `TEST_DATABASE_URL` | localhost `docue_test` | JDBC URL used when `APP_ENV=test` |
 | `SESSION_SECRET` | dev default; **required in prod** | 16-byte secret for encrypted session cookies |
+| `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | unset (console backend) | **Required in prod** — SMTP for login links (`SMTP_PORT` defaults 587) |
 
 Tests assert at the HTTP boundary (status codes, bodies) — never internals.

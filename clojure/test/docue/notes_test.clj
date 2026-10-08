@@ -26,10 +26,10 @@
     (is (= "/login" (get-in res [:headers "Location"])))))
 
 (deftest notes-list-ownership
-  (let [mine (h/login-cookie! "ada" "pw")]
-    (h/create-user! "grace" "pw")
-    (h/create-note! "ada" "Shopping" "milk" ["home" "errands"])
-    (h/create-note! "grace" "Grace note" "x" [])
+  (let [mine (h/magic-cookie! "ada@x.com")]
+    (h/create-user! "grace" "grace@x.com")
+    (h/create-note! "ada@x.com" "Shopping" "milk" ["home" "errands"])
+    (h/create-note! "grace@x.com" "Grace note" "x" [])
     (let [res (h/authed-get "/notes" mine)]
       (is (= 200 (:status res)))
       (is (re-find #"Shopping" (:body res)))
@@ -37,9 +37,9 @@
       (is (not (re-find #"Grace note" (:body res)))))))
 
 (deftest notes-list-tag-filter
-  (let [cookie (h/login-cookie! "ada" "pw")]
-    (h/create-note! "ada" "One" "a" ["work"])
-    (h/create-note! "ada" "Two" "b" ["home"])
+  (let [cookie (h/magic-cookie! "ada@x.com")]
+    (h/create-note! "ada@x.com" "One" "a" ["work"])
+    (h/create-note! "ada@x.com" "Two" "b" ["home"])
     (let [res (h/authed-get "/notes?tag=work" cookie)]
       (is (= 200 (:status res)))
       (is (re-find #"One" (:body res)))
@@ -48,7 +48,7 @@
 ;; create
 
 (deftest note-create-form
-  (let [cookie (h/login-cookie! "ada" "pw")
+  (let [cookie (h/magic-cookie! "ada@x.com")
         res (h/authed-get "/notes/new" cookie)]
     (is (= 200 (:status res)))
     (is (re-find #"title" (:body res)))
@@ -56,7 +56,7 @@
     (is (re-find #"formaction=\"/notes/preview\"" (:body res)))))
 
 (deftest note-create-persists-rendered-html
-  (let [cookie (h/login-cookie! "ada" "pw")
+  (let [cookie (h/magic-cookie! "ada@x.com")
         res (note-form-post cookie "/notes" {:title "Hello" :content_md "# Big" :tags "greet"})]
     (is (= 302 (:status res)))
     (let [view (h/authed-get (get-in res [:headers "Location"]) cookie)]
@@ -65,20 +65,20 @@
       (is (re-find #"greet" (:body view))))))
 
 (deftest note-create-requires-title
-  (let [cookie (h/login-cookie! "ada" "pw")
+  (let [cookie (h/magic-cookie! "ada@x.com")
         res (note-form-post cookie "/notes" {:title "" :content_md "x" :tags ""})]
     (is (= 422 (:status res)))
     (is (re-find #"Title is required" (:body res)))))
 
 (deftest note-create-duplicate-title
-  (let [cookie (h/login-cookie! "ada" "pw")]
-    (h/create-note! "ada" "Taken" "a" [])
+  (let [cookie (h/magic-cookie! "ada@x.com")]
+    (h/create-note! "ada@x.com" "Taken" "a" [])
     (let [res (note-form-post cookie "/notes" {:title "Taken" :content_md "b" :tags ""})]
       (is (= 422 (:status res)))
       (is (re-find #"already exists" (:body res))))))
 
 (deftest note-create-sanitizes-html
-  (let [cookie (h/login-cookie! "ada" "pw")
+  (let [cookie (h/magic-cookie! "ada@x.com")
         res (note-form-post cookie "/notes" {:title "Xss" :content_md "<script>alert(1)</script>" :tags ""})]
     (is (= 302 (:status res)))
     (let [view (h/authed-get (get-in res [:headers "Location"]) cookie)]
@@ -87,9 +87,9 @@
 ;; access
 
 (deftest note-access-control
-  (let [mine (h/login-cookie! "ada" "pw")]
-    (h/create-user! "grace" "pw")
-    (h/create-note! "grace" "Secret" "x" [])
+  (let [mine (h/magic-cookie! "ada@x.com")]
+    (h/create-user! "grace" "grace@x.com")
+    (h/create-note! "grace@x.com" "Secret" "x" [])
     (let [path (str "/notes/" (h/note-id "Secret"))
           other (h/authed-get path mine)
           anon (router/app (mock/request :get path))]
@@ -100,16 +100,16 @@
 ;; update
 
 (deftest note-update-form-prefilled
-  (let [cookie (h/login-cookie! "ada" "pw")]
-    (h/create-note! "ada" "Draft" "body text" ["a"])
+  (let [cookie (h/magic-cookie! "ada@x.com")]
+    (h/create-note! "ada@x.com" "Draft" "body text" ["a"])
     (let [res (edit-page cookie (h/note-id "Draft"))]
       (is (= 200 (:status res)))
       (is (re-find #"Draft" (:body res)))
       (is (re-find #"body text" (:body res))))))
 
 (deftest note-update-persists
-  (let [cookie (h/login-cookie! "ada" "pw")]
-    (h/create-note! "ada" "Draft" "old" [])
+  (let [cookie (h/magic-cookie! "ada@x.com")]
+    (h/create-note! "ada@x.com" "Draft" "old" [])
     (let [id (h/note-id "Draft")
           res (note-form-post cookie (str "/notes/" id)
                               {:title "Draft" :content_md "# New" :tags "b"
@@ -120,8 +120,8 @@
         (is (re-find #"pill pill-\d\">b</span>" (:body view)))))))
 
 (deftest note-update-conflict
-  (let [cookie (h/login-cookie! "ada" "pw")]
-    (h/create-note! "ada" "Draft" "old" [])
+  (let [cookie (h/magic-cookie! "ada@x.com")]
+    (h/create-note! "ada@x.com" "Draft" "old" [])
     (let [id (h/note-id "Draft")
           res (note-form-post cookie (str "/notes/" id)
                               {:title "Draft" :content_md "new" :tags ""
@@ -130,9 +130,9 @@
       (is (re-find #"Changed elsewhere" (:body res))))))
 
 (deftest note-update-forbidden
-  (let [mine (h/login-cookie! "ada" "pw")]
-    (h/create-user! "grace" "pw")
-    (h/create-note! "grace" "Secret" "x" [])
+  (let [mine (h/magic-cookie! "ada@x.com")]
+    (h/create-user! "grace" "grace@x.com")
+    (h/create-note! "grace@x.com" "Secret" "x" [])
     (let [id (h/note-id "Secret")
           res (note-form-post mine (str "/notes/" id)
                               {:title "Secret" :content_md "hijacked" :tags ""
@@ -142,8 +142,8 @@
 ;; delete
 
 (deftest note-delete-owned
-  (let [cookie (h/login-cookie! "ada" "pw")]
-    (h/create-note! "ada" "Gone" "x" [])
+  (let [cookie (h/magic-cookie! "ada@x.com")]
+    (h/create-note! "ada@x.com" "Gone" "x" [])
     (let [id (h/note-id "Gone")
           res (router/app (-> (mock/request :post (str "/notes/" id "/delete"))
                               (mock/header "Cookie" cookie)))]
@@ -152,9 +152,9 @@
       (is (= 404 (:status (h/authed-get (str "/notes/" id) cookie)))))))
 
 (deftest note-delete-forbidden
-  (let [mine (h/login-cookie! "ada" "pw")]
-    (h/create-user! "grace" "pw")
-    (h/create-note! "grace" "Secret" "x" [])
+  (let [mine (h/magic-cookie! "ada@x.com")]
+    (h/create-user! "grace" "grace@x.com")
+    (h/create-note! "grace@x.com" "Secret" "x" [])
     (let [id (h/note-id "Secret")
           res (router/app (-> (mock/request :post (str "/notes/" id "/delete"))
                               (mock/header "Cookie" mine)))]
@@ -166,7 +166,7 @@
     (is (= "/login" (get-in res [:headers "Location"])))))
 
 (deftest note-preview-renders-without-persisting
-  (let [cookie (h/login-cookie! "ada" "pw")
+  (let [cookie (h/magic-cookie! "ada@x.com")
         res (note-form-post cookie "/notes/preview" {:content_md "# Hi **there**"})]
     (is (= 200 (:status res)))
     (is (re-find #"<h1>Hi <strong>there</strong></h1>" (:body res)))
@@ -174,7 +174,7 @@
       (is (not (re-find #"Hi" (:body list-res)))))))
 
 (deftest note-preview-sanitizes
-  (let [cookie (h/login-cookie! "ada" "pw")
+  (let [cookie (h/magic-cookie! "ada@x.com")
         res (note-form-post cookie "/notes/preview"
                             {:content_md "<script>alert(1)</script>"})]
     (is (= 200 (:status res)))

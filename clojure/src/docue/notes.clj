@@ -2,6 +2,7 @@
   (:require [clojure.string :as str]
             [docue.db :as db]
             [docue.markdown :as markdown]
+            [docue.tokens :as tokens]
             [next.jdbc :as jdbc]))
 
 (defn parse-tags [s]
@@ -68,9 +69,6 @@
                ["DELETE FROM notes WHERE id = ? AND owner_id = ?" id owner-id]))]
     (if (pos? n) :ok :missing)))
 
-(defn- random-token []
-  (str/replace (str (random-uuid) (random-uuid)) "-" ""))
-
 (defn mint-share-token!
   "Sets a fresh share token on an owned note. Returns the token, or nil
   when the note is not owned by the user."
@@ -80,7 +78,7 @@
     (db/datasource)
     [(str "UPDATE notes SET share_token = ?"
           " WHERE id = ? AND owner_id = ? RETURNING share_token")
-     (random-token) id owner-id]
+     (tokens/random-hex) id owner-id]
     db/unqualified)))
 
 (defn revoke-share-token!

@@ -1,5 +1,5 @@
 (ns docue.test-helpers
-  (:require [buddy.hashers :as hashers]
+  (:require [docue.mail :as mail]
             [clojure.string :as str]
             [docue.db :as db]
             [docue.markdown :as markdown]
@@ -25,28 +25,38 @@
       first
       str/trim))
 
-(defn login! [username password]
-  (router/app (form-post "/login" {:username username :password password})))
-
 (defn authed-get [path cookie]
   (router/app (-> (mock/request :get path)
                   (mock/header "Cookie" cookie))))
 
-(defn create-user!
-  ([username password]
-   (create-user! username username password))
-  ([username name password]
-   (jdbc/execute! (db/datasource)
-                  ["INSERT INTO users(username, name, password_hash) VALUES(?,?,?)"
-                   username name (hashers/derive password)])))
+(defn create-user! [username email]
+  (jdbc/execute! (db/datasource)
+                 ["INSERT INTO users(username, email) VALUES(?,?)" username email]))
 
-(defn login-cookie! [username password]
-  (create-user! username password)
-  (session-cookie (login! username password)))
+(defn capture-mail [f]
+  (let [sent (atom [])]
+    (with-redefs [mail/send-login-link!
+                   (fn [email link]
+                     (swap! sent conj {:to email :link link})
+                     {:sent true})]
+      (f sent))))
 
-(defn user-id [username]
+(defn request-link! [identifier]
+  (router/app (form-post "/login" {:identifier identifier})))
+
+(defn magic-cookie! [identifier]
+  (capture-mail
+   (fn [sent]
+     (request-link! identifier)
+     (let [link (:link (first @sent))
+           token (last (str/split link #"/"))]
+       (session-cookie (router/app (mock/request :get (str "/auth/" token))))))))
+
+(defn user-id [username-or-email]
   (:id (jdbc/execute-one! (db/datasource)
-                           ["SELECT id FROM users WHERE username = ?" username]
+                           [(str "SELECT id FROM users"
+                                 " WHERE username = ? OR email = ?")
+                            username-or-email username-or-email]
                            db/unqualified)))
 
 (defn note-id [title]

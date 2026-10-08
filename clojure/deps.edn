@@ -7,7 +7,7 @@
         org.clojure/data.json {:mvn/version "2.5.2"}
         org.postgresql/postgresql {:mvn/version "42.7.4"}
         migratus/migratus {:mvn/version "1.6.3"}
-        buddy/buddy-hashers {:mvn/version "2.0.167"}
+        com.draines/postal {:mvn/version "2.0.5"}
         com.vladsch.flexmark/flexmark {:mvn/version "0.64.8"}
         com.vladsch.flexmark/flexmark-ext-tables {:mvn/version "0.64.8"}
         com.vladsch.flexmark/flexmark-ext-gfm-strikethrough {:mvn/version "0.64.8"}

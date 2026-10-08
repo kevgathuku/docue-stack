@@ -17,8 +17,8 @@
 
 (deftest share-mint-access
   (testing "owner mints a link; anonymous holder reads rendered note with no editor"
-    (let [cookie (h/login-cookie! "ada" "pw")]
-      (h/create-note! "ada" "Shared" "# Hello" ["t"])
+    (let [cookie (h/magic-cookie! "ada@x.com")]
+      (h/create-note! "ada@x.com" "Shared" "# Hello" ["t"])
       (let [id (h/note-id "Shared")
             mint (share! cookie id)]
         (is (= 302 (:status mint)))
@@ -32,9 +32,9 @@
 
 (deftest share-guards
   (testing "non-owners cannot mint"
-    (let [mine (h/login-cookie! "ada" "pw")]
-      (h/create-user! "grace" "pw")
-      (h/create-note! "grace" "Secret" "x" [])
+    (let [mine (h/magic-cookie! "ada@x.com")]
+      (h/create-user! "grace" "grace@x.com")
+      (h/create-note! "grace@x.com" "Secret" "x" [])
       (let [res (share! mine (h/note-id "Secret"))]
         (is (= 404 (:status res))))))
 
@@ -44,8 +44,8 @@
 
 (deftest share-rotate
   (testing "regenerating replaces the token; the old one dies"
-    (let [cookie (h/login-cookie! "ada" "pw")]
-      (h/create-note! "ada" "Shared" "# Hi" [])
+    (let [cookie (h/magic-cookie! "ada@x.com")]
+      (h/create-note! "ada@x.com" "Shared" "# Hi" [])
       (let [id (h/note-id "Shared")]
         (share! cookie id)
         (let [old-link (shared-link cookie id)]
@@ -59,8 +59,8 @@
 
 (deftest share-revoke
   (testing "revoking kills access indistinguishably from random tokens"
-    (let [cookie (h/login-cookie! "ada" "pw")]
-      (h/create-note! "ada" "Shared" "# Hi" [])
+    (let [cookie (h/magic-cookie! "ada@x.com")]
+      (h/create-note! "ada@x.com" "Shared" "# Hi" [])
       (let [id (h/note-id "Shared")]
         (share! cookie id)
         (let [link (shared-link cookie id)
@@ -77,17 +77,17 @@
 
 (deftest share-revoke-forbidden
   (testing "non-owners cannot revoke"
-    (let [mine (h/login-cookie! "ada" "pw")]
-      (h/create-user! "grace" "pw")
-      (h/create-note! "grace" "Secret" "x" [])
+    (let [mine (h/magic-cookie! "ada@x.com")]
+      (h/create-user! "grace" "grace@x.com")
+      (h/create-note! "grace@x.com" "Secret" "x" [])
       (let [res (router/app (-> (mock/request :post (str "/notes/" (h/note-id "Secret") "/unshare"))
                                 (mock/header "Cookie" mine)))]
         (is (= 404 (:status res)))))))
 
 (deftest share-route-write-protected
   (testing "writes under /s/ do not succeed"
-    (let [cookie (h/login-cookie! "ada" "pw")]
-      (h/create-note! "ada" "Shared" "# Hi" [])
+    (let [cookie (h/magic-cookie! "ada@x.com")]
+      (h/create-note! "ada@x.com" "Shared" "# Hi" [])
       (let [id (h/note-id "Shared")]
         (share! cookie id)
         (let [link (shared-link cookie id)
