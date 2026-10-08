@@ -4,6 +4,7 @@
             [docue.db :as db]
             [docue.markdown :as markdown]
             [docue.router :as router]
+            [docue.tokens :as tokens]
             [next.jdbc :as jdbc]
             [ring.mock.request :as mock]))
 
@@ -61,7 +62,7 @@
 
 (defn note-id [title]
   (:id (jdbc/execute-one! (db/datasource)
-                           ["SELECT id FROM notes WHERE title = ?" title]
+                           ["SELECT public_id AS id FROM notes WHERE title = ?" title]
                            db/unqualified)))
 
 (defn clean-db [f]
@@ -78,7 +79,7 @@
 (defn create-note!
   ([owner-username title content-md tags]
    (jdbc/execute! (db/datasource)
-                   [(str "INSERT INTO notes(title, content_md, content_html, tags, owner_id)"
-                         " VALUES(?,?,?,?,?)")
+                   [(str "INSERT INTO notes(title, content_md, content_html, tags, owner_id, public_id)"
+                         " VALUES(?,?,?,?,?,?)")
                     title content-md (markdown/render content-md) (into-array String tags)
-                    (user-id owner-username)])))
+                    (user-id owner-username) (tokens/short-id "note")])))

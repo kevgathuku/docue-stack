@@ -77,20 +77,16 @@
    :session nil
    :body ""})
 
-(defn- note-id [s]
-  (try (Long/parseLong s) (catch NumberFormatException _ nil)))
-
 (defn- owned-note [req]
-  (let [id (note-id (get-in req [:path-params :id]))]
-    (when id (notes/find-owned id (-> req :session :user-id)))))
+  (notes/find-owned (get-in req [:path-params :id]) (-> req :session :user-id)))
 (defn- share-note! [{:keys [session] :as req}]
-  (let [id (note-id (get-in req [:path-params :id]))]
+  (let [id (get-in req [:path-params :id])]
     (if (and id (notes/mint-share-token! id (:user-id session)))
       {:status 302 :headers {"Location" (str "/notes/" id)} :body ""}
       (not-found req))))
 
 (defn- unshare-note! [{:keys [session] :as req}]
-  (let [id (note-id (get-in req [:path-params :id]))]
+  (let [id (get-in req [:path-params :id])]
     (if (and id (= :ok (notes/revoke-share-token! id (:user-id session))))
       {:status 302 :headers {"Location" (str "/notes/" id)} :body ""}
       (not-found req))))
@@ -122,14 +118,13 @@
 
 (defn- update-note! [{:keys [params session] :as req}]
   (let [owner-id (:user-id session)
-        id (note-id (get-in req [:path-params :id]))
+        id (get-in req [:path-params :id])
 {:keys [title content-md tags]} (note-params params)
         form (fn [error] (views/note-form (str "/notes/" (get-in req [:path-params :id]))
                                              {:id id :title title :content_md content-md :tags tags
                                               :updated_at (get params "updated_at")}
                                              error))]
     (cond
-      (nil? id) (not-found req)
       (str/blank? title) (html 422 (form "Title is required"))
       :else (let [res (notes/update! id owner-id {:title title :content-md content-md
                                                   :tags tags :updated-at (get params "updated_at")})]
@@ -185,7 +180,7 @@
                                          (not-found req))))}]
          ["/notes/:id/delete" {:post (require-login
                                         (fn [req]
-                                          (let [id (note-id (get-in req [:path-params :id]))]
+                                          (let [id (get-in req [:path-params :id])]
                                             (if (and id (= :ok (notes/delete! id (-> req :session :user-id))))
                                               {:status 302 :headers {"Location" "/notes"} :body ""}
                                               (not-found req)))))}]

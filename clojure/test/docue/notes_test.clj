@@ -97,6 +97,14 @@
       (is (= 302 (:status anon)))
       (is (= "/login" (get-in anon [:headers "Location"]))))))
 
+(deftest note-opaque-ids
+  (testing "sequential integers and unknown strings 404 without errors"
+    (let [cookie (h/magic-cookie! "ada@x.com")]
+      (h/create-note! "ada@x.com" "Real" "x" [])
+      (is (= 404 (:status (h/authed-get "/notes/123" cookie))))
+      (is (= 404 (:status (h/authed-get "/notes/note_nosuchnote1" cookie))))
+      (is (re-find #"note_" (:body (h/authed-get (str "/notes/" (h/note-id "Real")) cookie)))))))
+
 ;; update
 
 (deftest note-update-form-prefilled

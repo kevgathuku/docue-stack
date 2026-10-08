@@ -17,77 +17,78 @@
 (defn all-for-owner
   [owner-id tag]
    (let [sql (if tag
-               ["SELECT id, title, tags, updated_at FROM notes WHERE owner_id = ? AND ? = ANY(tags) ORDER BY updated_at DESC"
+               ["SELECT public_id AS id, title, tags, updated_at FROM notes WHERE owner_id = ? AND ? = ANY(tags) ORDER BY updated_at DESC"
                 owner-id tag]
-               ["SELECT id, title, tags, updated_at FROM notes WHERE owner_id = ? ORDER BY updated_at DESC"
+               ["SELECT public_id AS id, title, tags, updated_at FROM notes WHERE owner_id = ? ORDER BY updated_at DESC"
                 owner-id])]
      (map with-tags (jdbc/execute! (db/datasource) sql db/unqualified))))
 
-(defn find-owned [id owner-id]
+(defn find-owned [public-id owner-id]
   (some-> (jdbc/execute-one!
              (db/datasource)
-             [(str "SELECT id, title, content_md, content_html, tags, share_token, updated_at"
-                   " FROM notes WHERE id = ? AND owner_id = ?")
-              id owner-id]
+             [(str "SELECT public_id AS id, title, content_md, content_html, tags, share_token, updated_at"
+                   " FROM notes WHERE public_id = ? AND owner_id = ?")
+              public-id owner-id]
              db/unqualified)
           with-tags))
 
-(defn- duplicate? [e]
+(defn- duplicate-title? [e]
   (and (instance? org.postgresql.util.PSQLException e)
-       (= "23505" (.getSQLState ^org.postgresql.util.PSQLException e))))
+       (= "23505" (.getSQLState ^org.postgresql.util.PSQLException e))
+       (not (str/includes? (str (.getMessage ^org.postgresql.util.PSQLException e)) "public_id"))))
 
 (defn create! [owner-id title content-md tags]
   (try
-    (:id (jdbc/execute-one!
+    (:public_id (jdbc/execute-one!
             (db/datasource)
-            [(str "INSERT INTO notes(title, content_md, content_html, tags, owner_id)"
-                  " VALUES(?,?,?,?,?) RETURNING id")
+            [(str "INSERT INTO notes(title, content_md, content_html, tags, owner_id, public_id)"
+                  " VALUES(?,?,?,?,?,?) RETURNING public_id")
              title content-md (markdown/render content-md)
-             (into-array String tags) owner-id]
+             (into-array String tags) owner-id (tokens/short-id "note")]
             db/unqualified))
     (catch org.postgresql.util.PSQLException e
-      (if (duplicate? e) {:error :duplicate-title} (throw e)))))
+      (if (duplicate-title? e) {:error :duplicate-title} (throw e)))))
 
-(defn update! [id owner-id {:keys [title content-md tags updated-at]}]
+(defn update! [public-id owner-id {:keys [title content-md tags updated-at]}]
   (try
     (let [n (:next.jdbc/update-count
                (jdbc/execute-one!
                  (db/datasource)
                  [(str "UPDATE notes SET title = ?, content_md = ?, content_html = ?,"
                        " tags = ?, updated_at = now()"
-                       " WHERE id = ? AND owner_id = ? AND updated_at = ?::timestamptz")
+                       " WHERE public_id = ? AND owner_id = ? AND updated_at = ?::timestamptz")
                   title content-md (markdown/render content-md)
-                  (into-array String tags) id owner-id updated-at]))]
-      (if (pos? n) :ok (if (find-owned id owner-id) :stale :missing)))
+                  (into-array String tags) public-id owner-id updated-at]))]
+      (if (pos? n) :ok (if (find-owned public-id owner-id) :stale :missing)))
     (catch org.postgresql.util.PSQLException e
-      (if (duplicate? e) {:error :duplicate-title} (throw e)))))
+      (if (duplicate-title? e) {:error :duplicate-title} (throw e)))))
 
-(defn delete! [id owner-id]
+(defn delete! [public-id owner-id]
   (let [n (:next.jdbc/update-count
              (jdbc/execute-one!
                (db/datasource)
-               ["DELETE FROM notes WHERE id = ? AND owner_id = ?" id owner-id]))]
+               ["DELETE FROM notes WHERE public_id = ? AND owner_id = ?" public-id owner-id]))]
     (if (pos? n) :ok :missing)))
 
 (defn mint-share-token!
   "Sets a fresh share token on an owned note. Returns the token, or nil
   when the note is not owned by the user."
-  [id owner-id]
+  [public-id owner-id]
   (:share_token
    (jdbc/execute-one!
     (db/datasource)
     [(str "UPDATE notes SET share_token = ?"
-          " WHERE id = ? AND owner_id = ? RETURNING share_token")
-     (tokens/random-hex) id owner-id]
+          " WHERE public_id = ? AND owner_id = ? RETURNING share_token")
+     (tokens/random-hex) public-id owner-id]
     db/unqualified)))
 
 (defn revoke-share-token!
   "Clears the share token. Returns :ok, or :missing when not owned."
-  [id owner-id]
-  (if (:id (jdbc/execute-one!
+  [public-id owner-id]
+  (if (:public_id (jdbc/execute-one!
              (db/datasource)
-             ["UPDATE notes SET share_token = NULL WHERE id = ? AND owner_id = ? RETURNING id"
-              id owner-id]
+             ["UPDATE notes SET share_token = NULL WHERE public_id = ? AND owner_id = ? RETURNING public_id"
+              public-id owner-id]
              db/unqualified))
     :ok
     :missing))
