@@ -65,3 +65,4 @@ migrations/.migrate
 .clj-kondo/
 .lsp/
 .nrepl-port
+.cpcache/

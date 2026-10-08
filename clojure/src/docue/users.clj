@@ -17,12 +17,7 @@
                  ["INSERT INTO users(username, name, password_hash) VALUES(?,?,?)"
                   username name (hashers/derive password)]))
 
-(defn all []
-  (jdbc/execute! (db/datasource)
-                 ["SELECT id, username, name FROM users ORDER BY username"]
-                 unqualified))
-
-(defn any? []
+(defn users-exist? []
   (pos? (:count (jdbc/execute-one! (db/datasource)
                                    ["SELECT COUNT(*) AS count FROM users"]
                                    unqualified))))
@@ -31,5 +26,5 @@
   "Creates the default admin user when the database is empty and a password
   is given. Called on boot with ADMIN_PASSWORD."
   [admin-password]
-  (when (and admin-password (not (any?)))
+  (when (and admin-password (not (users-exist?)))
     (create! "admin" "Administrator" admin-password)))

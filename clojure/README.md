@@ -9,13 +9,20 @@ Postgres. See the epic bead for direction.
 clojure/
 ├── deps.edn            # deps + :test alias (extra test path)
 ├── src/docue/
-│   ├── core.clj        # -main: migrate, serve Jetty
+│   ├── core.clj        # -main: migrate, seed admin, serve Jetty
 │   ├── router.clj      # Reitit routes (the app seam)
 │   ├── views.clj       # Hiccup pages
-│   └── db.clj          # datasource + Migratus entry point
+│   ├── db.clj          # env-aware config + Migratus entry point
+│   ├── users.clj       # user queries + admin seeding
+│   ├── notes.clj       # note queries (owner-scoped)
+│   └── markdown.clj    # render + sanitize pipeline
 ├── resources/migrations/  # Migratus SQL migrations
 ├── test/docue/
 │   ├── router_test.clj # HTTP-seam specs (ring-mock)
+│   ├── auth_test.clj   # login/access/seed specs
+│   ├── db_test.clj     # env selection specs
+│   ├── notes_test.clj  # notes/tags/preview specs
+│   └── test_helpers.clj # shared HTTP + DB helpers
 │   └── runner.clj      # test entrypoint
 ├── Dockerfile
 └── compose.yaml        # app + Postgres
