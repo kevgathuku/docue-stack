@@ -56,7 +56,7 @@
     "nock": "^9.0.2",
     "rescript": "^12.0.0",
     "sessionstorage": "^0.0.1",
-    "vite": "^6.4.1"
+    "vite": "^6.4.3"
   },
   "browserslist": [">0.2%", "not dead", "not ie <= 11", "not op_mini all"],
   "homepage": "https://docue-5105d.firebaseapp.com"
