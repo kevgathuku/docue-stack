@@ -1,0 +1,5 @@
+[
+  { "title": "admin", "accessLevel": 1 },
+  { "title": "viewer", "accessLevel": 2 },
+  { "title": "editor", "accessLevel": 3 }
+]

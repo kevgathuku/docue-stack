@@ -42,6 +42,9 @@ app.use(
 
 const port = process.env.PORT || 8000; // set our port
 
+// Auto-seed roles if database is empty (for Vercel deployment)
+app.use(require('./server/middleware/autoSeed'));
+
 app.use(require('./server/routes'));
 
 app.use((err, _req, res, next) => {
