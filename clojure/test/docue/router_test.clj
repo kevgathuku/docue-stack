@@ -28,3 +28,10 @@
       (is (= 200 (:status css)))
       (is (re-find #"text/css" (get-in css [:headers "Content-Type"])))
       (is (re-find #"style\.css" (:body page))))))
+
+(deftest stylesheet-rules
+  (testing "buttons signal interactivity and size consistently"
+    (let [css (slurp (:body (router/app (mock/request :get "/style.css"))))]
+      (is (re-find #"cursor:\s*pointer" css))
+      (is (re-find #"\.btn\s*\{[^}]*display:\s*inline-block" css))
+      (is (re-find #"\.btn\s*\{[^}]*text-decoration:\s*none" css)))))

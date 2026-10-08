@@ -2,6 +2,15 @@
   (:require [clojure.string :as str]
             [hiccup2.core :as h]))
 
+(defn- topbar [logged-in?]
+  [:header.topbar [:div.wrap
+                  [:a.brand {:href "/"} "Docue"]
+                  (when logged-in?
+                    [:nav
+                     [:a {:href "/notes"} "My notes"]
+                     [:form.logout-form {:method "post" :action "/logout"}
+                      [:button.btn.btn-ghost {:type "submit"} "Log out"]]])]])
+
 (defn layout [title & content]
   (str (h/html [:html {:lang "en"}
                 [:head
@@ -10,7 +19,18 @@
                  [:title title]
                  [:link {:rel "stylesheet" :href "/style.css"}]]
                 [:body
-                 [:header.topbar [:div.wrap [:a.brand {:href "/"} "Docue"]]]
+                 (topbar false)
+                 [:main [:div.wrap content]]]])))
+
+(defn app-layout [title & content]
+  (str (h/html [:html {:lang "en"}
+                [:head
+                 [:meta {:charset "utf-8"}]
+                 [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
+                 [:title title]
+                 [:link {:rel "stylesheet" :href "/style.css"}]]
+                [:body
+                 (topbar true)
                  [:main [:div.wrap content]]]])))
 
 (defn- pill-class [tag]
@@ -62,7 +82,7 @@
           [:p [:a {:href "/login"} "Request a fresh link"]]))
 
 (defn notes-list [notes active-tag]
-  (layout "My notes"
+  (app-layout "My notes"
           [:h1 "My notes"]
           [:p [:a.btn.btn-primary {:href "/notes/new"} "New note"]]
           [:h2.section-label "Notes"]
@@ -75,7 +95,7 @@
 (defn note-form
   ([action note] (note-form action note nil))
   ([action note error]
-   (layout (if (:id note) "Edit note" "New note")
+   (app-layout (if (:id note) "Edit note" "New note")
            [:h1 (if (:id note) "Edit note" "New note")]
            (when error [:p.error error])
            [:form.form {:method "post" :action action}
@@ -108,11 +128,11 @@
         [:div.note-body (h/raw (:content_html note))]))
 
 (defn note-view [note]
-  (layout (:title note)
+  (app-layout (:title note)
           (note-head note)
-          [:section.share-box [:h2 "Share"]]
+          [:h2 "Share"]
           (if (:share_token note)
-            [:div
+            [:section.share-box
              [:p [:code (str "/s/" (:share_token note))]]
              [:div.form-row
               [:form {:method "post" :action (str "/notes/" (:id note) "/share")}
@@ -122,7 +142,7 @@
             [:form {:method "post" :action (str "/notes/" (:id note) "/share")}
              [:button.btn.btn-primary {:type "submit"} "Create share link"]])
           [:div.form-row
-           [:p [:a.btn.btn-ghost {:href (str "/notes/" (:id note) "/edit")} "Edit"]]
+           [:a.btn.btn-ghost {:href (str "/notes/" (:id note) "/edit")} "Edit"]
            [:form {:method "post" :action (str "/notes/" (:id note) "/delete")}
             [:button.btn.btn-danger {:type "submit"} "Delete"]]]))
 

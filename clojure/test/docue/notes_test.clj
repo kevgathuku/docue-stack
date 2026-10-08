@@ -1,5 +1,5 @@
 (ns docue.notes-test
-  (:require [clojure.test :refer [deftest is use-fixtures]]
+  (:require [clojure.test :refer [deftest is testing use-fixtures]]
             [docue.router :as router]
             [docue.test-helpers :as h]
             [ring.mock.request :as mock]))
@@ -179,3 +179,19 @@
                             {:content_md "<script>alert(1)</script>"})]
     (is (= 200 (:status res)))
     (is (not (re-find #"<script" (:body res))))))
+
+(deftest header-logout
+  (testing "logged-in pages expose logout; anonymous pages do not"
+    (let [cookie (h/magic-cookie! "ada@x.com")
+          authed (h/authed-get "/notes" cookie)
+          anon (router/app (mock/request :get "/login"))]
+      (is (re-find #"action=\"/logout\"" (:body authed)))
+      (is (not (re-find #"action=\"/logout\"" (:body anon)))))))
+
+(deftest share-box-only-when-actionable
+  (testing "unshared notes show the header without the box"
+    (let [cookie (h/magic-cookie! "ada@x.com")]
+      (h/create-note! "ada@x.com" "Plain" "x" [])
+      (let [res (h/authed-get (str "/notes/" (h/note-id "Plain")) cookie)]
+        (is (re-find #"Share" (:body res)))
+        (is (not (re-find #"share-box" (:body res))))))))

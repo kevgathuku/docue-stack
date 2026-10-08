@@ -34,7 +34,21 @@ body {
 
 /* top bar */
 
-.topbar { padding: 0.75rem 0; margin-bottom: 1rem; }
+.topbar { border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+
+.topbar .wrap {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+}
+
+.topbar nav { display: flex; align-items: center; gap: 1rem; margin-left: auto; }
+
+.topbar nav .logout-form { margin: 0; }
+
+.topbar nav .logout-form .btn { min-height: 0; padding: 0.35rem 0.8rem; }
 
 .topbar a.brand {
   font-weight: 700;
@@ -122,13 +136,17 @@ a { color: var(--accent); }
 
 .form textarea { min-height: 14rem; resize: vertical; }
 
-.form-row { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.form-row { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; }
+
+.form-row form, .form-row p { margin: 0; }
 
 /* buttons */
 
 .btn {
+  display: inline-block;
   font: inherit;
   font-weight: 600;
+  text-decoration: none;
   border: 1px solid transparent;
   border-radius: 8px;
   padding: 0.55rem 1.1rem;
