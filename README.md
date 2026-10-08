@@ -9,28 +9,28 @@ Each document defines access rights (which roles can access it) and tracks publi
 ## Tech Stack
 
 ### Backend
-- **Runtime**: Node.js 22.x
+- **Runtime**: Node.js 24.x
 - **Framework**: Express.js 4.x
-- **Database**: MongoDB 7.0+ with Mongoose ODM
+- **Database**: MongoDB 7.0+ with Mongoose 8.x ODM
 - **Authentication**: JWT with bcrypt
 - **Testing**: Jasmine with Supertest
 
 ### Frontend
-- **Framework**: React 16.x + Elm (hybrid architecture)
-- **State Management**: Redux with redux-thunk
-- **Routing**: React Router 4.x
-- **Build Tool**: Webpack 4.x
-- **Testing**: Jest + Enzyme for React, elm-test for Elm
+- **Framework**: React 18.x + ReScript 12.x 
+- **State Management**: Redux Toolkit
+- **Routing**: React Router 6.x
+- **Build Tool**: Vite 6.x
+- **Testing**: Jest + React Testing Library
 
 ### Monorepo
-- **Package Manager**: pnpm 10.x with workspaces
+- **Package Manager**: pnpm 12.x with workspaces
 - **Code Quality**: ESLint, Biome formatter
 - **CI/CD**: GitHub Actions
 
 ## Requirements
 
-- Node.js 22.x
-- pnpm 10.x
+- Node.js 24.x
+- pnpm 12.x
 - MongoDB 7.0+
 
 ## Installation
@@ -101,17 +101,11 @@ pnpm --filter frontend start
 ## Testing
 
 ```bash
-# Run all tests
-pnpm test
-
-# Backend tests only
+# Backend tests
 pnpm --filter backend test:simple
 
-# Frontend tests only
+# Frontend tests
 pnpm --filter frontend test
-
-# Frontend Elm tests
-pnpm --filter frontend test:elm
 ```
 
 For advanced testing scenarios (parallel execution, custom databases), see [backend/TESTING.md](backend/TESTING.md).
@@ -127,6 +121,12 @@ pnpm --filter backend lint
 
 # Lint and auto-fix backend
 pnpm --filter backend lint:fix
+
+# Lint frontend
+pnpm --filter frontend lint
+
+# Lint and auto-fix frontend
+pnpm --filter frontend lint:fix
 ```
 
 ## Project Structure
@@ -141,11 +141,11 @@ docue-stack/
 │   │   └── routes/      # API routes
 │   ├── spec/            # Jasmine tests
 │   └── migrations/      # Database migrations
-├── frontend/            # React + Elm application
-│   ├── src/            # React components and logic
+├── frontend/            # React + ReScript application
+│   ├── src/            # Components, bindings, features (Redux), store
 │   ├── public/         # Static assets
-│   ├── config/         # Webpack configuration
-│   └── tests/          # Jest and Elm tests
+│   ├── bsconfig.json   # ReScript compiler config
+│   └── vite.config.js  # Vite build configuration
 └── .github/            # CI/CD workflows
 ```
 
@@ -196,7 +196,7 @@ For detailed development guidelines, see:
 
 1. Create a feature branch from `develop`
 2. Make your changes with tests
-3. Ensure all tests pass: `pnpm test`
+3. Ensure all tests pass for the touched package(s) (see [Testing](#testing))
 4. Format code: `pnpm format`
 5. Submit a pull request to `develop`
 
