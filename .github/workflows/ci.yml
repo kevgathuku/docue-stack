@@ -168,4 +168,5 @@ jobs:
         run: clojure -M:test -m docue.runner
         working-directory: clojure
         env:
-          DATABASE_URL: jdbc:postgresql://localhost:5432/docue_test?user=postgres&password=postgres
+          APP_ENV: test
+          TEST_DATABASE_URL: jdbc:postgresql://localhost:5432/docue_test?user=postgres&password=postgres

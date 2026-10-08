@@ -14,6 +14,9 @@
      "test" (or test-database-url "jdbc:postgresql://localhost:5432/docue_test")
      (or database-url "jdbc:postgresql://localhost:5432/docue"))))
 
+(defn datasource []
+  (jdbc/get-datasource {:jdbcUrl (db-url)}))
+
 (defn migratus-config []
   {:store :database
    :migration-dir "migrations"

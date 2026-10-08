@@ -60,3 +60,8 @@ migrations/.migrate
 .beads/proxieddb/
 *.gate.lock*
 .beads/issues.jsonl
+
+# Clojure tooling
+.clj-kondo/
+.lsp/
+.nrepl-port
