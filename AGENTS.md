@@ -1,438 +1,102 @@
 # AI Agent Development Guide
 
-This document provides essential context for AI agents working on the Docue document management system codebase.
+This document provides essential context for AI agents working on the Docue private-notes codebase.
 
 ## Project Overview
 
-Docue is a full-stack document management system with role-based access control. It manages documents, users, and roles where each document defines access rights and users are categorized by roles.
+Docue is a single-process web app for private notes: markdown editing with
+gated preview, tags, and read-only sharing by revocable link. Every note is
+private to its author by default. No roles, no admin interface, no public
+notes, no drafts.
 
-**Key Features:**
-- Document CRUD with role-based access control
-- User management with JWT authentication
-- Role management and assignment
-- Publication date tracking
+**Access rule, one sentence:** owner or token.
 
 ## Architecture
 
-### Monorepo Structure
-
-This is a **pnpm workspace monorepo** with two main packages:
-
 ```
-docue-stack/
-├── backend/              # Express.js + MongoDB API (Node 22.x)
-│   ├── server/
-│   │   ├── config/      # Database configuration
-│   │   ├── controllers/ # Request handlers
-│   │   ├── models/      # Mongoose schemas
-│   │   └── routes/      # API routes
-│   ├── spec/            # Jasmine tests
-│   └── migrations/      # Database migrations
-├── frontend/            # React + ReScript application
-│   ├── src/
-│   │   ├── components/  # React and ReScript components
-│   │   ├── bindings/    # ReScript JS interop bindings
-│   │   ├── features/    # Redux slices and ReScript types
-│   │   └── store/       # Redux store configuration
-│   ├── public/          # Static assets
-│   └── bsconfig.json    # ReScript compiler config
-└── .kiro/
-    └── steering/        # Development standards and guidelines
+clojure/
+├── deps.edn            # deps + :test alias
+├── src/docue/
+│   ├── core.clj        # -main: migrate, seed admin, serve Jetty
+│   ├── router.clj      # Reitit routes (the app seam)
+│   ├── views.clj       # Hiccup pages
+│   ├── db.clj          # env-aware config + Migratus entry point
+│   ├── users.clj       # user queries + admin seeding
+│   ├── notes.clj       # note queries (owner-scoped) + share tokens
+│   └── markdown.clj    # render + sanitize pipeline
+├── resources/migrations/  # Migratus SQL
+├── test/docue/         # ring-mock HTTP specs + shared helpers
+├── Dockerfile
+└── compose.yaml        # app + Postgres
 ```
 
 ### Tech Stack
 
-**Backend:**
-- Node.js 22.x with Express.js 4.x
-- MongoDB 7.0+ with Mongoose ODM
-- JWT authentication with bcrypt
-- Jasmine + Supertest for testing
+- **Language**: Clojure 1.12 (CLI + deps.edn)
+- **HTTP**: Reitit + Jetty, Hiccup views, HTMX where it removes code
+- **Database**: Postgres 17 via next.jdbc, Migratus migrations
+- **Auth**: Ring cookie sessions + buddy-hashers (bcrypt)
+- **Markdown**: flexmark-java + OWASP sanitizer, rendered server-side at write time
+- **Testing**: clojure.test + ring-mock at the HTTP seam
+- **Lint**: clj-kondo, zero warnings (`clj-kondo --lint src test` from `clojure/`)
+- **CI/CD**: GitHub Actions (tests + lint against a Postgres service)
 
-**Frontend:**
-- React 18.3.1 with functional components and hooks
-- ReScript 12.0.0 for type-safe components (8 components migrated)
-- Redux Toolkit 2.11.0 for state management
-- React Router 6.30.2 for routing
-- Vite 6.x for build tooling (100x faster than Webpack)
-- Jest 29.x + React Testing Library for testing
+## Key Patterns
 
-**Modernization Status:** 95% complete
-- ✅ React 18, Vite, Redux Toolkit, ReScript integration
-- ✅ All 204 tests passing
-- ⚡ Dev server: 135ms startup (was 10-15s)
-- 🔥 HMR: <100ms (was 1-3s)
-
-## Package Manager: pnpm
-
-**CRITICAL:** Always use `pnpm`, never `npm` or `yarn`.
-
-### Common Commands
-
-```bash
-# Install dependencies (from root)
-pnpm install
-
-# Run backend (port 8000)
-pnpm --filter backend start
-
-# Run frontend (port 3000)
-pnpm --filter frontend start
-
-# Run tests
-pnpm --filter backend test
-pnpm --filter frontend test
-
-# Add dependencies
-pnpm --filter <package> add <dependency>
-pnpm --filter <package> add -D <dev-dependency>
-
-# Format code (entire monorepo)
-pnpm format
-```
-
-## Frontend Development
-
-### Technology Choices
-
-**Type Safety:** Use **ReScript** (not TypeScript) for frontend type safety
-- 8 components already migrated (Login, SignUp, Profile, Admin, RolesAdmin, CreateRole, Landing, NotFound)
-- Compile-time type safety with sound type system
-- No null/undefined errors
-- Compiles to optimized JavaScript
-
-**State Management:** Redux Toolkit (migrated from Flux)
-- Use `createSlice` for reducers and actions
-- Use `createAsyncThunk` for async operations
-- Use typed hooks: `useAppDispatch` and `useAppSelector`
-
-### ReScript Development Workflow
-
-**Recommended setup (2 terminals):**
-
-```bash
-# Terminal 1: ReScript compiler in watch mode
-pnpm --filter frontend res:watch
-
-# Terminal 2: Vite dev server
-pnpm --filter frontend start
-```
-
-**ReScript Commands:**
-```bash
-pnpm --filter frontend res:build   # Compile once
-pnpm --filter frontend res:watch   # Watch mode (recommended)
-pnpm --filter frontend res:clean   # Clean build artifacts
-```
-
-### Key Frontend Patterns
-
-**Authentication:**
-- Always check `session.loggedIn` before redirecting
-- Never trust user object alone (can contain stale data)
-- Use session validation guard pattern
-
-**Component Structure:**
-- Functional components with hooks
-- Co-locate tests in `__tests__/` directories
-- ReScript components export with `let default = make`
-
-**Testing:**
-- Unit tests: `*.test.js` (Jest + React Testing Library)
-- Property-based tests: `*.properties.test.js` (fast-check)
-- Run with: `pnpm --filter frontend test`
-
-### File Organization
-
-```
-frontend/src/
-├── bindings/              # ReScript JS interop
-│   ├── Redux.res         # Redux Toolkit bindings
-│   ├── ReactRouter.res   # React Router bindings
-│   ├── LocalStorage.res  # localStorage API
-│   ├── Materialize.res   # Toast notifications
-│   └── Fetch.res         # HTTP client
-├── features/             # Redux slices + ReScript types
-│   ├── auth/
-│   │   ├── authSlice.js  # Redux slice (JavaScript)
-│   │   └── AuthTypes.res # Type definitions (ReScript)
-│   ├── documents/
-│   └── roles/
-└── components/           # React + ReScript components
-    ├── Login/
-    │   ├── Login.res     # ReScript component
-    │   ├── Login.res.js  # Compiled (auto-generated)
-    │   └── __tests__/
-    └── [other components...]
-```
-
-## Backend Development
-
-### Key Patterns
-
-**Database:**
-- Mongoose 4.7.9 (legacy, needs update to 8.x)
-- Models in `server/models/`
-- Migrations in `migrations/`
-
-**Authentication:**
-- JWT tokens with bcrypt password hashing
-- Token passed in `x-access-token` header
-- Middleware validates tokens on protected routes
-
-**Testing:**
-- Jasmine with Supertest for API testing
-- Tests in `spec/` directory
-- Run with: `pnpm --filter backend test`
-
-### API Endpoints
-
-- **Auth**: `/api/users/login`, `/api/users/logout`
-- **Users**: `/api/users` (CRUD)
-- **Documents**: `/api/documents` (CRUD with role-based access)
-- **Roles**: `/api/roles` (CRUD)
-
-All authenticated endpoints require `x-access-token` header.
+- **Seam**: HTTP boundary. Tests assert status codes, redirects, rendered
+  content — never internals. One seam; no new ones without agreement.
+- **TDD**: red → green in vertical slices, one test + minimal code per cycle.
+- **Ownership**: every note query scopes by owner; non-owners get not-found
+  (existence is never disclosed). Share routes are read-only; nothing
+  writes through a token.
+- **Markdown**: source in, sanitized HTML out, both persisted. Preview posts
+  unsaved markdown and renders without persisting.
+- **Tags**: Postgres `text[]`, comma-separated input, `?tag=` filter.
 
 ## Environment Configuration
 
-### Backend (.env)
-```bash
-PORT=8000
-SECRET=your-jwt-secret
-MONGODB_URL=mongodb://localhost:27017/docue
-NODE_ENV=development
-```
-
-### Frontend (.env)
-```bash
-NODE_ENV=development
-VITE_API_BASE_URL=http://localhost:8000
-```
-
-**Important:** 
-- Never commit `.env` files
-- Always update `.env.example` when adding variables
-- Frontend env vars must be prefixed with `VITE_` to be exposed to client
+| Var | Default | Notes |
+|---|---|---|
+| `PORT` | `8000` | Jetty listen port |
+| `APP_ENV` | `dev` | `dev`, `test`, or `prod` — selects the database |
+| `DATABASE_URL` | localhost `docue`; **required in prod** | JDBC URL for dev and prod |
+| `TEST_DATABASE_URL` | localhost `docue_test` | Used when `APP_ENV=test` |
+| `SESSION_SECRET` | dev default; **required in prod** | 16-byte secret for session cookies |
+| `ADMIN_PASSWORD` | unset (no seeding) | Creates `admin` on boot when no users exist |
 
 ## Development Workflow
 
 ### Starting Development
 
-1. **Install dependencies:**
-   ```bash
-   pnpm install
-   ```
+```bash
+createdb docue docue_test   # once
+cd clojure
+clojure -P                  # prefetch deps (once / after deps.edn changes)
+clojure -M -m docue.core    # migrate + serve on :8000
+```
 
-2. **Set up environment files:**
-   ```bash
-   cp backend/.env.example backend/.env
-   cp frontend/.env.example frontend/.env
-   ```
+### Running Tests
 
-3. **Start MongoDB** (if running locally)
+```bash
+cd clojure
+APP_ENV=test clojure -M:test -m docue.runner   # full suite (test DB only)
+clj-kondo --lint src test                       # lint, zero warnings
+```
 
-4. **Run services:**
-   ```bash
-   # Terminal 1: Backend
-   pnpm --filter backend start
-
-   # Terminal 2: Frontend (ReScript watch)
-   pnpm --filter frontend res:watch
-
-   # Terminal 3: Frontend (Vite)
-   pnpm --filter frontend start
-   ```
-
-5. **Access app:** http://localhost:3000
+The suite refuses to run without `APP_ENV=test` so fixtures can't wipe dev data.
 
 ### Before Committing
 
 ```bash
-# Run tests
-pnpm test
-
-# Format code
-pnpm format
-
-# Check for issues
-pnpm --filter backend lint
+APP_ENV=test clojure -M:test -m docue.runner
+clj-kondo --lint src test
 ```
-
-> Run auto-fix (`pnpm --filter backend lint:fix`) **and** format (`pnpm format`)
-> before committing — they cover different things (lint findings vs. style)
-> and only together leave the tree clean.
-
-## Common Issues & Solutions
-
-### Port Conflicts
-- Backend: 8000 (change in backend/.env)
-- Frontend: 3000 (change with `--port` flag)
-
-### MongoDB Connection
-- Ensure MongoDB is running
-- Check `MONGODB_URL` in backend/.env
-- Test environment uses in-memory database
-
-### ReScript Compilation
-- Run `pnpm --filter frontend res:clean` if issues
-- Ensure `res:watch` is running during development
-- Check compiler output for errors
-
-### Lockfile Out of Sync
-```bash
-# Regenerate lockfile
-pnpm install --lockfile-only
-
-# Verify
-pnpm install --frozen-lockfile
-```
-
-## Testing Strategy
-
-### Frontend
-- **Unit tests**: Component rendering, user interactions
-- **Property-based tests**: Correctness properties with fast-check
-- **Integration tests**: Redux state management, API calls
-- All 204 tests passing
-
-### Backend
-- **Unit tests**: Model validation, utility functions
-- **Integration tests**: API endpoints with Supertest
-- **Database tests**: Mongoose operations
-
-### Running Tests
-```bash
-# All tests
-pnpm test
-
-# Specific package
-pnpm --filter backend test
-pnpm --filter frontend test
-
-# With coverage
-pnpm --filter frontend test:ci
-```
-
-## Code Quality Standards
-
-### Frontend
-- Use ReScript for new critical components (type safety)
-- Functional components with hooks (no class components)
-- Redux Toolkit patterns (slices, thunks, selectors)
-- React Testing Library (not Enzyme)
-- Property-based testing for correctness properties
-
-### Backend
-- Async/await patterns (migrating from callbacks)
-- Proper error handling and validation
-- JWT authentication on protected routes
-- Comprehensive API tests
-
-### General
-- Use Biome for formatting and linting: `pnpm format` and `pnpm lint`
-- Auto-fix issues: `pnpm check:fix`
-- Write tests for new features
-- Keep commits focused and atomic
-
-## Documentation
-
-### Key Documents
-- `README.md` - Project overview and setup
-- `frontend/MODERNIZATION.md` - Complete modernization guide
-- `frontend/RESCRIPT_GUIDE.md` - ReScript development guide
-- `frontend/REACT_TO_RESCRIPT_MIGRATION.md` - Migration patterns
-- `backend/TESTING.md` - Backend testing guide
-- `.kiro/steering/*.md` - Development standards
-
-### Steering Documents
-Located in `.kiro/steering/`:
-- `monorepo-structure.md` - Workspace organization
-- `development-workflow.md` - Development guidelines
-- `frontend-standards.md` - Frontend best practices
-- `backend-standards.md` - Backend best practices
-- `modernization-strategy.md` - Modernization roadmap
-
-## Modernization Roadmap
-
-### Completed (95%)
-- ✅ React 18.3.1 with new root API
-- ✅ Vite 6.x build system
-- ✅ Redux Toolkit state management
-- ✅ React Testing Library
-- ✅ ReScript integration (8 components)
-- ✅ All tests passing
-
-### Optional Enhancements
-- Continue ReScript migration (more components)
-- Remove Flow types (deprecated)
-- Update API client (Superagent → Axios)
-- Backend: Update Mongoose to 8.x
-- Backend: Migrate callbacks to async/await
-- Backend: Add TypeScript (optional)
-
-## Performance Metrics
-
-### Frontend Improvements
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| Dev Server Start | 10-15s | 135ms | 100x faster |
-| HMR Update | 1-3s | <100ms | 10-30x faster |
-| Build Time | Variable | 3.2s | Consistent |
-
-### Build Tools
-- **Webpack 4** → **Vite 6**: Dramatically faster development
-- **Flux** → **Redux Toolkit**: Modern state management
-- **Enzyme** → **React Testing Library**: Better testing practices
-- **Elm** → **ReScript**: Unified type-safe frontend
-
-## Security Considerations
-
-- Never commit secrets or API keys
-- Use environment variables for sensitive data
-- Validate and sanitize all user inputs
-- Keep dependencies updated
-- Use HTTPS in production
-- Rotate JWT secrets regularly
-- Review CORS configuration
-
-## CI/CD
-
-- GitHub Actions for continuous integration
-- Tests run on push to `main` or `develop`
-- Tests run on pull requests
-- See `.github/workflows/` for configurations
 
 ## Getting Help
 
-### Documentation
-1. Check `README.md` for setup and overview
-2. Check `frontend/MODERNIZATION.md` for frontend details
-3. Check `.kiro/steering/` for standards
-4. Check component-specific docs in respective directories
-
-### Common Commands Reference
-```bash
-# Development
-pnpm --filter backend start
-pnpm --filter frontend start
-pnpm --filter frontend res:watch
-
-# Testing
-pnpm test
-pnpm --filter <package> test
-
-# Code Quality
-pnpm format
-pnpm --filter backend lint
-
-# Dependencies
-pnpm install
-pnpm --filter <package> add <dependency>
-
-# Build
-pnpm --filter frontend build
-pnpm --filter backend build
-```
+- Product spec: epic bead (user stories live there)
+- Task tracking: beads (`bd ready`, `bd show <id>`, `bd close <id>`)
+- Clojure specifics: `clojure/README.md`
 
 ## Key Principles
 
@@ -544,3 +208,7 @@ Default five-label vocabulary (`needs-triage` … `wontfix`) applied to beads. S
 ### Domain docs
 
 Single-context: one root `GLOSSARY.md` + `docs/adr/`. See `docs/agents/domain.md`.
+
+### Definition of done
+
+TDD in slices, self-review via `code-review`, gates green, then close. See `docs/agents/definition-of-done.md`.
