@@ -9,7 +9,8 @@
       "recommended": true,
       "correctness": {
         "noUnusedVariables": "warn",
-        "noUnknownProperty": "warn"
+        "noUnknownProperty": "warn",
+        "noUndeclaredVariables": "error"
       },
       "suspicious": {
         "noExplicitAny": "off"
@@ -30,6 +31,24 @@
     "lineWidth": 100
   },
   "javascript": {
+    "globals": [
+      "console",
+      "process",
+      "require",
+      "module",
+      "__dirname",
+      "__filename",
+      "exports",
+      "Buffer",
+      "setTimeout",
+      "clearTimeout",
+      "describe",
+      "it",
+      "beforeEach",
+      "afterEach",
+      "expect",
+      "jasmine"
+    ],
     "formatter": {
       "quoteStyle": "single",
       "jsxQuoteStyle": "double",

@@ -258,6 +258,10 @@ pnpm format
 pnpm --filter backend lint
 ```
 
+> Run auto-fix (`pnpm --filter backend lint:fix`) **and** format (`pnpm format`)
+> before committing — they cover different things (lint findings vs. style)
+> and only together leave the tree clean.
+
 ## Common Issues & Solutions
 
 ### Port Conflicts
