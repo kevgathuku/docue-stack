@@ -19,7 +19,7 @@
        (finally (jdbc/execute! (db/datasource) ["DELETE FROM users"]))))
 
 (use-fixtures :once migrate-once)
-(use-fixtures :each clean-users)
+(use-fixtures :each h/clean-db)
 
 (deftest login-page
   (testing "renders a login form"

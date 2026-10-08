@@ -69,6 +69,23 @@
           (when (seq (:tags note))
             [:p.tags (str/join ", " (:tags note))])
           [:div.note-body (h/raw (:content_html note))]
+          [:h2 "Share"]
+          (if (:share_token note)
+            [:div
+             [:p [:a {:href (str "/s/" (:share_token note))} "Share link"]]
+             [:form {:method "post" :action (str "/notes/" (:id note) "/share")}
+              [:button {:type "submit"} "Regenerate"]]
+             [:form {:method "post" :action (str "/notes/" (:id note) "/unshare")}
+              [:button {:type "submit"} "Revoke"]]]
+            [:form {:method "post" :action (str "/notes/" (:id note) "/share")}
+             [:button {:type "submit"} "Create share link"]])
           [:p [:a {:href (str "/notes/" (:id note) "/edit")} "Edit"]]
           [:form {:method "post" :action (str "/notes/" (:id note) "/delete")}
            [:button {:type "submit"} "Delete"]]))
+
+(defn shared-note-view [note]
+  (layout (:title note)
+          [:h1 (:title note)]
+          (when (seq (:tags note))
+            [:p.tags (str/join ", " (:tags note))])
+          [:div.note-body (h/raw (:content_html note))]))

@@ -170,3 +170,10 @@ jobs:
         env:
           APP_ENV: test
           TEST_DATABASE_URL: jdbc:postgresql://localhost:5432/docue_test?user=postgres&password=postgres
+
+      - name: Lint Clojure
+        run: |
+          curl -fsSL -o /tmp/kondo.zip "https://github.com/clj-kondo/clj-kondo/releases/download/v2026.08.04/clj-kondo-2026.08.04-linux-amd64.zip"
+          sudo unzip -o /tmp/kondo.zip -d /usr/local/bin
+          clj-kondo --lint src test
+        working-directory: clojure

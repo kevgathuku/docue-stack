@@ -3,7 +3,8 @@
             [docue.db :as db]
             [docue.markdown :as markdown]
             [next.jdbc :as jdbc]
-            [next.jdbc.result-set :as rs]))
+            [next.jdbc.result-set :as rs])
+  (:import [java.security SecureRandom]))
 
 (def ^:private unqualified {:builder-fn rs/as-unqualified-lower-maps})
 
@@ -29,7 +30,8 @@
 (defn find-owned [id owner-id]
   (some-> (jdbc/execute-one!
              (db/datasource)
-             ["SELECT id, title, content_md, content_html, tags, updated_at FROM notes WHERE id = ? AND owner_id = ?"
+             [(str "SELECT id, title, content_md, content_html, tags, share_token, updated_at"
+                   " FROM notes WHERE id = ? AND owner_id = ?")
               id owner-id]
              unqualified)
           with-tags))
@@ -70,3 +72,47 @@
                (db/datasource)
                ["DELETE FROM notes WHERE id = ? AND owner_id = ?" id owner-id]))]
     (if (pos? n) :ok :missing)))
+
+(defn- random-token []
+  (let [bytes (byte-array 32)]
+    (.nextBytes (SecureRandom.) bytes)
+    (apply str (map #(format "%02x" (bit-and % 0xff)) bytes))))
+
+(defn mint-share-token!
+  "Sets a fresh share token on an owned note. Returns the token, or nil
+  when the note is not owned by the user."
+  [id owner-id]
+  (when (find-owned id owner-id)
+    (loop [attempts 6]
+      (let [res (try
+                  (:share_token
+                   (jdbc/execute-one!
+                    (db/datasource)
+                    [(str "UPDATE notes SET share_token = ?"
+                          " WHERE id = ? AND owner_id = ? RETURNING share_token")
+                     (random-token) id owner-id]
+                    unqualified))
+                  (catch org.postgresql.util.PSQLException e
+                    (if (= "23505" (.getSQLState e)) ::collision (throw e))))]
+        (if (= ::collision res)
+          (when (pos? attempts) (recur (dec attempts)))
+          res)))))
+
+(defn revoke-share-token!
+  "Clears the share token. Returns :ok, or :missing when not owned."
+  [id owner-id]
+  (if (find-owned id owner-id)
+    (do (jdbc/execute-one!
+           (db/datasource)
+           ["UPDATE notes SET share_token = NULL WHERE id = ? AND owner_id = ?" id owner-id])
+        :ok)
+    :missing))
+
+(defn find-by-share-token [token]
+  (some-> (jdbc/execute-one!
+             (db/datasource)
+             [(str "SELECT id, title, content_html, tags"
+                   " FROM notes WHERE share_token = ?")
+              token]
+             unqualified)
+          with-tags))

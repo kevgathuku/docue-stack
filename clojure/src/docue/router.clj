@@ -63,6 +63,25 @@
 (defn- owned-note [req]
   (let [id (note-id (get-in req [:path-params :id]))]
     (when id (notes/find-owned id (-> req :session :user-id)))))
+(defn- share-note! [{:keys [session] :as req}]
+  (let [id (note-id (get-in req [:path-params :id]))]
+    (if (and id (notes/mint-share-token! id (:user-id session)))
+      {:status 302 :headers {"Location" (str "/notes/" id)} :body ""}
+      (not-found req))))
+
+(defn- unshare-note! [{:keys [session] :as req}]
+  (let [id (note-id (get-in req [:path-params :id]))]
+    (if (and id (= :ok (notes/revoke-share-token! id (:user-id session))))
+      {:status 302 :headers {"Location" (str "/notes/" id)} :body ""}
+      (not-found req))))
+
+(defn- show-shared-note [{:keys [path-params]}]
+  (if-let [note (notes/find-by-share-token (:token path-params))]
+    (html 200 (views/shared-note-view note))
+    {:status 404
+     :headers {"Content-Type" "text/html"}
+     :body (views/not-found-page)}))
+
 
 (defn- create-note! [{:keys [params session]}]
   (let [owner-id (:user-id session)
@@ -148,6 +167,9 @@
                                             (if (and id (= :ok (notes/delete! id (-> req :session :user-id))))
                                               {:status 302 :headers {"Location" "/notes"} :body ""}
                                               (not-found req)))))}]
+         ["/notes/:id/share" {:post (require-login share-note!)}]
+         ["/notes/:id/unshare" {:post (require-login unshare-note!)}]
+         ["/s/:token" {:get show-shared-note}]
          ["/api/health"
           {:get (fn [_]
                   (json-resp 200 {:status "ok"

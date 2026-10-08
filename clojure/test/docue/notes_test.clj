@@ -1,26 +1,11 @@
 (ns docue.notes-test
-  (:require [clojure.test :refer [deftest is testing use-fixtures]]
-            [docue.db :as db]
+  (:require [clojure.test :refer [deftest is use-fixtures]]
             [docue.router :as router]
             [docue.test-helpers :as h]
-            [next.jdbc :as jdbc]
             [ring.mock.request :as mock]))
 
-(defn migrate-once [f]
-  (db/migrate!)
-  (f))
-
-(defn clean-notes [f]
-  (jdbc/execute! (db/datasource) ["DELETE FROM notes"])
-  (jdbc/execute! (db/datasource) ["DELETE FROM users"])
-  (try
-    (f)
-    (finally
-      (jdbc/execute! (db/datasource) ["DELETE FROM notes"])
-      (jdbc/execute! (db/datasource) ["DELETE FROM users"]))))
-
-(use-fixtures :once migrate-once)
-(use-fixtures :each clean-notes)
+(use-fixtures :once h/migrate-once)
+(use-fixtures :each h/clean-db)
 
 (defn note-form-post [cookie path params]
   (router/app (-> (h/form-post path params)

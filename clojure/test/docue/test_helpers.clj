@@ -2,6 +2,7 @@
   (:require [buddy.hashers :as hashers]
             [clojure.string :as str]
             [docue.db :as db]
+            [docue.markdown :as markdown]
             [docue.router :as router]
             [next.jdbc :as jdbc]
             [next.jdbc.result-set :as rs]
@@ -54,10 +55,21 @@
                            ["SELECT id FROM notes WHERE title = ?" title]
                            {:builder-fn rs/as-unqualified-lower-maps})))
 
+(defn clean-db [f]
+  (when (not= "test" (db/app-env))
+    (throw (ex-info "Refusing to wipe the database outside the test env (run with APP_ENV=test)" {})))
+  (jdbc/execute! (db/datasource) ["DELETE FROM notes"])
+  (jdbc/execute! (db/datasource) ["DELETE FROM users"])
+  (try
+    (f)
+    (finally
+      (jdbc/execute! (db/datasource) ["DELETE FROM notes"])
+      (jdbc/execute! (db/datasource) ["DELETE FROM users"]))))
+
 (defn create-note!
   ([owner-username title content-md tags]
    (jdbc/execute! (db/datasource)
                    [(str "INSERT INTO notes(title, content_md, content_html, tags, owner_id)"
                          " VALUES(?,?,?,?,?)")
-                    title content-md "" (into-array String tags)
+                    title content-md (markdown/render content-md) (into-array String tags)
                     (user-id owner-username)])))

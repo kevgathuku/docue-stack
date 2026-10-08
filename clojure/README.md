@@ -34,6 +34,7 @@ clojure/
 cd clojure
 clojure -P                    # prefetch deps
 APP_ENV=test clojure -M:test -m docue.runner   # tests (against the test DB)
+clj-kondo --lint src test    # lint (zero warnings is the bar)
 docker compose up --build     # app on :8000 + Postgres
 ```
 
