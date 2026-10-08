@@ -130,3 +130,42 @@ jobs:
       - name: Check linting and formatting
         run: pnpm run ci
         continue-on-error: true
+
+  clojure:
+    name: Clojure Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: docue_test
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 27
+
+      - name: Install Clojure CLI
+        run: |
+          curl -fsSL https://download.clojure.org/install/linux-install.sh -o /tmp/install.sh
+          sudo bash /tmp/install.sh
+
+      - name: Run Clojure tests
+        run: clojure -M:test -m docue.runner
+        working-directory: clojure
+        env:
+          DATABASE_URL: jdbc:postgresql://localhost:5432/docue_test?user=postgres&password=postgres
