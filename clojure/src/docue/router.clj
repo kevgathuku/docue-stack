@@ -1,7 +1,6 @@
 (ns docue.router
   (:require [buddy.hashers :as hashers]
             [clojure.data.json :as json]
-            [clojure.string :as str]
             [docue.db :as db]
             [docue.users :as users]
             [docue.views :as views]
@@ -15,12 +14,10 @@
    :headers {"Content-Type" "application/json"}
    :body (json/write-str body)})
 
-(defn- not-found [{:keys [uri]}]
-  (if (str/starts-with? uri "/api")
-    (json-resp 404 {:error "Not Found"})
-    {:status 404
-     :headers {"Content-Type" "text/html"}
-     :body (views/not-found-page)}))
+(defn- not-found [_req]
+  {:status 404
+   :headers {"Content-Type" "text/html"}
+   :body (views/not-found-page)})
 
 (defn- logged-in? [req]
   (some? (-> req :session :user-id)))
