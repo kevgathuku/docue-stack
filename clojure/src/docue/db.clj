@@ -2,9 +2,17 @@
   (:require [migratus.core :as migratus]
             [next.jdbc :as jdbc]))
 
-(defn db-url []
-  (or (System/getenv "DATABASE_URL")
-      "jdbc:postgresql://localhost:5432/docue"))
+(defn app-env []
+  (or (System/getenv "APP_ENV") "dev"))
+
+(defn db-url
+  ([] (db-url (app-env) (System/getenv "DATABASE_URL") (System/getenv "TEST_DATABASE_URL")))
+  ([env database-url test-database-url]
+   (case env
+     "prod" (or database-url
+                  (throw (ex-info "DATABASE_URL is required in prod" {})))
+     "test" (or test-database-url "jdbc:postgresql://localhost:5432/docue_test")
+     (or database-url "jdbc:postgresql://localhost:5432/docue"))))
 
 (defn migratus-config []
   {:store :database

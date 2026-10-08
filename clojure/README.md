@@ -35,6 +35,8 @@ docker compose up --build     # app on :8000 + Postgres
 | Var | Default | Notes |
 |---|---|---|
 | `PORT` | `8000` | Jetty listen port |
-| `DATABASE_URL` | `jdbc:postgresql://localhost:5432/docue` | JDBC URL; migrations run on boot |
+| `APP_ENV` | `dev` | `dev`, `test`, or `prod` — selects the database |
+| `DATABASE_URL` | localhost `docue`; **required in prod** | JDBC URL for dev and prod |
+| `TEST_DATABASE_URL` | localhost `docue_test` | JDBC URL used when `APP_ENV=test` |
 
 Tests assert at the HTTP boundary (status codes, bodies) — never internals.
