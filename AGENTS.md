@@ -62,7 +62,6 @@ clojure/
 | `DATABASE_URL` | localhost `docue`; **required in prod** | JDBC URL for dev and prod |
 | `TEST_DATABASE_URL` | localhost `docue_test` | Used when `APP_ENV=test` |
 | `SESSION_SECRET` | dev default; **required in prod** | 16-byte secret for session cookies |
-| `ADMIN_PASSWORD` | unset (no seeding) | Creates `admin` on boot when no users exist |
 
 ## Development Workflow
 
@@ -84,6 +83,19 @@ clj-kondo --lint src test                       # lint, zero warnings
 ```
 
 The suite refuses to run without `APP_ENV=test` so fixtures can't wipe dev data.
+
+### Paren emergencies (fixed sequence, in order)
+
+1. `clj-kondo --lint src test` — pinpoints the exact line/col. Trust it over
+   eyeballing; cascades below the first error are usually noise.
+2. `clj-paren-repair <file>` — auto-fixes delimiter errors and reformats.
+   Re-run kondo after; repeat 1–2 until clean.
+3. Manual only if the tool leaves errors: count brackets by char code
+   (`od -c`), never by eye — `]` vs `)` confusion is how these happen.
+
+`rewrite-clj` was evaluated for this pipeline and deliberately excluded:
+it parses broken code without complaint, so it contributes no error
+signal beyond what kondo already gives. Its job is codemods, not repair.
 
 ### Before Committing
 

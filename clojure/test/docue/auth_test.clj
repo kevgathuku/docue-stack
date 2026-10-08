@@ -2,7 +2,6 @@
   (:require [clojure.test :refer [deftest is testing use-fixtures]]
             [docue.router :as router]
             [docue.test-helpers :as h]
-            [docue.users :as users]
             [ring.mock.request :as mock]))
 
 (use-fixtures :once h/migrate-once)
@@ -68,24 +67,6 @@
     (let [res (h/authed-get "/" (h/session-cookie (h/login! "jsnow" "youKnowNothing")))]
       (is (= 302 (:status res)))
       (is (= "/notes" (get-in res [:headers "Location"]))))))
-
-(deftest admin-seed-creates-when-empty
-  (testing "creates the admin user when the database is empty"
-    (users/ensure-admin! "s3cret")
-    (let [admin (users/find-by-username "admin")]
-      (is (some? admin))
-      (is (= "Administrator" (:name admin))))))
-
-(deftest admin-seed-skips-when-users-exist
-  (testing "does nothing when users already exist"
-    (h/create-user! "jsnow" "youKnowNothing")
-    (users/ensure-admin! "s3cret")
-    (is (nil? (users/find-by-username "admin")))))
-
-(deftest admin-seed-skips-without-password
-  (testing "does nothing without a password"
-    (users/ensure-admin! nil)
-    (is (nil? (users/find-by-username "admin")))))
 
 (deftest users-page-removed
   (testing "the users list route is gone for everyone"

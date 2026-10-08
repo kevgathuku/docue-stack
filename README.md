@@ -39,6 +39,6 @@ clj-kondo --lint src test
 
 ## Use it
 
-- `/` → your notes (login first — `ADMIN_PASSWORD` seeds `admin` on empty DB)
+- `/` → your notes (sign up first, then log in)
 - Write markdown, **Preview** button renders without saving, tag inline
 - Note view → create/copy/regenerate/revoke the share link (`/s/:token`, read-only, no login)

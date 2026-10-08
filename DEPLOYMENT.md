@@ -10,7 +10,6 @@ PORT=8000
 APP_ENV=prod                  # dev | test | prod
 DATABASE_URL=<postgres jdbc url>   # required
 SESSION_SECRET=<16-byte secret>    # required
-ADMIN_PASSWORD=<set once>          # creates admin on empty DB, then unset
 ```
 
 ## Option A: Compose on a VPS
@@ -28,7 +27,7 @@ Postgres data lives in the `pgdata` volume. Back it up.
 ```bash
 cd clojure
 fly launch                    # answers Docker automatically
-fly secrets set DATABASE_URL=... SESSION_SECRET=... ADMIN_PASSWORD=...
+fly secrets set DATABASE_URL=... SESSION_SECRET=...
 fly deploy
 ```
 
@@ -52,4 +51,3 @@ log out.
 - [ ] Strong `SESSION_SECRET` (exactly 16 bytes) and secrets only via env
 - [ ] Postgres authenticated, network-restricted
 - [ ] HTTPS in front (platform-provided or reverse proxy)
-- [ ] `ADMIN_PASSWORD` unset after first boot
