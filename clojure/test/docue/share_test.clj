@@ -22,9 +22,11 @@
       (let [id (h/note-id "Shared")
             mint (share! cookie id)]
         (is (= 302 (:status mint)))
-        (let [link (shared-link cookie id)
+        (let [owner-view (:body (h/authed-get (str "/notes/" id) cookie))
+              link (shared-link cookie id)
               res (router/app (mock/request :get link))]
           (is (some? link))
+          (is (re-find #"http://localhost:8000/s/[0-9a-f]{64}" owner-view))
           (is (= 200 (:status res)))
           (is (re-find #"<h1>Hello</h1>" (:body res)))
           (is (not (re-find #"Edit" (:body res))))

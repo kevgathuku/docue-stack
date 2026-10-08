@@ -8,6 +8,10 @@
 (defn app-env []
   (or (System/getenv "APP_ENV") "dev"))
 
+(defn base-url []
+  (or (System/getenv "APP_URL")
+      (str "http://localhost:" (or (System/getenv "PORT") "8000"))))
+
 (defn db-url
   ([] (db-url (app-env) (System/getenv "DATABASE_URL") (System/getenv "TEST_DATABASE_URL")))
   ([env database-url test-database-url]

@@ -1,5 +1,6 @@
 (ns docue.views
   (:require [clojure.string :as str]
+            [docue.db :as db]
             [hiccup2.core :as h]))
 
 (defn- topbar [logged-in?]
@@ -133,7 +134,7 @@
           [:h2 "Share"]
           (if (:share_token note)
             [:section.share-box
-             [:p [:code (str "/s/" (:share_token note))]]
+             [:p [:code (str (db/base-url) "/s/" (:share_token note))]]
              [:div.form-row
               [:form {:method "post" :action (str "/notes/" (:id note) "/share")}
                [:button.btn.btn-ghost {:type "submit"} "Regenerate"]]
