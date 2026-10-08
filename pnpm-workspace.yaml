@@ -2,5 +2,13 @@ packages:
   - frontend
   - backend
 
+allowBuilds:
+  '@biomejs/biome': false
+  bcrypt: true
+  es5-ext: false
+  esbuild: false
+  fsevents: false
+  rescript: false
+
 onlyBuiltDependencies:
   - bcrypt
