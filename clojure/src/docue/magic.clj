@@ -30,10 +30,14 @@
       user-id (tokens/sha256-hex token) link-expiry-minutes])
     token))
 
+(defn- base-url []
+  (or (System/getenv "APP_URL")
+      (str "http://localhost:" (or (System/getenv "PORT") "8000"))))
+
 (defn- send-to! [user]
   (when-not (recent-token? (:id user))
     (let [token (store-token! (:id user))]
-      (mail/send-login-link! (:email user) (str "/auth/" token)))))
+      (mail/send-login-link! (:email user) (str (base-url) "/auth/" token)))))
 
 (defn request-link!
   "Sends a login link for an email (creating the account on first use)

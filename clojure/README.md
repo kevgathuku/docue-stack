@@ -43,6 +43,7 @@ docker compose up --build     # app on :8000 + Postgres
 | Var | Default | Notes |
 |---|---|---|
 | `PORT` | `8000` | Jetty listen port |
+| `APP_URL` | `http://localhost:$PORT` | Public base URL used to build absolute login links |
 | `APP_ENV` | `dev` | `dev`, `test`, or `prod` — selects the database |
 | `DATABASE_URL` | localhost `docue`; **required in prod** | JDBC URL for dev and prod |
 | `TEST_DATABASE_URL` | localhost `docue_test` | JDBC URL used when `APP_ENV=test` |

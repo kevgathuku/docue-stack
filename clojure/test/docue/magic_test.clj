@@ -19,7 +19,7 @@
         (is (re-find #"Check your inbox" (:body res)))
         (is (= 1 (count @sent)))
         (is (= "new@x.com" (:to (first @sent)))))
-        (is (re-find #"/auth/[0-9a-f]{64}" (:link (first @sent)))))))
+        (is (re-find #"http://localhost:8000/auth/[0-9a-f]{64}" (:link (first @sent)))))))
 (deftest request-link-username
   (h/capture-mail
    (fn [sent]
