@@ -1,11 +1,7 @@
-FROM eclipse-temurin:27-jre
-
-RUN apt-get update \
- && apt-get install -y --no-install-recommends curl ca-certificates git \
- && rm -rf /var/lib/apt/lists/* \
- && curl -fsSL https://download.clojure.org/install/linux-install.sh -o /tmp/install.sh \
- && bash /tmp/install.sh \
- && rm /tmp/install.sh
+# Official Clojure image: Temurin + Clojure CLI preinstalled. Deliberately
+# no apt steps — they add failure modes (e.g. mirror hash mismatches)
+# for tools we don't need (no git deps in deps.edn).
+FROM clojure:temurin-26-tools-deps-bookworm-slim
 
 WORKDIR /app
 
