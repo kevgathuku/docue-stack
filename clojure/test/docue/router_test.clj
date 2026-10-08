@@ -20,3 +20,11 @@
         (is (= 404 (:status res)))
         (is (re-find #"text/html" (get-in res [:headers "Content-Type"])))
         (is (re-find #"Not Found" (:body res)))))))
+
+(deftest stylesheet
+  (testing "served as CSS and linked from pages"
+    (let [css (router/app (mock/request :get "/style.css"))
+          page (router/app (mock/request :get "/login"))]
+      (is (= 200 (:status css)))
+      (is (re-find #"text/css" (get-in css [:headers "Content-Type"])))
+      (is (re-find #"style\.css" (:body page))))))

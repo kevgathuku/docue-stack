@@ -9,6 +9,8 @@
             [docue.views :as views]
             [reitit.ring :as ring]
             [ring.middleware.params :refer [wrap-params]]
+            [ring.middleware.content-type :refer [wrap-content-type]]
+            [ring.middleware.resource :refer [wrap-resource]]
             [ring.middleware.session :refer [wrap-session]]
             [ring.middleware.session.cookie :refer [cookie-store]]))
 
@@ -179,4 +181,6 @@
       wrap-params
       (wrap-session {:store (cookie-store {:key (session-key)})
                      :cookie-name "docue-session"
-                     :cookie-attrs {:http-only true :same-site :lax}})))
+                     :cookie-attrs {:http-only true :same-site :lax}})
+      (wrap-resource "public")
+      wrap-content-type))
