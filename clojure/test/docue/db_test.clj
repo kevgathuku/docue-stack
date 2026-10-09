@@ -2,25 +2,23 @@
   (:require [clojure.test :refer [deftest is testing]]
             [docue.db :as db]))
 
-(deftest db-url-selection
-  (testing "dev uses DATABASE_URL, defaulting to localhost"
-    (is (= "jdbc:postgresql://db:5432/devdb"
-           (db/db-url "dev" "jdbc:postgresql://db:5432/devdb" nil)))
-    (is (= "jdbc:postgresql://localhost:5432/docue"
-           (db/db-url "dev" nil nil))))
+(deftest db-file-selection
+  (testing "dev and unknown envs default to docue.db"
+    (is (= "docue.db" (db/db-file "dev" nil)))
+    (is (= "docue.db" (db/db-file "staging" nil))))
 
-  (testing "test uses TEST_DATABASE_URL, defaulting to localhost test db"
-    (is (= "jdbc:postgresql://db:5432/testdb"
-           (db/db-url "test" nil "jdbc:postgresql://db:5432/testdb")))
-    (is (= "jdbc:postgresql://localhost:5432/docue_test"
-           (db/db-url "test" nil nil))))
+  (testing "test defaults to docue_test.db"
+    (is (= "docue_test.db" (db/db-file "test" nil))))
 
-  (testing "prod requires DATABASE_URL and fails fast without it"
-    (is (= "jdbc:postgresql://db:5432/proddb"
-           (db/db-url "prod" "jdbc:postgresql://db:5432/proddb" nil)))
+  (testing "SQLITE_FILE overrides every env"
+    (is (= "/data/prod.db" (db/db-file "prod" "/data/prod.db")))
+    (is (= "/tmp/x.db" (db/db-file "dev" "/tmp/x.db"))))
+
+  (testing "prod requires SQLITE_FILE and fails fast without it"
     (is (thrown? clojure.lang.ExceptionInfo
-                 (db/db-url "prod" nil nil))))
+                 (db/db-file "prod" nil)))))
 
-  (testing "unknown envs fall back to dev behavior"
-    (is (= "jdbc:postgresql://localhost:5432/docue"
-           (db/db-url "staging" nil nil)))))
+(deftest db-url-shape
+  (testing "jdbc URL wraps the file with pragmatic pragmas"
+    (is (= "jdbc:sqlite:docue_test.db?foreign_keys=on&journal_mode=WAL"
+           (db/db-url "test" nil)))))

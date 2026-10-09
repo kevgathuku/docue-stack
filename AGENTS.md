@@ -27,19 +27,19 @@ clojure/
 ├── resources/migrations/  # Migratus SQL
 ├── test/docue/         # ring-mock HTTP specs + shared helpers
 ├── Dockerfile
-└── compose.yaml        # app + Postgres
+└── compose.yaml        # app + SQLite file
 ```
 
 ### Tech Stack
 
 - **Language**: Clojure 1.12 (CLI + deps.edn)
 - **HTTP**: Reitit + Jetty, Hiccup views, HTMX where it removes code
-- **Database**: Postgres 17 via next.jdbc, Migratus migrations
+- **Database**: SQLite via next.jdbc + Xerial, Migratus migrations
 - **Auth**: Ring cookie sessions + buddy-hashers (bcrypt)
 - **Markdown**: flexmark-java + OWASP sanitizer, rendered server-side at write time
 - **Testing**: clojure.test + ring-mock at the HTTP seam
 - **Lint**: clj-kondo, zero warnings (`clj-kondo --lint src test` from `clojure/`)
-- **CI/CD**: GitHub Actions (tests + lint against a Postgres service)
+- **CI/CD**: GitHub Actions (tests + lint, no services)
 
 ## Key Patterns
 
@@ -51,7 +51,7 @@ clojure/
   writes through a token.
 - **Markdown**: source in, sanitized HTML out, both persisted. Preview posts
   unsaved markdown and renders without persisting.
-- **Tags**: Postgres `text[]`, comma-separated input, `?tag=` filter.
+- **Tags**: JSON array column, comma-separated input, `?tag=` filter.
 
 ## Environment Configuration
 
@@ -59,8 +59,7 @@ clojure/
 |---|---|---|
 | `PORT` | `8000` | Jetty listen port |
 | `APP_ENV` | `dev` | `dev`, `test`, or `prod` — selects the database |
-| `DATABASE_URL` | localhost `docue`; **required in prod** | JDBC URL for dev and prod |
-| `TEST_DATABASE_URL` | localhost `docue_test` | Used when `APP_ENV=test` |
+| `SQLITE_FILE` | `docue.db` (`docue_test.db` under `test`); **required in prod** | SQLite file path |
 | `SESSION_SECRET` | dev default; **required in prod** | 16-byte secret for session cookies |
 
 ## Development Workflow
@@ -68,7 +67,6 @@ clojure/
 ### Starting Development
 
 ```bash
-createdb docue docue_test   # once
 cd clojure
 clojure -P                  # prefetch deps (once / after deps.edn changes)
 clojure -M -m docue.core    # migrate + serve on :8000

@@ -13,20 +13,21 @@
   (boolean (and (string? s) (re-find #"^[^@\s]+@[^@\s]+\.[^@\s]+$" s))))
 
 (defn- recent-token? [user-id]
-  (:exists
+  ;; SQLite EXISTS yields 1/0, not booleans (and 0 is truthy): compare, don't trust truthiness.
+  (= 1 (:exists
    (jdbc/execute-one!
     (db/datasource)
     [(str "SELECT EXISTS(SELECT 1 FROM login_tokens WHERE user_id = ?"
-          " AND created_at > now() - make_interval(secs => CAST(? AS integer))) AS exists")
+          " AND datetime(created_at) > datetime('now','-' || CAST(? AS INTEGER) || ' seconds')) AS \"exists\"")
      user-id resend-cooldown-seconds]
-    db/unqualified)))
+    db/unqualified))))
 
 (defn- store-token! [user-id]
   (let [token (tokens/random-hex)]
     (jdbc/execute-one!
      (db/datasource)
      [(str "INSERT INTO login_tokens(user_id, token_hash, expires_at)"
-           " VALUES(?,?, now() + make_interval(mins => CAST(? AS integer)))")
+           " VALUES(?,?, strftime('%Y-%m-%dT%H:%M:%fZ','now','+' || CAST(? AS INTEGER) || ' minutes'))")
       user-id (tokens/sha256-hex token) link-expiry-minutes])
     token))
 
@@ -55,7 +56,7 @@
   (let [row (jdbc/execute-one!
              (db/datasource)
              [(str "SELECT id, user_id FROM login_tokens"
-                   " WHERE token_hash = ? AND expires_at > now()")
+                   " WHERE token_hash = ? AND datetime(expires_at) > datetime('now')")
               (tokens/sha256-hex (or token ""))]
              db/unqualified)]
     (when row

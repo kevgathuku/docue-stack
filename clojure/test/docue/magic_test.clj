@@ -95,7 +95,7 @@
      (h/request-link! "new@x.com")
      (let [token (last (str/split (:link (first @sent)) #"/"))]
        (jdbc/execute! (db/datasource)
-                      ["UPDATE login_tokens SET expires_at = now() - INTERVAL '1 hour' WHERE token_hash = ?"
+                      ["UPDATE login_tokens SET expires_at = datetime('now','-1 hour') WHERE token_hash = ?"
                        (tokens/sha256-hex token)])
        (let [res (router/app (mock/request :get (str "/auth/" token)))]
          (is (= 404 (:status res))))))))
