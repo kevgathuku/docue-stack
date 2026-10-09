@@ -1,5 +1,6 @@
 (ns docue.notes
-  (:require [clojure.string :as str]
+  (:require [clojure.data.json :as json]
+            [clojure.string :as str]
             [docue.db :as db]
             [docue.markdown :as markdown]
             [docue.tokens :as tokens]
@@ -12,12 +13,12 @@
        vec))
 
 (defn- with-tags [row]
-  (update row :tags (fn [tags] (if tags (vec (.getArray ^java.sql.Array tags)) []))))
+  (update row :tags (fn [tags] (if tags (json/read-str tags) []))))
 
 (defn all-for-owner
   [owner-id tag]
    (let [sql (if tag
-               ["SELECT public_id AS id, title, tags, updated_at FROM notes WHERE owner_id = ? AND ? = ANY(tags) ORDER BY updated_at DESC"
+               ["SELECT public_id AS id, title, tags, updated_at FROM notes WHERE owner_id = ? AND EXISTS(SELECT 1 FROM json_each(notes.tags) WHERE value = ?) ORDER BY updated_at DESC"
                 owner-id tag]
                ["SELECT public_id AS id, title, tags, updated_at FROM notes WHERE owner_id = ? ORDER BY updated_at DESC"
                 owner-id])]
@@ -33,9 +34,9 @@
           with-tags))
 
 (defn- duplicate-title? [e]
-  (and (instance? org.postgresql.util.PSQLException e)
-       (= "23505" (.getSQLState ^org.postgresql.util.PSQLException e))
-       (not (str/includes? (str (.getMessage ^org.postgresql.util.PSQLException e)) "public_id"))))
+  (and (instance? java.sql.SQLException e)
+       (str/includes? (str (.getMessage ^java.sql.SQLException e)) "UNIQUE constraint failed")
+       (not (str/includes? (str (.getMessage ^java.sql.SQLException e)) "notes.public_id"))))
 
 (defn create! [owner-id title content-md tags]
   (try
@@ -44,9 +45,9 @@
             [(str "INSERT INTO notes(title, content_md, content_html, tags, owner_id, public_id)"
                   " VALUES(?,?,?,?,?,?) RETURNING public_id")
              title content-md (markdown/render content-md)
-             (into-array String tags) owner-id (tokens/short-id "note")]
+             (json/write-str tags) owner-id (tokens/short-id "note")]
             db/unqualified))
-    (catch org.postgresql.util.PSQLException e
+    (catch java.sql.SQLException e
       (if (duplicate-title? e) {:error :duplicate-title} (throw e)))))
 
 (defn update! [public-id owner-id {:keys [title content-md tags updated-at]}]
@@ -55,12 +56,12 @@
                (jdbc/execute-one!
                  (db/datasource)
                  [(str "UPDATE notes SET title = ?, content_md = ?, content_html = ?,"
-                       " tags = ?, updated_at = now()"
-                       " WHERE public_id = ? AND owner_id = ? AND updated_at = ?::timestamptz")
+                       " tags = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')"
+                       " WHERE public_id = ? AND owner_id = ? AND updated_at = ?")
                   title content-md (markdown/render content-md)
-                  (into-array String tags) public-id owner-id updated-at]))]
+                  (json/write-str tags) public-id owner-id updated-at]))]
       (if (pos? n) :ok (if (find-owned public-id owner-id) :stale :missing)))
-    (catch org.postgresql.util.PSQLException e
+    (catch java.sql.SQLException e
       (if (duplicate-title? e) {:error :duplicate-title} (throw e)))))
 
 (defn delete! [public-id owner-id]

@@ -1,14 +1,17 @@
 # Deployment Guide
 
-One process plus Postgres. No build step for the app itself (Clojure runs
+One process plus a SQLite file. No build step for the app itself (Clojure runs
 from source via the CLI); the Docker image bakes dependencies.
+
+> Options comparison (Kamal vs Dokku vs Dokploy vs jar vs Fly):
+> see [DEPLOYMENT-OPTIONS.md](./DEPLOYMENT-OPTIONS.md).
 
 ## Environment
 
 ```
 PORT=8000
 APP_ENV=prod                  # dev | test | prod
-DATABASE_URL=<postgres jdbc url>   # required
+SQLITE_FILE=/data/docue.db    # required in prod
 SESSION_SECRET=<16-byte secret>    # required
 ```
 
@@ -20,18 +23,18 @@ cd clojure
 docker compose up -d --build
 ```
 
-Postgres data lives in the `pgdata` volume. Back it up.
+SQLite data lives in the `sqlite-data` volume. Back it up.
 
 ## Option B: Fly.io
 
 ```bash
 cd clojure
 fly launch                    # answers Docker automatically
-fly secrets set DATABASE_URL=... SESSION_SECRET=...
+fly secrets set SQLITE_FILE=/data/docue.db SESSION_SECRET=...
 fly deploy
 ```
 
-Use a managed Postgres (or Fly Postgres) — set its JDBC URL as `DATABASE_URL`.
+SQLite rides along as a file — mount a volume at the `SQLITE_FILE` path.
 
 ## Post-deploy checks
 
@@ -49,5 +52,5 @@ log out.
 ## Security checklist
 
 - [ ] Strong `SESSION_SECRET` (exactly 16 bytes) and secrets only via env
-- [ ] Postgres authenticated, network-restricted
+- [ ] SQLite file persisted (volume) and backed up
 - [ ] HTTPS in front (platform-provided or reverse proxy)

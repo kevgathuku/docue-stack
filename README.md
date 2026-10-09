@@ -11,13 +11,12 @@ Documents previously visible within a role are now private to their author.
 
 ## Stack
 
-Clojure (Reitit + Jetty + Hiccup), Postgres, Ring sessions, server-rendered
+Clojure (Reitit + Jetty + Hiccup), SQLite, Ring sessions, server-rendered
 markdown. Details in [AGENTS.md](AGENTS.md) and [clojure/README.md](clojure/README.md).
 
 ## Run it
 
 ```bash
-createdb docue
 cd clojure
 clojure -M -m docue.core   # migrates + serves on :8000
 ```
@@ -26,7 +25,7 @@ With Docker:
 
 ```bash
 cd clojure
-docker compose up --build  # app on :8000 + Postgres
+docker compose up --build  # app on :8000 + SQLite file
 ```
 
 ## Test it

@@ -1,7 +1,7 @@
 # Docue (Clojure)
 
 Server-rendered document management. Hiccup views, Ring sessions,
-Postgres. See the epic bead for direction.
+SQLite. See the epic bead for direction.
 
 ## Layout
 
@@ -25,7 +25,7 @@ clojure/
 │   └── test_helpers.clj # shared HTTP + DB helpers
 │   └── runner.clj      # test entrypoint
 ├── Dockerfile
-└── compose.yaml        # app + Postgres
+└── compose.yaml        # app + SQLite file
 ```
 
 ## Commands
@@ -35,7 +35,7 @@ cd clojure
 clojure -P                    # prefetch deps
 APP_ENV=test clojure -M:test -m docue.runner   # tests (against the test DB)
 clj-kondo --lint src test    # lint (zero warnings is the bar)
-docker compose up --build     # app on :8000 + Postgres
+docker compose up --build     # app on :8000 + SQLite file
 ```
 
 ## Environment
@@ -45,8 +45,7 @@ docker compose up --build     # app on :8000 + Postgres
 | `PORT` | `8000` | Jetty listen port |
 | `APP_URL` | `http://localhost:$PORT` | Public base URL used to build absolute login links |
 | `APP_ENV` | `dev` | `dev`, `test`, or `prod` — selects the database |
-| `DATABASE_URL` | localhost `docue`; **required in prod** | JDBC URL for dev and prod |
-| `TEST_DATABASE_URL` | localhost `docue_test` | JDBC URL used when `APP_ENV=test` |
+| `SQLITE_FILE` | `docue.db` (`docue_test.db` under `test`); **required in prod** | SQLite file path |
 | `SESSION_SECRET` | dev default; **required in prod** | 16-byte secret for encrypted session cookies |
 | `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | unset (console backend) | **Required in prod** — SMTP for login links (`SMTP_PORT` defaults 587) |
 

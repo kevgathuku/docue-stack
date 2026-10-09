@@ -1,5 +1,6 @@
 (ns docue.test-helpers
   (:require [docue.mail :as mail]
+            [clojure.data.json :as json]
             [clojure.string :as str]
             [docue.db :as db]
             [docue.markdown :as markdown]
@@ -68,11 +69,13 @@
 (defn clean-db [f]
   (when (not= "test" (db/app-env))
     (throw (ex-info "Refusing to wipe the database outside the test env (run with APP_ENV=test)" {})))
+  (jdbc/execute! (db/datasource) ["DELETE FROM login_tokens"])
   (jdbc/execute! (db/datasource) ["DELETE FROM notes"])
   (jdbc/execute! (db/datasource) ["DELETE FROM users"])
   (try
     (f)
     (finally
+      (jdbc/execute! (db/datasource) ["DELETE FROM login_tokens"])
       (jdbc/execute! (db/datasource) ["DELETE FROM notes"])
       (jdbc/execute! (db/datasource) ["DELETE FROM users"]))))
 
@@ -81,5 +84,5 @@
    (jdbc/execute! (db/datasource)
                    [(str "INSERT INTO notes(title, content_md, content_html, tags, owner_id, public_id)"
                          " VALUES(?,?,?,?,?,?)")
-                    title content-md (markdown/render content-md) (into-array String tags)
+                    title content-md (markdown/render content-md) (json/write-str tags)
                     (user-id owner-username) (tokens/short-id "note")])))

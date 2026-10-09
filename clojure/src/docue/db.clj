@@ -12,14 +12,19 @@
   (or (System/getenv "APP_URL")
       (str "http://localhost:" (or (System/getenv "PORT") "8000"))))
 
+(defn db-file
+  ([] (db-file (app-env) (System/getenv "SQLITE_FILE")))
+  ([env sqlite-file]
+   (or sqlite-file
+       (case env
+         "prod" (throw (ex-info "SQLITE_FILE is required in prod" {}))
+         "test" "docue_test.db"
+         "docue.db"))))
+
 (defn db-url
-  ([] (db-url (app-env) (System/getenv "DATABASE_URL") (System/getenv "TEST_DATABASE_URL")))
-  ([env database-url test-database-url]
-   (case env
-     "prod" (or database-url
-                  (throw (ex-info "DATABASE_URL is required in prod" {})))
-     "test" (or test-database-url "jdbc:postgresql://localhost:5432/docue_test")
-     (or database-url "jdbc:postgresql://localhost:5432/docue"))))
+  ([] (db-url (app-env) (System/getenv "SQLITE_FILE")))
+  ([env sqlite-file]
+   (str "jdbc:sqlite:" (db-file env sqlite-file) "?foreign_keys=on&journal_mode=WAL")))
 
 (defn datasource []
   (jdbc/get-datasource {:jdbcUrl (db-url)}))
