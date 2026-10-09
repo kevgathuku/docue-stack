@@ -23,6 +23,6 @@
 
 (defn create! [username email]
   (:id (jdbc/execute-one! (db/datasource)
-                           ["INSERT INTO users(username, email) VALUES(?,?) RETURNING id"
-                            username email]
-                           db/unqualified)))
+                          ["INSERT INTO users(username, email) VALUES(?,?) RETURNING id"
+                           username email]
+                          db/unqualified)))

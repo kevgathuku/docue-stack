@@ -14,20 +14,20 @@
 (deftest request-link-new-email
   (h/capture-mail
    (fn [sent]
-      (let [res (h/request-link! "new@x.com")]
-        (is (= 200 (:status res)))
-        (is (re-find #"Check your inbox" (:body res)))
-        (is (= 1 (count @sent)))
-        (is (= "new@x.com" (:to (first @sent)))))
-        (is (re-find #"http://localhost:8000/auth/[0-9a-f]{64}" (:link (first @sent)))))))
+     (let [res (h/request-link! "new@x.com")]
+       (is (= 200 (:status res)))
+       (is (re-find #"Check your inbox" (:body res)))
+       (is (= 1 (count @sent)))
+       (is (= "new@x.com" (:to (first @sent)))))
+     (is (re-find #"http://localhost:8000/auth/[0-9a-f]{64}" (:link (first @sent)))))))
 (deftest request-link-username
   (h/capture-mail
    (fn [sent]
-      (h/create-user! "ada" "ada@x.com")
-      (let [res (h/request-link! "ada")]
-        (is (= 200 (:status res)))
-        (is (= 1 (count @sent)))
-        (is (= "ada@x.com" (:to (first @sent))))))))
+     (h/create-user! "ada" "ada@x.com")
+     (let [res (h/request-link! "ada")]
+       (is (= 200 (:status res)))
+       (is (= 1 (count @sent)))
+       (is (= "ada@x.com" (:to (first @sent))))))))
 (deftest request-link-unknown-non-email
   (let [res (h/request-link! "notauser")]
     (is (= 422 (:status res)))
@@ -36,32 +36,32 @@
 (deftest verify-link-session
   (h/capture-mail
    (fn [sent]
-      (h/request-link! "new@x.com")
-      (let [token (last (str/split (:link (first @sent)) #"/"))
-            res (router/app (mock/request :get (str "/auth/" token)))]
-        (is (= 302 (:status res)))
-        (is (= "/notes" (get-in res [:headers "Location"])))
-        (let [notes (h/authed-get "/notes" (h/session-cookie res))]
-          (is (= 200 (:status notes))))))))
+     (h/request-link! "new@x.com")
+     (let [token (last (str/split (:link (first @sent)) #"/"))
+           res (router/app (mock/request :get (str "/auth/" token)))]
+       (is (= 302 (:status res)))
+       (is (= "/notes" (get-in res [:headers "Location"])))
+       (let [notes (h/authed-get "/notes" (h/session-cookie res))]
+         (is (= 200 (:status notes))))))))
 (deftest verify-link-rejected
   (testing "expired, reused, and tampered tokens fail identically"
     (h/capture-mail
-   (fn [sent]
-        (h/request-link! "new@x.com")
-        (let [token (last (str/split (:link (first @sent)) #"/"))
-              good (router/app (mock/request :get (str "/auth/" token)))
-              replay (router/app (mock/request :get (str "/auth/" token)))
-              tampered (router/app (mock/request :get (str "/auth/" (apply str (reverse token)))))]
-          (is (= 302 (:status good)))
-          (is (= 404 (:status replay)))
-          (is (= 404 (:status tampered)))
-          (is (= (:body replay) (:body tampered))))))))
+     (fn [sent]
+       (h/request-link! "new@x.com")
+       (let [token (last (str/split (:link (first @sent)) #"/"))
+             good (router/app (mock/request :get (str "/auth/" token)))
+             replay (router/app (mock/request :get (str "/auth/" token)))
+             tampered (router/app (mock/request :get (str "/auth/" (apply str (reverse token)))))]
+         (is (= 302 (:status good)))
+         (is (= 404 (:status replay)))
+         (is (= 404 (:status tampered)))
+         (is (= (:body replay) (:body tampered))))))))
 (deftest request-throttled
   (h/capture-mail
    (fn [sent]
-      (h/request-link! "new@x.com")
-      (h/request-link! "new@x.com")
-      (is (= 1 (count @sent))))))
+     (h/request-link! "new@x.com")
+     (h/request-link! "new@x.com")
+     (is (= 1 (count @sent))))))
 (deftest signup-page
   (let [res (router/app (mock/request :get "/signup"))]
     (is (= 200 (:status res)))
@@ -72,11 +72,11 @@
 (deftest signup-creates-and-mails
   (h/capture-mail
    (fn [sent]
-      (let [res (router/app (h/form-post "/signup" {:username "ada" :email "ada@x.com"}))]
-        (is (= 200 (:status res)))
-        (is (re-find #"Check your inbox" (:body res)))
-        (is (= 1 (count @sent)))
-        (is (= "ada@x.com" (:to (first @sent))))))))
+     (let [res (router/app (h/form-post "/signup" {:username "ada" :email "ada@x.com"}))]
+       (is (= 200 (:status res)))
+       (is (re-find #"Check your inbox" (:body res)))
+       (is (= 1 (count @sent)))
+       (is (= "ada@x.com" (:to (first @sent))))))))
 (deftest signup-validation
   (h/create-user! "ada" "ada@x.com")
   (let [dup-user (router/app (h/form-post "/signup" {:username "ada" :email "other@x.com"}))

@@ -15,12 +15,12 @@
 (defn- recent-token? [user-id]
   ;; SQLite EXISTS yields 1/0, not booleans (and 0 is truthy): compare, don't trust truthiness.
   (= 1 (:exists
-   (jdbc/execute-one!
-    (db/datasource)
-    [(str "SELECT EXISTS(SELECT 1 FROM login_tokens WHERE user_id = ?"
-          " AND datetime(created_at) > datetime('now','-' || CAST(? AS INTEGER) || ' seconds')) AS \"exists\"")
-     user-id resend-cooldown-seconds]
-    db/unqualified))))
+        (jdbc/execute-one!
+         (db/datasource)
+         [(str "SELECT EXISTS(SELECT 1 FROM login_tokens WHERE user_id = ?"
+               " AND datetime(created_at) > datetime('now','-' || CAST(? AS INTEGER) || ' seconds')) AS \"exists\"")
+          user-id resend-cooldown-seconds]
+         db/unqualified))))
 
 (defn- store-token! [user-id]
   (let [token (tokens/random-hex)]

@@ -54,10 +54,10 @@
           (is (some? old-link))
           (share! cookie id)
           (let [new-link (shared-link cookie id)]
-          (is (some? new-link))
-          (is (not= old-link new-link))
-          (is (= 404 (:status (router/app (mock/request :get old-link)))))
-          (is (= 200 (:status (router/app (mock/request :get new-link)))))))))))
+            (is (some? new-link))
+            (is (not= old-link new-link))
+            (is (= 404 (:status (router/app (mock/request :get old-link)))))
+            (is (= 200 (:status (router/app (mock/request :get new-link)))))))))))
 
 (deftest share-revoke
   (testing "revoking kills access indistinguishably from random tokens"

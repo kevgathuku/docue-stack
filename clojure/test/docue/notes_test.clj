@@ -125,7 +125,7 @@
       (is (= 302 (:status res)))
       (let [view (h/authed-get (str "/notes/" id) cookie)]
         (is (re-find #"<h1>New</h1>" (:body view)))
-        (is (re-find #"pill pill-\d\">b</span>" (:body view)))))))
+        (is (re-find #"pill pill-\d\" href=\"/notes\?tag=b\">b</a>" (:body view)))))))
 
 (deftest note-update-conflict
   (let [cookie (h/magic-cookie! "ada@x.com")]
