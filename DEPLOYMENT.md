@@ -3,7 +3,7 @@
 One process (uberjar) plus a SQLite file. Local dev needs only Java +
 the Clojure CLI — no Docker. The prod image builds the jar in-stage.
 
-> Options comparison (Kamal vs Dokku vs Dokploy vs jar vs Fly):
+> Options comparison (Kamal vs Dokku vs jar):
 > see [DEPLOYMENT-OPTIONS.md](./DEPLOYMENT-OPTIONS.md).
 
 ## Environment
@@ -13,7 +13,7 @@ Required in prod (the app throws at boot without them, except `PORT`):
 | Var | Example | Notes |
 |---|---|---|
 | `APP_ENV` | `prod` | `dev` default prints login links to the console instead of mailing |
-| `SQLITE_FILE` | `/data/docue.db` | Must live on persistent storage (Dokku mount / Fly volume) |
+| `SQLITE_FILE` | `/data/docue.db` | Must live on persistent storage (Dokku mount) |
 | `SESSION_SECRET` | output of `openssl rand -hex 8` | Exactly 16 bytes; sessions invalidate on change |
 | `APP_URL` | `https://notes.yourdomain.com` | Base for absolute login/share links in mail |
 | `SMTP_HOST` / `SMTP_USER` / `SMTP_PASS` | `smtp.resend.com` / `resend` / `re_xxx` | Port 587 + TLS by default (`SMTP_PORT` overrides; port 25 is blocked on DO) |
@@ -52,18 +52,6 @@ TLS only after the first HTTP deploy answers:
 dokku letsencrypt:set docue email you@yourdomain.com
 dokku letsencrypt:enable docue
 ```
-
-## Option B: Fly.io
-
-```bash
-cd clojure
-fly launch                    # answers Docker automatically
-fly secrets set SQLITE_FILE=/data/docue.db SESSION_SECRET=... APP_URL=... \
-  SMTP_HOST=... SMTP_USER=... SMTP_PASS=... MAIL_FROM=...
-fly deploy
-```
-
-SQLite rides along as a file — mount a volume at the `SQLITE_FILE` path.
 
 ## Post-deploy checks
 
