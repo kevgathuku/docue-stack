@@ -7,6 +7,21 @@ on:
     branches: [ main, develop ]
 
 jobs:
+  lint:
+    name: clj-kondo
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Lint Clojure
+        run: |
+          curl -fsSL -o /tmp/kondo.zip "https://github.com/clj-kondo/clj-kondo/releases/download/v2026.08.04/clj-kondo-2026.08.04-linux-amd64.zip"
+          sudo unzip -o /tmp/kondo.zip -d /usr/local/bin
+          clj-kondo --lint src test
+        working-directory: clojure
+
   clojure:
     name: Clojure Tests
     runs-on: ubuntu-latest
@@ -31,10 +46,3 @@ jobs:
         working-directory: clojure
         env:
           APP_ENV: test
-
-      - name: Lint Clojure
-        run: |
-          curl -fsSL -o /tmp/kondo.zip "https://github.com/clj-kondo/clj-kondo/releases/download/v2026.08.04/clj-kondo-2026.08.04-linux-amd64.zip"
-          sudo unzip -o /tmp/kondo.zip -d /usr/local/bin
-          clj-kondo --lint src test
-        working-directory: clojure
