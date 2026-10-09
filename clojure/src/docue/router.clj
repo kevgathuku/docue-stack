@@ -166,6 +166,10 @@
                     :post (require-login create-note!)}]
          ["/notes/new" {:get (require-login
                                 (fn [_] (html 200 (views/note-form "/notes" {}))))}]
+         ["/tags" {:get (require-login
+                             (fn [req]
+                               (html 200 (views/tags-list
+                                         (notes/tag-counts (-> req :session :user-id))))))}]
          ["/notes/preview" {:post (require-login preview-note!)}]
          ["/notes/:id" {:get (require-login
                                 (fn [req]

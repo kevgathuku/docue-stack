@@ -1,7 +1,8 @@
 (ns docue.views
   (:require [clojure.string :as str]
             [docue.db :as db]
-            [hiccup2.core :as h]))
+            [hiccup2.core :as h]
+            [ring.util.codec :as codec]))
 
 (defn- topbar [logged-in?]
   [:header.topbar [:div.wrap
@@ -86,12 +87,22 @@
   (app-layout "My notes"
           [:h1 "My notes"]
           [:p [:a.btn.btn-primary {:href "/notes/new"} "New note"]]
+          [:p [:a {:href "/tags"} "Browse by tag"]]
           [:h2.section-label "Notes"]
           (when active-tag
             [:p "Filtered by tag: " active-tag " " [:a {:href "/notes"} "clear"]])
           [:ul.cards (for [{:keys [id title tags]} notes]
                        [:li.card [:a.title {:href (str "/notes/" id)} title]
                         (pills tags)])]))
+
+(defn tags-list [tags]
+  (app-layout "Tags"
+          [:h1 "Tags"]
+          (if (seq tags)
+            [:ul.tags (for [{:keys [tag n]} tags]
+                         [:li [:a {:href (str "/notes?tag=" (codec/url-encode tag))} tag]
+                          " " [:span.count (str "(" n ")")]])]
+            [:p "No tags yet."])))
 
 (defn note-form
   ([action note] (note-form action note nil))

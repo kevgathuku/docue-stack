@@ -24,6 +24,13 @@
                 owner-id])]
      (map with-tags (jdbc/execute! (db/datasource) sql db/unqualified))))
 
+(defn tag-counts [owner-id]
+  (jdbc/execute! (db/datasource)
+    [(str "SELECT value AS tag, COUNT(*) AS n FROM notes, json_each(notes.tags)"
+          " WHERE owner_id = ? GROUP BY value ORDER BY n DESC, value")
+     owner-id]
+    db/unqualified))
+
 (defn find-owned [public-id owner-id]
   (some-> (jdbc/execute-one!
              (db/datasource)
