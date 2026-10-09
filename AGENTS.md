@@ -17,11 +17,11 @@ notes, no drafts.
 clojure/
 ├── deps.edn            # deps + :test alias
 ├── src/docue/
-│   ├── core.clj        # -main: migrate, seed admin, serve Jetty
+│   ├── core.clj        # -main: migrate, serve Jetty
 │   ├── router.clj      # Reitit routes (the app seam)
 │   ├── views.clj       # Hiccup pages
 │   ├── db.clj          # env-aware config + Migratus entry point
-│   ├── users.clj       # user queries + admin seeding
+│   ├── users.clj       # user queries
 │   ├── notes.clj       # note queries (owner-scoped) + share tokens
 │   └── markdown.clj    # render + sanitize pipeline
 ├── resources/migrations/  # Migratus SQL
@@ -33,9 +33,9 @@ clojure/
 ### Tech Stack
 
 - **Language**: Clojure 1.12 (CLI + deps.edn)
-- **HTTP**: Reitit + Jetty, Hiccup views, HTMX where it removes code
+- **HTTP**: Reitit + Jetty, Hiccup views (no client JS)
 - **Database**: SQLite via next.jdbc + Xerial, Migratus migrations
-- **Auth**: Ring cookie sessions + buddy-hashers (bcrypt)
+- **Auth**: passwordless magic-link login, Ring cookie sessions
 - **Markdown**: flexmark-java + OWASP sanitizer, rendered server-side at write time
 - **Testing**: clojure.test + ring-mock at the HTTP seam
 - **Lint**: clj-kondo, zero warnings (`clj-kondo --lint src test` from `clojure/`)
@@ -118,20 +118,18 @@ git config core.hooksPath .githooks
 
 ## Key Principles
 
-1. **Use pnpm** - Never npm or yarn
-2. **ReScript for type safety** - Not TypeScript on frontend
-3. **Redux Toolkit patterns** - Modern state management
-4. **Test everything** - Maintain 100% passing tests
-5. **Format before commit** - Use Biome
-6. **Session validation** - Always check `session.loggedIn`
-7. **Environment variables** - Never commit `.env` files
-8. **Incremental modernization** - Follow established patterns
+1. **Test everything** - Maintain 100% passing tests
+2. **Format before commit** - cljfmt (hook + CI enforce it)
+3. **Session validation** - Every note query scopes by owner (`owner or token`)
+4. **Environment variables** - Never commit secrets (`.env` files, `.kamal/secrets`)
+5. **Smallest complete change** - No abstraction, options, or "for later" code
 
 ---
 
-**Last Updated:** Based on 95% complete modernization (React 18, Vite, Redux Toolkit, ReScript integration)
+**Last Updated:** Clojure single-process rewrite merged; Node system decommissioned
+(archived at tag `js-final`).
 
-**Status:** Production-ready frontend, stable backend ready for modernization
+**Status:** Working in `main`, awaiting deploy (`docue-repo-3kc`)
 
 <!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:46cd31e7 -->
 ## Beads Issue Tracker
