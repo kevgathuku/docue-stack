@@ -15,7 +15,8 @@ notes, no drafts.
 
 ```
 clojure/
-├── deps.edn            # deps + :test alias
+├── deps.edn            # deps + :build/:test aliases
+├── build.clj           # uberjar task (default run path)
 ├── src/docue/
 │   ├── core.clj        # -main: migrate, serve Jetty
 │   ├── router.clj      # Reitit routes (the app seam)
@@ -26,8 +27,7 @@ clojure/
 │   └── markdown.clj    # render + sanitize pipeline
 ├── resources/migrations/  # Migratus SQL
 ├── test/docue/         # ring-mock HTTP specs + shared helpers
-├── Dockerfile
-└── compose.yaml        # app + SQLite file
+└── Dockerfile          # source-run fallback (Dokku uses root Dockerfile)
 ```
 
 ### Tech Stack
@@ -69,7 +69,8 @@ clojure/
 ```bash
 cd clojure
 clojure -P                  # prefetch deps (once / after deps.edn changes)
-clojure -M -m docue.core    # migrate + serve on :8000
+clojure -T:build uber       # build the jar (rebuild after source changes)
+java -jar target/docue.jar  # migrate + serve on :8000
 ```
 
 ### Running Tests

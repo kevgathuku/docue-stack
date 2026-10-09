@@ -56,6 +56,7 @@ migrations/.migrate
 # Beads / Dolt files (added by bd init)
 .dolt/
 *.db
+target/
 .beads-credential-key
 .beads/proxieddb/
 *.gate.lock*

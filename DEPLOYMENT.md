@@ -1,36 +1,65 @@
 # Deployment Guide
 
-One process plus a SQLite file. No build step for the app itself (Clojure runs
-from source via the CLI); the Docker image bakes dependencies.
+One process (uberjar) plus a SQLite file. Local dev needs only Java +
+the Clojure CLI — no Docker. The prod image builds the jar in-stage.
 
 > Options comparison (Kamal vs Dokku vs Dokploy vs jar vs Fly):
 > see [DEPLOYMENT-OPTIONS.md](./DEPLOYMENT-OPTIONS.md).
 
 ## Environment
 
-```
-PORT=8000
-APP_ENV=prod                  # dev | test | prod
-SQLITE_FILE=/data/docue.db    # required in prod
-SESSION_SECRET=<16-byte secret>    # required
-```
+Required in prod (the app throws at boot without them, except `PORT`):
 
-## Option A: Compose on a VPS
+| Var | Example | Notes |
+|---|---|---|
+| `APP_ENV` | `prod` | `dev` default prints login links to the console instead of mailing |
+| `SQLITE_FILE` | `/data/docue.db` | Must live on persistent storage (Dokku mount / Fly volume) |
+| `SESSION_SECRET` | output of `openssl rand -hex 8` | Exactly 16 bytes; sessions invalidate on change |
+| `APP_URL` | `https://notes.yourdomain.com` | Base for absolute login/share links in mail |
+| `SMTP_HOST` / `SMTP_USER` / `SMTP_PASS` | `smtp.resend.com` / `resend` / `re_xxx` | Port 587 + TLS by default (`SMTP_PORT` overrides; port 25 is blocked on DO) |
+| `MAIL_FROM` | `login@yourdomain.com` | Domain must be verified in Resend |
+| `PORT` | `8000` | Optional; must match the image `EXPOSE` — leave default |
+
+## Option A: Dokku on a VPS (pinned path)
+
+On the server (Dokku already set up):
 
 ```bash
-# set env in clojure/compose.yaml (or an env_file), then:
-cd clojure
-docker compose up -d --build
+dokku apps:create docue
+dokku storage:ensure-directory docue
+dokku storage:mount docue /var/lib/dokku/data/storage/docue:/data
+dokku domains:add docue notes.yourdomain.com   # optional; wildcard covers docue.<vhost>
+dokku config:set docue APP_ENV=prod SQLITE_FILE=/data/docue.db \
+  SESSION_SECRET=$(openssl rand -hex 8) APP_URL=https://notes.yourdomain.com \
+  SMTP_HOST=smtp.resend.com SMTP_USER=resend SMTP_PASS=re_xxx \
+  MAIL_FROM=login@yourdomain.com
 ```
 
-SQLite data lives in the `sqlite-data` volume. Back it up.
+Without the storage mount the SQLite file dies on every redeploy. The root
+`Dockerfile`, `Procfile` (`web: java -jar docue.jar`), and `app.json` (startup
+check on `/api/health:8000`) are the deploy contract.
+
+From the laptop:
+
+```bash
+git remote add dokku dokku@<droplet-ip>:docue   # once
+git push dokku feat/dokku-deploy:main           # migrations run on boot
+```
+
+TLS only after the first HTTP deploy answers:
+
+```bash
+dokku letsencrypt:set docue email you@yourdomain.com
+dokku letsencrypt:enable docue
+```
 
 ## Option B: Fly.io
 
 ```bash
 cd clojure
 fly launch                    # answers Docker automatically
-fly secrets set SQLITE_FILE=/data/docue.db SESSION_SECRET=...
+fly secrets set SQLITE_FILE=/data/docue.db SESSION_SECRET=... APP_URL=... \
+  SMTP_HOST=... SMTP_USER=... SMTP_PASS=... MAIL_FROM=...
 fly deploy
 ```
 

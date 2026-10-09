@@ -7,25 +7,20 @@ SQLite. See the epic bead for direction.
 
 ```
 clojure/
-├── deps.edn            # deps + :test alias (extra test path)
+├── deps.edn            # deps + :build/:test aliases
+├── build.clj           # uberjar task (default run path)
 ├── src/docue/
-│   ├── core.clj        # -main: migrate, seed admin, serve Jetty
+│   ├── core.clj        # -main: migrate, serve Jetty
 │   ├── router.clj      # Reitit routes (the app seam)
 │   ├── views.clj       # Hiccup pages
 │   ├── db.clj          # env-aware config + Migratus entry point
-│   ├── users.clj       # user queries + admin seeding
+│   ├── users.clj       # user queries
 │   ├── notes.clj       # note queries (owner-scoped)
 │   └── markdown.clj    # render + sanitize pipeline
 ├── resources/migrations/  # Migratus SQL migrations
-├── test/docue/
-│   ├── router_test.clj # HTTP-seam specs (ring-mock)
-│   ├── auth_test.clj   # login/access/seed specs
-│   ├── db_test.clj     # env selection specs
-│   ├── notes_test.clj  # notes/tags/preview specs
-│   └── test_helpers.clj # shared HTTP + DB helpers
-│   └── runner.clj      # test entrypoint
-├── Dockerfile
-└── compose.yaml        # app + SQLite file
+├── test/docue/         # HTTP-seam specs (ring-mock) + runner
+├── target/docue.jar    # built artifact (gitignored)
+├── Dockerfile          # source-run fallback (Dokku uses root Dockerfile)
 ```
 
 ## Commands
@@ -33,9 +28,10 @@ clojure/
 ```bash
 cd clojure
 clojure -P                    # prefetch deps
+clojure -T:build uber       # build the jar (rebuild after source changes)
+java -jar target/docue.jar  # migrate + serve on :8000
 APP_ENV=test clojure -M:test -m docue.runner   # tests (against the test DB)
 clj-kondo --lint src test    # lint (zero warnings is the bar)
-docker compose up --build     # app on :8000 + SQLite file
 ```
 
 ## Environment
