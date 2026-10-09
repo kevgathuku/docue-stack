@@ -18,14 +18,8 @@ markdown. Details in [AGENTS.md](AGENTS.md) and [clojure/README.md](clojure/READ
 
 ```bash
 cd clojure
-clojure -M -m docue.core   # migrates + serves on :8000
-```
-
-With Docker:
-
-```bash
-cd clojure
-docker compose up --build  # app on :8000 + SQLite file
+clojure -T:build uber      # build the jar (rebuild after source changes)
+java -jar target/docue.jar # migrates + serves on :8000
 ```
 
 ## Test it

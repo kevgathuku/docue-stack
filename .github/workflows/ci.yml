@@ -61,3 +61,7 @@ jobs:
         working-directory: clojure
         env:
           APP_ENV: test
+
+      - name: Build uberjar
+        run: clojure -T:build uber
+        working-directory: clojure
