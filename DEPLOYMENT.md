@@ -29,6 +29,7 @@ dokku apps:create docue
 dokku storage:ensure-directory docue
 dokku storage:mount docue /var/lib/dokku/data/storage/docue:/data
 dokku domains:add docue notes.yourdomain.com   # optional; wildcard covers docue.<vhost>
+dokku ports:set docue http:80:8000         # required: auto-map is host 8000, proxy must be 80
 dokku config:set docue APP_ENV=prod SQLITE_FILE=/data/docue.db \
   SESSION_SECRET=$(openssl rand -hex 8) APP_URL=https://notes.yourdomain.com \
   SMTP_HOST=smtp.resend.com SMTP_USER=resend SMTP_PASS=re_xxx \
@@ -65,6 +66,21 @@ curl -s https://your-app.example.com/ | head -c 100
 
 Log in, create a markdown note, preview it, tag it, share-link round trip,
 log out.
+
+## Troubleshooting
+
+**Domain connects but returns empty reply / times out while the app is healthy.**
+Dokku auto-detects the port mapping from the image `EXPOSE` as `http:8000:8000`,
+so nginx binds 8000 — never 80 — and port-80 requests fall through to the default
+server, which closes them. Symptom: `curl http://<domain>/api/health` → empty
+reply (52) or timeout, while the app answers fine at its container port.
+
+Check: `dokku ports:report docue` (want `http:80:8000`) and
+`dokku nginx:show-config docue | grep listen` (want `listen 80`).
+
+Fix: `dokku ports:set docue http:80:8000`, re-verify the `listen` line, re-curl.
+Host-port 8000 goes away with the explicit mapping — use the domain afterwards.
+`letsencrypt:enable` adds the 443 mapping itself.
 
 ## Security checklist
 
