@@ -111,6 +111,16 @@ Enable the pre-commit hook once per clone (runs the format gate on every commit)
 git config core.hooksPath .githooks
 ```
 
+### After Committing
+
+```bash
+graft build   # refresh the repo context graph
+```
+
+Then file lessons to mempal (wing `docue_repo`, via `mempal_ingest`) for anything
+learned: decisions with rationale, bug root causes + fixes, deployment gotchas —
+one evidence drawer per lesson, importance 3–5.
+
 ## Getting Help
 
 - Product spec: epic bead (user stories live there)
