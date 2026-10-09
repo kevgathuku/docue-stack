@@ -7,6 +7,21 @@ on:
     branches: [ main, develop ]
 
 jobs:
+  fmt:
+    name: cljfmt
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Check formatting
+        run: |
+          curl -fsSL -o /tmp/cljfmt.tar.gz "https://github.com/weavejester/cljfmt/releases/download/0.16.6/cljfmt-0.16.6-linux-amd64.tar.gz"
+          sudo tar -xzf /tmp/cljfmt.tar.gz -C /usr/local/bin
+          cljfmt check src test
+        working-directory: clojure
+
   lint:
     name: clj-kondo
     runs-on: ubuntu-latest

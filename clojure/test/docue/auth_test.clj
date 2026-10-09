@@ -11,7 +11,7 @@
   (testing "renders a login form"
     (let [res (router/app (mock/request :get "/login"))]
       (is (= 200 (:status res)))
-(is (re-find #"identifier" (:body res)))
+      (is (re-find #"identifier" (:body res)))
       (is (re-find #"/signup" (:body res))))))
 
 (deftest access-control
@@ -28,7 +28,7 @@
       (is (= 302 (:status logout-res)))
       (is (= "/login" (get-in logout-res [:headers "Location"])))
       (let [after (router/app (-> (mock/request :get "/notes")
-                                 (mock/header "Cookie" (h/session-cookie logout-res))))]
+                                  (mock/header "Cookie" (h/session-cookie logout-res))))]
         (is (= 302 (:status after)))
         (is (= "/login" (get-in after [:headers "Location"])))))))
 

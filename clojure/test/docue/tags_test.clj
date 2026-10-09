@@ -51,3 +51,23 @@
   (let [cookie (h/magic-cookie! "ada@x.com")
         body (:body (h/authed-get "/notes" cookie))]
     (is (re-find #"href=\"/tags\"" body))))
+
+(deftest note-page-pills-link-to-filter
+  (let [cookie (h/magic-cookie! "ada@x.com")]
+    (h/create-note! "ada@x.com" "Tagged" "x" ["home"])
+    (let [list-body (:body (h/authed-get "/notes" cookie))
+          note-body (:body (h/authed-get (str "/notes/" (h/note-id "Tagged")) cookie))]
+      (is (re-find #"href=\"/notes\?tag=home\"" list-body))
+      (is (re-find #"href=\"/notes\?tag=home\"" note-body)))))
+
+(deftest shared-page-pills-stay-plain
+  (let [cookie (h/magic-cookie! "ada@x.com")]
+    (h/create-note! "ada@x.com" "Shared" "x" ["home"])
+    (let [id (h/note-id "Shared")]
+      (router/app (-> (mock/request :post (str "/notes/" id "/share"))
+                      (mock/header "Cookie" cookie)))
+      (let [link (second (re-find #"(/s/[0-9a-f]{64})"
+                                  (:body (h/authed-get (str "/notes/" id) cookie))))
+            body (:body (router/app (mock/request :get link)))]
+        (is (re-find #"home" body))
+        (is (not (re-find #"href=\"/notes\?tag=" body)))))))

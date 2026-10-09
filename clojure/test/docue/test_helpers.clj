@@ -38,9 +38,9 @@
 (defn capture-mail [f]
   (let [sent (atom [])]
     (with-redefs [mail/send-login-link!
-                   (fn [email link]
-                     (swap! sent conj {:to email :link link})
-                     {:sent true})]
+                  (fn [email link]
+                    (swap! sent conj {:to email :link link})
+                    {:sent true})]
       (f sent))))
 
 (defn request-link! [identifier]
@@ -56,15 +56,15 @@
 
 (defn user-id [username-or-email]
   (:id (jdbc/execute-one! (db/datasource)
-                           [(str "SELECT id FROM users"
-                                 " WHERE username = ? OR email = ?")
-                            username-or-email username-or-email]
-                           db/unqualified)))
+                          [(str "SELECT id FROM users"
+                                " WHERE username = ? OR email = ?")
+                           username-or-email username-or-email]
+                          db/unqualified)))
 
 (defn note-id [title]
   (:id (jdbc/execute-one! (db/datasource)
-                           ["SELECT public_id AS id FROM notes WHERE title = ?" title]
-                           db/unqualified)))
+                          ["SELECT public_id AS id FROM notes WHERE title = ?" title]
+                          db/unqualified)))
 
 (defn clean-db [f]
   (when (not= "test" (db/app-env))
@@ -82,7 +82,7 @@
 (defn create-note!
   ([owner-username title content-md tags]
    (jdbc/execute! (db/datasource)
-                   [(str "INSERT INTO notes(title, content_md, content_html, tags, owner_id, public_id)"
-                         " VALUES(?,?,?,?,?,?)")
-                    title content-md (markdown/render content-md) (json/write-str tags)
-                    (user-id owner-username) (tokens/short-id "note")])))
+                  [(str "INSERT INTO notes(title, content_md, content_html, tags, owner_id, public_id)"
+                        " VALUES(?,?,?,?,?,?)")
+                   title content-md (markdown/render content-md) (json/write-str tags)
+                   (user-id owner-username) (tokens/short-id "note")])))

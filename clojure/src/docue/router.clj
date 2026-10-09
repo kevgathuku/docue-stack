@@ -98,7 +98,6 @@
      :headers {"Content-Type" "text/html"}
      :body (views/not-found-page)}))
 
-
 (defn- note-params [params]
   {:title (str/trim (get params "title" ""))
    :content-md (get params "content_md" "")
@@ -119,27 +118,27 @@
 (defn- update-note! [{:keys [params session] :as req}]
   (let [owner-id (:user-id session)
         id (get-in req [:path-params :id])
-{:keys [title content-md tags]} (note-params params)
+        {:keys [title content-md tags]} (note-params params)
         form (fn [error] (views/note-form (str "/notes/" (get-in req [:path-params :id]))
-                                             {:id id :title title :content_md content-md :tags tags
-                                              :updated_at (get params "updated_at")}
-                                             error))]
+                                          {:id id :title title :content_md content-md :tags tags
+                                           :updated_at (get params "updated_at")}
+                                          error))]
     (cond
       (str/blank? title) (html 422 (form "Title is required"))
       :else (let [res (notes/update! id owner-id {:title title :content-md content-md
                                                   :tags tags :updated-at (get params "updated_at")})]
-               (cond
-                 (= :ok res) {:status 302 :headers {"Location" (str "/notes/" id)} :body ""}
-                 (= :stale res) (html 409 (form "Changed elsewhere — reload and retry"))
-                 (= :missing res) (not-found req)
-                 :else (html 422 (form "A note with that title already exists")))))))
+              (cond
+                (= :ok res) {:status 302 :headers {"Location" (str "/notes/" id)} :body ""}
+                (= :stale res) (html 409 (form "Changed elsewhere — reload and retry"))
+                (= :missing res) (not-found req)
+                :else (html 422 (form "A note with that title already exists")))))))
 
 (defn- session-key []
   (let [secret (.getBytes ^String (or (System/getenv "SESSION_SECRET")
-                                     (when (= "prod" (db/app-env))
-                                       (throw (ex-info "SESSION_SECRET is required in prod" {})))
-                                     "0123456789abcdef")
-                                 "UTF-8")]
+                                      (when (= "prod" (db/app-env))
+                                        (throw (ex-info "SESSION_SECRET is required in prod" {})))
+                                      "0123456789abcdef")
+                          "UTF-8")]
     (when (not= 16 (alength secret))
       (throw (ex-info "SESSION_SECRET must be 16 bytes" {})))
     secret))
@@ -158,48 +157,48 @@
          ["/auth/:token" {:get verify-link!}]
          ["/logout" {:post logout!}]
          ["/notes" {:get (require-login
-                            (fn [req]
-                              (let [tag (get-in req [:query-params "tag"])]
-                                (html 200 (views/notes-list
-                                            (notes/all-for-owner (-> req :session :user-id) tag)
-                                            tag)))))
+                          (fn [req]
+                            (let [tag (get-in req [:query-params "tag"])]
+                              (html 200 (views/notes-list
+                                         (notes/all-for-owner (-> req :session :user-id) tag)
+                                         tag)))))
                     :post (require-login create-note!)}]
          ["/notes/new" {:get (require-login
-                                (fn [_] (html 200 (views/note-form "/notes" {}))))}]
+                              (fn [_] (html 200 (views/note-form "/notes" {}))))}]
          ["/tags" {:get (require-login
-                             (fn [req]
-                               (html 200 (views/tags-list
-                                         (notes/tag-counts (-> req :session :user-id))))))}]
+                         (fn [req]
+                           (html 200 (views/tags-list
+                                      (notes/tag-counts (-> req :session :user-id))))))}]
          ["/notes/preview" {:post (require-login preview-note!)}]
          ["/notes/:id" {:get (require-login
-                                (fn [req]
-                                  (if-let [note (owned-note req)]
-                                    (html 200 (views/note-view note))
-                                    (not-found req))))
-                         :post (require-login update-note!)}]
+                              (fn [req]
+                                (if-let [note (owned-note req)]
+                                  (html 200 (views/note-view note))
+                                  (not-found req))))
+                        :post (require-login update-note!)}]
          ["/notes/:id/edit" {:get (require-login
-                                     (fn [req]
-                                       (if-let [note (owned-note req)]
-                                         (html 200 (views/note-form (str "/notes/" (:id note)) note))
-                                         (not-found req))))}]
+                                   (fn [req]
+                                     (if-let [note (owned-note req)]
+                                       (html 200 (views/note-form (str "/notes/" (:id note)) note))
+                                       (not-found req))))}]
          ["/notes/:id/delete" {:post (require-login
-                                        (fn [req]
-                                          (let [id (get-in req [:path-params :id])]
-                                            (if (and id (= :ok (notes/delete! id (-> req :session :user-id))))
-                                              {:status 302 :headers {"Location" "/notes"} :body ""}
-                                              (not-found req)))))}]
+                                      (fn [req]
+                                        (let [id (get-in req [:path-params :id])]
+                                          (if (and id (= :ok (notes/delete! id (-> req :session :user-id))))
+                                            {:status 302 :headers {"Location" "/notes"} :body ""}
+                                            (not-found req)))))}]
          ["/notes/:id/share" {:post (require-login share-note!)}]
          ["/notes/:id/unshare" {:post (require-login unshare-note!)}]
          ["/s/:token" {:get show-shared-note}]
          ["/api/health"
           {:get (fn [_]
-{:status 200
+                  {:status 200
                    :headers {"Content-Type" "application/json"}
                    :body (json/write-str {:status "ok"
-                                           :timestamp (str (java.time.Instant/now))
-                                           :service "docue-api"})})}]]
+                                          :timestamp (str (java.time.Instant/now))
+                                          :service "docue-api"})})}]]
        ;; Static segments win over :id (e.g. /notes/new); conflicts disabled.
-       {:conflicts (constantly nil)})
+        {:conflicts (constantly nil)})
        (ring/create-default-handler {:not-found not-found}))
       wrap-params
       (wrap-session {:store (cookie-store {:key (session-key)})

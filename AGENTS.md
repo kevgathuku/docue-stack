@@ -98,8 +98,16 @@ signal beyond what kondo already gives. Its job is codemods, not repair.
 ### Before Committing
 
 ```bash
+cd clojure
+cljfmt check src test             # format gate (also enforced by hook + CI)
 APP_ENV=test clojure -M:test -m docue.runner
 clj-kondo --lint src test
+```
+
+Enable the pre-commit hook once per clone (runs the format gate on every commit):
+
+```bash
+git config core.hooksPath .githooks
 ```
 
 ## Getting Help
