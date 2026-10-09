@@ -3,9 +3,6 @@
 One process (uberjar) plus a SQLite file. Local dev needs only Java +
 the Clojure CLI — no Docker. The prod image builds the jar in-stage.
 
-> Options comparison (Kamal vs Dokku vs jar):
-> see [DEPLOYMENT-OPTIONS.md](./DEPLOYMENT-OPTIONS.md).
-
 ## Environment
 
 Required in prod (the app throws at boot without them, except `PORT`):
@@ -26,6 +23,7 @@ On the server (Dokku already set up):
 
 ```bash
 dokku apps:create docue
+sudo ufw allow 80,443/tcp        # on-box firewall; mirror both in the DO cloud firewall
 dokku storage:ensure-directory docue
 dokku storage:mount docue /var/lib/dokku/data/storage/docue:/data
 dokku domains:add docue notes.yourdomain.com   # optional; wildcard covers docue.<vhost>
@@ -87,3 +85,5 @@ Host-port 8000 goes away with the explicit mapping — use the domain afterwards
 - [ ] Strong `SESSION_SECRET` (exactly 16 bytes) and secrets only via env
 - [ ] SQLite file persisted (volume) and backed up
 - [ ] HTTPS in front (platform-provided or reverse proxy)
+- [ ] Ports 80 + 443 open in *both* firewalls (UFW on-box *and* DO cloud panel) —
+  a missing rule shows as TLS handshake reset, not a clean refusal
